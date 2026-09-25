@@ -1,0 +1,1344 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+:root {
+  /* Rigitix & Nà Mè Dèy Sell Brand Tokens */
+  --primary-purple: #522672;
+  --secondary-violet: #8236CF;
+  --brand-lavender: #D9C0EB;
+  --brand-lavender-light: #F7F5F9;
+  --warm-amber: #ff8a65;
+  --brand-gold: #F5D061;
+  --brand-gold-dark: #D4AF37;
+  --electric-pink: #EB018E;
+  --emerald-green: #10b981;
+  
+  --bg-dark: #11081a;
+  --bg-dark-surface: #1a0e28;
+  --bg-card: #201233;
+  --bg-card-hover: #2a1844;
+
+  --text-white: #ffffff;
+  --text-muted: #cbbad9;
+  --text-dim: #8b799e;
+
+  --border-subtle: rgba(217, 192, 235, 0.15);
+  --border-glow: 0 0 25px rgba(130, 54, 207, 0.35);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--bg-dark);
+  color: var(--text-white);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, .font-heading {
+  font-family: 'Sora', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ==========================================================================
+   Rigitix Signature Split Action Buttons (.rx-btn)
+   ========================================================================== */
+.rx-btn {
+  display: inline-flex;
+  align-items: stretch;
+  font-family: 'Sora', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none !important;
+  cursor: pointer;
+  border: none;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.rx-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(82, 38, 114, 0.45);
+}
+
+.rx-btn:active {
+  transform: translateY(0);
+}
+
+.rx-btn-text {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-weight: 800;
+}
+
+.rx-btn-icon {
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.rx-btn:hover .rx-btn-icon svg {
+  transform: translateX(2px);
+}
+
+/* Button Variants */
+.rx-btn-primary .rx-btn-text {
+  background: var(--primary-purple);
+  color: #ffffff;
+}
+.rx-btn-primary .rx-btn-icon {
+  background: var(--warm-amber);
+  color: #ffffff;
+}
+
+.rx-btn-gold .rx-btn-text {
+  background: linear-gradient(135deg, #F5D061 0%, #D4AF37 100%);
+  color: #11081a;
+  font-weight: 900;
+}
+.rx-btn-gold .rx-btn-icon {
+  background: #11081a;
+  color: #F5D061;
+}
+
+.rx-btn-secondary .rx-btn-text {
+  background: rgba(217, 192, 235, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(217, 192, 235, 0.25);
+  backdrop-filter: blur(8px);
+}
+.rx-btn-secondary .rx-btn-icon {
+  background: var(--primary-purple);
+  color: #ffffff;
+}
+
+.rx-btn-sm .rx-btn-text {
+  padding: 8px 16px;
+  font-size: 11px;
+}
+.rx-btn-sm .rx-btn-icon {
+  width: 34px;
+}
+
+/* ==========================================================================
+   Header & Sticky Glassmorphism Navigation
+   ========================================================================== */
+.rx-nav-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background: rgba(17, 8, 26, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(217, 192, 235, 0.12);
+  transition: all 0.3s ease;
+}
+
+.rx-nav-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.brand-logo-img {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(245, 208, 97, 0.25));
+  transition: transform 0.2s ease;
+}
+
+.brand-logo-link:hover .brand-logo-img {
+  transform: scale(1.03);
+}
+
+.brand-tagline-pill {
+  background: rgba(245, 208, 97, 0.12);
+  border: 1px solid rgba(245, 208, 97, 0.3);
+  color: var(--brand-gold);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .brand-tagline-pill {
+    display: inline-block;
+  }
+}
+
+.nav-links-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-link-item {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link-item:hover {
+  color: #ffffff;
+  background: rgba(217, 192, 235, 0.08);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-ticket-wallet {
+  position: relative;
+  background: rgba(82, 38, 114, 0.4);
+  border: 1px solid rgba(217, 192, 235, 0.25);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ticket-wallet:hover {
+  background: var(--primary-purple);
+  border-color: var(--brand-lavender);
+  box-shadow: 0 4px 20px rgba(82, 38, 114, 0.5);
+}
+
+.badge-ticket-counter {
+  background: var(--warm-amber);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 999px;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+.rx-hero {
+  position: relative;
+  min-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 70px 24px 60px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 20%, rgba(82, 38, 114, 0.45) 0%, rgba(17, 8, 26, 0.98) 70%);
+}
+
+.rx-hero-glow-1 {
+  position: absolute;
+  top: -150px;
+  left: 20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(130, 54, 207, 0.25) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.rx-hero-glow-2 {
+  position: absolute;
+  bottom: -100px;
+  right: 15%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(255, 138, 101, 0.18) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.rx-announcement-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(82, 38, 114, 0.5);
+  border: 1px solid rgba(245, 208, 97, 0.35);
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 24px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-lavender);
+  backdrop-filter: blur(10px);
+}
+
+.rx-announcement-pill .accent-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--brand-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--brand-gold);
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.rx-hero-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.1;
+  max-width: 900px;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .rx-hero-title {
+    font-size: 4.5rem;
+  }
+}
+
+.rx-highlight-lavender {
+  color: var(--brand-lavender);
+}
+
+.rx-highlight-gold {
+  background: linear-gradient(135deg, #F5D061 0%, #D4AF37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rx-hero-subtitle {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 680px;
+  margin: 0 auto 36px;
+  color: var(--text-muted);
+}
+
+@media (min-width: 768px) {
+  .rx-hero-subtitle {
+    font-size: 1.3rem;
+  }
+}
+
+.rx-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+/* Live Platform Stats Row */
+.rx-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(26, 14, 40, 0.6);
+  border: 1px solid rgba(217, 192, 235, 0.15);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+}
+
+.rx-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rx-stat-item:nth-child(2) {
+  border-left: 1px solid rgba(217, 192, 235, 0.15);
+  border-right: 1px solid rgba(217, 192, 235, 0.15);
+}
+
+.rx-stat-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .rx-stat-num {
+    font-size: 2.6rem;
+  }
+}
+
+.rx-stat-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   Search & Filter Bar with City Selector
+   ========================================================================== */
+.rx-filter-section {
+  max-width: 1320px;
+  margin: -24px auto 36px;
+  padding: 0 24px;
+  position: relative;
+  z-index: 20;
+}
+
+.rx-filter-box {
+  background: var(--bg-card);
+  border: 1px solid rgba(217, 192, 235, 0.2);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.rx-search-input-wrap {
+  flex: 1;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(17, 8, 26, 0.6);
+  border: 1px solid rgba(217, 192, 235, 0.15);
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+.rx-search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.rx-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.rx-city-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(17, 8, 26, 0.6);
+  border: 1px solid rgba(217, 192, 235, 0.15);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.rx-city-select {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rx-city-select option {
+  background: var(--bg-dark);
+  color: #ffffff;
+}
+
+.rx-category-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-top: 16px;
+  scrollbar-width: none;
+}
+
+.rx-category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.rx-category-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(217, 192, 235, 0.12);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rx-category-pill:hover {
+  background: rgba(217, 192, 235, 0.15);
+  color: #ffffff;
+}
+
+.rx-category-pill.active {
+  background: var(--primary-purple);
+  color: #ffffff;
+  border-color: var(--brand-lavender);
+  box-shadow: 0 4px 15px rgba(82, 38, 114, 0.4);
+}
+
+/* ==========================================================================
+   Rigitix Creative Notched Ticket Card (.rx-creative-card & .rx-ticket-notches)
+   ========================================================================== */
+.rx-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+}
+
+.rx-creative-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid rgba(217, 192, 235, 0.15);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.rx-creative-card:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 20px 50px rgba(82, 38, 114, 0.35), 0 0 20px rgba(245, 208, 97, 0.15);
+  border-color: rgba(217, 192, 235, 0.35);
+}
+
+.rx-card-top {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: #11081a;
+}
+
+.rx-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.rx-creative-card:hover .rx-card-img {
+  transform: scale(1.08);
+}
+
+.rx-card-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(17, 8, 26, 0.95) 0%, rgba(17, 8, 26, 0.3) 50%, rgba(0,0,0,0.4) 100%);
+}
+
+.rx-live-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.rx-live-badge-icon {
+  color: var(--warm-amber);
+}
+
+.rx-category-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  z-index: 2;
+}
+
+.rx-card-venue-overlay {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rx-venue-loc, .rx-venue-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* The Iconic Rigitix Ticket Notches with Dashed Perforation */
+.rx-ticket-notches {
+  position: relative;
+  height: 16px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+}
+
+.rx-notch-left, .rx-notch-right {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: var(--bg-dark);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.4);
+}
+
+.rx-notch-left {
+  left: -11px;
+}
+
+.rx-notch-right {
+  right: -11px;
+}
+
+.rx-perforated-line {
+  width: 100%;
+  margin: 0 16px;
+  border-top: 2px dashed rgba(217, 192, 235, 0.2);
+}
+
+/* Card Body */
+.rx-card-body {
+  padding: 18px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.rx-card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.rx-event-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--warm-amber);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.rx-xp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--emerald-green);
+  text-transform: uppercase;
+}
+
+.rx-event-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s;
+}
+
+.rx-creative-card:hover .rx-event-title {
+  color: var(--brand-gold);
+}
+
+.rx-event-subtitle {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Social Proof & RSVP "Going?" row like Rigitix */
+.rx-social-proof-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(217, 192, 235, 0.1);
+}
+
+.rx-rsvp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(217, 192, 235, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+.rx-rsvp-btn:hover {
+  background: rgba(82, 38, 114, 0.4);
+  color: #ffffff;
+  border-color: var(--brand-lavender);
+}
+
+.rx-rsvp-btn.attending {
+  background: var(--primary-purple);
+  border-color: var(--brand-gold);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(245, 208, 97, 0.3);
+}
+
+.rx-going-count-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--warm-amber);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Card Price & Split Button Footer */
+.rx-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.rx-price-tag {
+  display: flex;
+  flex-direction: column;
+}
+
+.rx-price-prefix {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.rx-price-amount {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--brand-gold);
+}
+
+/* ==========================================================================
+   Trending Events Spotlight Slider Section
+   ========================================================================== */
+.rx-trending-section {
+  padding: 40px 0 60px;
+  background: linear-gradient(180deg, rgba(82, 38, 114, 0.15) 0%, rgba(17, 8, 26, 0.8) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.rx-section-header-wrap {
+  max-width: 1320px;
+  margin: 0 auto 30px;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.rx-section-badge {
+  color: var(--brand-gold);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rx-section-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .rx-section-title {
+    font-size: 3rem;
+  }
+}
+
+.rx-trending-slider {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 10px 24px 30px;
+  max-width: 1320px;
+  margin: 0 auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-purple) transparent;
+}
+
+.rx-trending-slider > .rx-creative-card {
+  min-width: 320px;
+  max-width: 360px;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Why Choose Nà Mè Dèy Sell (Rigitix Feature Highlights)
+   ========================================================================== */
+.rx-features-section {
+  max-width: 1320px;
+  margin: 40px auto 80px;
+  padding: 0 24px;
+}
+
+.rx-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.rx-feature-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(217, 192, 235, 0.15);
+  border-radius: var(--radius-md);
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.rx-feature-card:hover {
+  border-color: rgba(245, 208, 97, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(82, 38, 114, 0.3);
+}
+
+.rx-feature-icon-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(82, 38, 114, 0.5);
+  border: 1px solid rgba(217, 192, 235, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-gold);
+}
+
+.rx-feature-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.rx-feature-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.rx-footer {
+  background: #09040d;
+  border-top: 1px solid rgba(217, 192, 235, 0.12);
+  padding: 60px 24px 30px;
+}
+
+.rx-footer-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.rx-footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+@media (max-width: 900px) {
+  .rx-footer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rx-footer-brand-desc {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin-top: 16px;
+}
+
+.rx-footer-heading {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--brand-lavender);
+  margin-bottom: 16px;
+}
+
+.rx-footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rx-footer-link {
+  color: var(--text-dim);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.rx-footer-link:hover {
+  color: #ffffff;
+}
+
+.rx-footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(217, 192, 235, 0.08);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ==========================================================================
+   Modal Suite: Digital Pass, Checkout, Scanner, Create Event
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 4, 16, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.modal-panel {
+  background: var(--bg-card);
+  border: 1px solid rgba(217, 192, 235, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  max-width: 640px;
+  position: relative;
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: var(--primary-purple);
+  transform: scale(1.05);
+}
+
+/* Digital Ticket Pass Card (Rigitix Mobile Pass Style) */
+.digital-pass-card {
+  background: #11081a;
+  border: 1px solid rgba(245, 208, 97, 0.3);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+}
+
+.pass-header {
+  padding: 24px;
+  position: relative;
+  background: linear-gradient(135deg, #2D1B4E 0%, #522672 50%, #ff8a65 100%);
+}
+
+.pass-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pass-brand-stamp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--brand-gold);
+}
+
+.pass-status-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.chip-active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.chip-checked-in {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid #ef4444;
+}
+
+.pass-event-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.pass-event-org {
+  font-size: 12px;
+  color: var(--brand-lavender);
+  font-weight: 600;
+}
+
+.pass-body {
+  padding: 24px;
+  background: var(--bg-card);
+}
+
+.ticket-id-highlight-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(17, 8, 26, 0.7);
+  border: 1px solid rgba(245, 208, 97, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.ticket-id-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+}
+
+.ticket-id-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-gold);
+}
+
+.btn-copy-id {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pass-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.detail-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.cell-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 3px;
+}
+
+.cell-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.cell-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tier-badge-highlight {
+  color: var(--brand-gold);
+}
+
+.pass-perforation {
+  position: relative;
+  height: 20px;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+}
+
+.perforation-notch-left, .perforation-notch-right {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  background: rgba(10, 4, 16, 0.95);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.perforation-notch-left { left: -13px; }
+.perforation-notch-right { right: -13px; }
+
+.perforation-dash-line {
+  width: 100%;
+  margin: 0 20px;
+  border-top: 2px dashed rgba(217, 192, 235, 0.25);
+}
+
+.pass-stub {
+  padding: 24px;
+  background: #170c24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.stub-qr-container {
+  padding: 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.qr-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pass-actions-bar {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--bg-card);
+  border-top: 1px solid rgba(217, 192, 235, 0.1);
+}
+
+/* Scanner Styles */
+.scanner-viewport-box {
+  height: 240px;
+  background: #000000;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 2px solid rgba(82, 38, 114, 0.6);
+}
+
+.scanner-laser-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #10b981, transparent);
+  box-shadow: 0 0 15px #10b981;
+  animation: scanLaser 2s linear infinite alternate;
+}
+
+@keyframes scanLaser {
+  0% { top: 10%; }
+  100% { top: 90%; }
+}
+
+.scanner-target-crosshairs {
+  width: 160px;
+  height: 160px;
+  border: 2px dashed rgba(245, 208, 97, 0.7);
+  border-radius: 16px;
+  position: relative;
+}
