@@ -161,9 +161,13 @@ export function saveTickets(newTicketsList) {
 /**
  * Issues new tickets upon successful checkout
  */
-export function issueTickets({ event, tier, quantity, attendee, paymentMethod, promoDiscount = 0 }) {
+export function issueTickets({ event, tier, quantity, attendee, paymentMethod, promoDiscount = 0, gatewayResponse = null }) {
   const orderId = generateOrderId();
   const createdTickets = [];
+
+  const paymentReference = gatewayResponse?.paymentReference || gatewayResponse?.reference || null;
+  const transactionReference = gatewayResponse?.transactionReference || null;
+  const paymentStatus = gatewayResponse?.paymentStatus || gatewayResponse?.status || "PAID";
 
   for (let i = 0; i < quantity; i++) {
     const seatLetter = String.fromCharCode(65 + Math.floor(Math.random() * 6));
@@ -198,6 +202,9 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
         notes: attendee.notes || ""
       },
       paymentMethod,
+      paymentReference,
+      transactionReference,
+      paymentStatus,
       purchaseDate: new Date().toISOString(),
       status: "active",
       checkedInAt: null,
@@ -210,6 +217,8 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
   return {
     orderId,
     tickets: createdTickets,
+    paymentReference,
+    transactionReference,
     totalPaid: (tier.price * quantity) - promoDiscount
   };
 }

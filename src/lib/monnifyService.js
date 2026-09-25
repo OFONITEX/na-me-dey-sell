@@ -1,34 +1,85 @@
 /**
  * Monnify Payment Gateway Integration for Nà Mè Dèy Sell
- * Supports both Live & Test (Sandbox) environments.
- * Uses unique 'NMDS-TXN-...' references to avoid collision with other platforms using the same Monnify account.
+ * Connects directly to Cloudflare Pages Environment Variables via /api/monnify-config.
+ * Zero hardcoded keys or secrets.
+ * Unique 'NMDS-TXN-...' references prevent collisions with any other projects on the same Monnify account.
  */
 
-const MONNIFY_LIVE_SDK = "https://sdk.monnify.com/plugin/monnify.js";
-const MONNIFY_SANDBOX_SDK = "https://sandbox.monnify.com/plugin/monnify.js";
+const MONNIFY_SDK_URL = "https://sdk.monnify.com/plugin/monnify.js";
+
+let cachedConfig = null;
 
 /**
- * Dynamically loads the Monnify inline JS SDK into the document head
+ * Dynamically queries Cloudflare Pages Function for public gateway settings
  */
-export function loadMonnifySDK(isSandbox = false) {
+export async function getMonnifyConfig() {
+  if (cachedConfig) return cachedConfig;
+
+  // 1. Check if configured in environment at build time
+  const envKey = process.env.NEXT_PUBLIC_MONNIFY_API_KEY;
+  const envContract = process.env.NEXT_PUBLIC_MONNIFY_CONTRACT_CODE;
+  const envSandbox = process.env.NEXT_PUBLIC_MONNIFY_IS_SANDBOX;
+
+  if (envKey && envContract && envKey !== "YOUR_MONNIFY_API_KEY_HERE") {
+    cachedConfig = {
+      apiKey: envKey,
+      contractCode: envContract,
+      isSandbox: envSandbox === "true" || envKey.startsWith("MK_TEST_"),
+      configured: true
+    };
+    return cachedConfig;
+  }
+
+  // 2. Query Cloudflare Pages /api/monnify-config endpoint
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/monnify-config");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.configured) {
+          cachedConfig = data;
+          return cachedConfig;
+        }
+      }
+    } catch (err) {
+      console.warn("Could not query /api/monnify-config:", err);
+    }
+  }
+
+  return {
+    apiKey: "",
+    contractCode: "",
+    isSandbox: true,
+    configured: false
+  };
+}
+
+/**
+ * Dynamically loads the Monnify inline JS SDK into the document
+ */
+export function loadMonnifySDK() {
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined") return resolve(null);
     if (window.MonnifySDK) return resolve(window.MonnifySDK);
 
-    const scriptSrc = isSandbox ? MONNIFY_SANDBOX_SDK : MONNIFY_LIVE_SDK;
-    const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+    const existingScript = document.querySelector(`script[src="${MONNIFY_SDK_URL}"]`);
 
     if (existingScript) {
-      existingScript.onload = () => resolve(window.MonnifySDK);
+      if (window.MonnifySDK) return resolve(window.MonnifySDK);
+      existingScript.addEventListener("load", () => resolve(window.MonnifySDK));
+      existingScript.addEventListener("error", () => reject(new Error("Failed to load Monnify SDK")));
+      setTimeout(() => {
+        if (window.MonnifySDK) resolve(window.MonnifySDK);
+      }, 500);
       return;
     }
 
     const script = document.createElement("script");
-    script.src = scriptSrc;
+    script.src = MONNIFY_SDK_URL;
     script.async = true;
     script.onload = () => resolve(window.MonnifySDK);
-    script.onerror = () => reject(new Error("Failed to load Monnify SDK"));
-    document.body.appendChild(script);
+    script.onerror = () => reject(new Error("Failed to load Monnify SDK script"));
+    document.head.appendChild(script);
   });
 }
 
@@ -42,29 +93,37 @@ export async function payWithMonnify({
   customerPhone,
   paymentDescription,
   metadata = {},
-  isSandbox = false,
+  isSandbox,
   apiKey,
   contractCode,
   onSuccess,
   onClose,
   onError
 }) {
-  const activeApiKey = apiKey || process.env.NEXT_PUBLIC_MONNIFY_API_KEY;
-  const activeContractCode = contractCode || process.env.NEXT_PUBLIC_MONNIFY_CONTRACT_CODE;
-  
-  // Auto-detect sandbox mode if key starts with MK_TEST_ or env is true
-  const isTestKey = Boolean(activeApiKey && activeApiKey.startsWith("MK_TEST_"));
-  const activeSandbox = isSandbox !== undefined ? isSandbox : (isTestKey || process.env.NEXT_PUBLIC_MONNIFY_IS_SANDBOX === "true");
+  // Dynamically resolve configuration from Cloudflare environment
+  const config = await getMonnifyConfig();
+
+  const activeApiKey = apiKey || config.apiKey;
+  const activeContractCode = contractCode || config.contractCode;
+
+  // Determine sandbox mode
+  let activeSandbox = config.isSandbox;
+  if (isSandbox !== undefined && isSandbox !== null) {
+    activeSandbox = Boolean(isSandbox);
+  } else if (activeApiKey && activeApiKey.startsWith("MK_PROD_")) {
+    activeSandbox = false;
+  } else if (activeApiKey && activeApiKey.startsWith("MK_TEST_")) {
+    activeSandbox = true;
+  }
 
   // Globally unique reference with NMDS- prefix to prevent collision with other platforms
   const paymentReference = `NMDS-TXN-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   try {
-    const SDK = await loadMonnifySDK(activeSandbox);
+    const SDK = await loadMonnifySDK();
 
-    if (!SDK || !activeApiKey || !activeContractCode) {
-      console.warn("Monnify API Key or Contract Code not found. Falling back to test checkout mode.");
-      // Provide simulated success if credentials are not configured yet
+    if (!SDK || !activeApiKey || !activeContractCode || activeApiKey === "YOUR_MONNIFY_API_KEY_HERE") {
+      console.warn("Monnify API Key or Contract Code not found. Falling back to simulated checkout mode.");
       setTimeout(() => {
         onSuccess({
           paymentReference,
@@ -87,10 +146,12 @@ export async function payWithMonnify({
       apiKey: activeApiKey,
       contractCode: activeContractCode,
       paymentDescription: paymentDescription || "Nà Mè Dèy Sell Event Ticket",
+      isTestMode: activeSandbox,
       metadata: {
         platform: "Na Me Dey Sell",
         ...metadata
       },
+      paymentMethods: ["CARD", "ACCOUNT_TRANSFER", "USSD"],
       onLoadStart: () => {
         console.log("Monnify checkout initialized");
       },
@@ -99,7 +160,8 @@ export async function payWithMonnify({
       },
       onComplete: function (response) {
         console.log("Monnify payment completed:", response);
-        if (response.paymentStatus === "PAID" || response.status === "SUCCESS") {
+        const status = (response.paymentStatus || response.status || "").toUpperCase();
+        if (status === "PAID" || status === "SUCCESS" || (response.authorizedAmount && response.authorizedAmount >= amount)) {
           onSuccess(response);
         } else {
           onError && onError(response);

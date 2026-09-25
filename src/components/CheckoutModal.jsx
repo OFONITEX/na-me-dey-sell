@@ -57,7 +57,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
       quantity,
       attendee,
       paymentMethod,
-      promoDiscount: appliedDiscount
+      promoDiscount: appliedDiscount,
+      gatewayResponse
     });
 
     setIsProcessing(false);
