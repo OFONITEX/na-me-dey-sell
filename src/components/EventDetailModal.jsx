@@ -7,12 +7,15 @@ import { formatNaira } from "../lib/ticketService";
 export default function EventDetailModal({ event, onClose, onProceedToCheckout }) {
   const [selectedTierId, setSelectedTierId] = useState(event?.tiers[0]?.id || "");
   const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(event?.imageUrl || "");
 
   if (!event) return null;
 
   const selectedTier = event.tiers.find(t => t.id === selectedTierId) || event.tiers[0];
   const remaining = Math.max(0, (selectedTier?.capacity || 100) - (selectedTier?.soldCount || 0));
   const subtotal = selectedTier ? selectedTier.price * quantity : 0;
+
+  const currentHeroImage = activeImage || event.imageUrl;
 
   const handleProceed = () => {
     onProceedToCheckout({
@@ -31,11 +34,12 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
           style={{
             position: "relative",
             minHeight: "220px",
-            background: `linear-gradient(to bottom, rgba(17,8,26,0.3), #1a0e28), url(${event.imageUrl}) center/cover no-repeat`,
+            background: `linear-gradient(to bottom, rgba(17,8,26,0.3), #1a0e28), url(${currentHeroImage}) center/cover no-repeat`,
             padding: "24px 28px",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-end"
+            justifyContent: "flex-end",
+            transition: "background 0.3s ease"
           }}
         >
           <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
@@ -57,6 +61,35 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
             <div style={{ fontSize: "13px", color: "var(--brand-lavender)", fontWeight: "600" }}>
               Organized by <strong style={{ color: "#fff" }}>{event.organizer}</strong>
             </div>
+
+            {/* Multi-flyer gallery thumbnails if event has multiple flyers */}
+            {event.galleryImages && event.galleryImages.length > 1 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "12px" }}>
+                <span style={{ fontSize: "10px", color: "#fff", fontWeight: "700", textTransform: "uppercase", background: "rgba(0,0,0,0.6)", padding: "2px 6px", borderRadius: "3px" }}>
+                  Flyers ({event.galleryImages.length}):
+                </span>
+                {event.galleryImages.map((imgUrl, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveImage(imgUrl)}
+                    style={{
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "6px",
+                      overflow: "hidden",
+                      border: currentHeroImage === imgUrl ? "2px solid var(--brand-gold)" : "1px solid rgba(255,255,255,0.3)",
+                      padding: 0,
+                      background: "#11081a",
+                      cursor: "pointer",
+                      boxShadow: currentHeroImage === imgUrl ? "0 0 8px rgba(212,175,55,0.6)" : "none"
+                    }}
+                  >
+                    <img src={imgUrl} alt={`Flyer ${i+1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -94,7 +127,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
             <h4 style={{ fontSize: "14px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
               About This Experience
             </h4>
-            <p style={{ fontSize: "13px", lineHeight: "1.7", color: "var(--text-muted)" }}>
+            <p style={{ fontSize: "13px", lineHeight: "1.7", color: "var(--text-muted)", whiteSpace: "pre-wrap" }}>
               {event.description}
             </p>
           </div>

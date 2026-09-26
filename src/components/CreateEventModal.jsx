@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon } from "./Icons";
+import { useState, useEffect, useRef } from "react";
+import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon, CheckCircleIcon, ShieldCheckIcon } from "./Icons";
 import { saveNewEvent } from "../lib/ticketService";
 import CitySearchSelector from "./CitySearchSelector";
 import DatePickerCalendar from "./DatePickerCalendar";
 import VenueLocationSearch from "./VenueLocationSearch";
 import { SUPPORTED_CURRENCIES } from "../data/currencies";
 
+const DRAFT_STORAGE_KEY = "nmds_event_draft_v1";
+
 export default function CreateEventModal({ onClose, onEventCreated }) {
   const [selectedCurrency, setSelectedCurrency] = useState(SUPPORTED_CURRENCIES[0]); // NGN default
+  const [showProModal, setShowProModal] = useState(false);
+  const [draftSavedToast, setDraftSavedToast] = useState(false);
+  const [savedDraftAvailable, setSavedDraftAvailable] = useState(null);
+  const [descActiveTab, setDescActiveTab] = useState("editor"); // 'editor' | 'preview'
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -21,12 +28,21 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
     city: "Uyo, Akwa Ibom, Nigeria",
     address: "Ring Road 3, Uyo",
     organizer: "Naija Live Entertainment",
-    imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
-    description: "An electrifying live concert and cultural gathering with top afrobeat stars, gourmet food stalls, and unforgettable music vibes.",
+    description: "An electrifying live concert and cultural gathering with top afrobeat stars, gourmet food stalls, and unforgettable music vibes.\n\n📅 EVENT SCHEDULE:\n- 07:00 PM: Red Carpet & VIP Cocktail Arrival\n- 08:30 PM: Opening Acts & Cultural Showcase\n- 10:00 PM: Headline Superstar Live Performance\n- 12:30 AM: Afterparty & Resident DJ Jam\n\n👔 DRESS CODE:\nDress to impress. Smart casual & traditional chic are warmly welcomed.\n\n🔒 SECURITY & ADMISSION:\nStrict digital QR verification at all gates. Licensed security & paramedical marshals on site.",
     accentColor: "#522672"
   });
 
-  // Dynamic Tiers state (supporting up to 10 tiers for concerts, arenas and stadiums)
+  // Uploaded flyers (Free limit = 3, Pro limit = 10)
+  const [uploadedImages, setUploadedImages] = useState([
+    {
+      id: "flyer_default",
+      url: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
+      name: "Main Event Flyer",
+      isPrimary: true
+    }
+  ]);
+
+  // Dynamic Tiers state (supporting up to 10 tiers)
   const [tiers, setTiers] = useState([
     {
       id: "tier_1",
@@ -57,7 +73,155 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
     "Food Event"
   ];
 
-  // Helper to add tier (max 10)
+  // Check for saved draft on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.formData?.title || parsed.uploadedImages?.length)) {
+          setSavedDraftAvailable(parsed);
+        }
+      }
+    } catch (err) {
+      console.warn("Could not check saved draft:", err);
+    }
+  }, []);
+
+  const handleResumeDraft = () => {
+    if (!savedDraftAvailable) return;
+    if (savedDraftAvailable.formData) setFormData(savedDraftAvailable.formData);
+    if (savedDraftAvailable.tiers) setTiers(savedDraftAvailable.tiers);
+    if (savedDraftAvailable.uploadedImages) setUploadedImages(savedDraftAvailable.uploadedImages);
+    if (savedDraftAvailable.selectedCurrency) setSelectedCurrency(savedDraftAvailable.selectedCurrency);
+    setSavedDraftAvailable(null);
+    setDraftSavedToast("Draft restored! You can continue editing your event.");
+    setTimeout(() => setDraftSavedToast(false), 4000);
+  };
+
+  const handleDiscardDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      setSavedDraftAvailable(null);
+    } catch (err) {
+      console.warn("Could not discard draft:", err);
+    }
+  };
+
+  // Save work and continue later
+  const handleSaveWorkAndContinue = (e) => {
+    e?.preventDefault();
+    try {
+      const draftPayload = {
+        formData,
+        tiers,
+        uploadedImages,
+        selectedCurrency,
+        savedAt: new Date().toISOString(),
+        formattedTime: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      };
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+      setDraftSavedToast("Work saved successfully! You can close this window and finish anytime.");
+      setTimeout(() => setDraftSavedToast(false), 4500);
+    } catch (err) {
+      alert("Draft saved to browser memory.");
+    }
+  };
+
+  // Handle uploading flyer images (max 3 free, up to 10 for Pro)
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    const currentCount = uploadedImages.length;
+    const freeMax = 3;
+
+    if (currentCount >= freeMax) {
+      setShowProModal(true);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const availableSlots = freeMax - currentCount;
+    const filesToProcess = files.slice(0, availableSlots);
+
+    if (files.length > availableSlots) {
+      setShowProModal(true);
+    }
+
+    filesToProcess.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        setUploadedImages(prev => {
+          if (prev.length >= 10) return prev;
+          const isFirst = prev.length === 0;
+          return [
+            ...prev,
+            {
+              id: `flyer_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+              url: dataUrl,
+              name: file.name || `Flyer #${prev.length + 1}`,
+              isPrimary: isFirst
+            }
+          ];
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    setUploadedImages(prev => {
+      const filtered = prev.filter((_, idx) => idx !== indexToRemove);
+      if (filtered.length > 0 && !filtered.some(img => img.isPrimary)) {
+        filtered[0].isPrimary = true;
+      }
+      return filtered;
+    });
+  };
+
+  const handleSetPrimaryImage = (index) => {
+    setUploadedImages(prev =>
+      prev.map((img, idx) => ({
+        ...img,
+        isPrimary: idx === index
+      }))
+    );
+  };
+
+  // Description Dashboard template inserter
+  const handleInsertDescTemplate = (templateKey) => {
+    let snippet = "";
+    switch (templateKey) {
+      case "schedule":
+        snippet = "\n\n📅 EVENT SCHEDULE:\n- 06:00 PM: Doors Open & Red Carpet Photography\n- 07:30 PM: Welcome Speech & Opening Performances\n- 09:00 PM: Main Stage Presentation & Grand Performances\n- 11:30 PM: After-Party & Networking";
+        break;
+      case "performers":
+        snippet = "\n\n🎤 GUEST ARTISTS & HEADLINERS:\n- Top African Afrobeat sensations & celebrity guests\n- Resident and guest international DJs\n- Live instrumental band & hype masters";
+        break;
+      case "dresscode":
+        snippet = "\n\n👔 DRESS CODE & ENTRY POLICY:\n- Strictly Glamorous, Black-Tie or Afro-Chic attire\n- No slippers or athletic sportswear permitted";
+        break;
+      case "perks":
+        snippet = "\n\n🍹 FOOD, DRINKS & HOSPITALITY:\n- Gourmet finger foods & cocktail bars on-site\n- Reserved VIP table butler service for premium ticket holders";
+        break;
+      case "security":
+        snippet = "\n\n🔒 SAFETY & SECURITY:\n- Verified digital QR scan required for admission\n- Uniformed security personnel & fenced perimeter parking";
+        break;
+      default:
+        break;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      description: (prev.description || "").trim() + snippet
+    }));
+  };
+
+  // Dynamic Tiers
   const handleAddTier = () => {
     if (tiers.length >= 10) {
       alert("Maximum 10 ticket tiers reached (Stadium / Arena limit).");
@@ -134,6 +298,9 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
       return;
     }
 
+    const primaryFlyer = uploadedImages.find(img => img.isPrimary)?.url || uploadedImages[0]?.url || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80";
+    const allFlyers = uploadedImages.map(img => img.url);
+
     const eventTiers = tiers.map((t, idx) => ({
       id: t.id || `tier_${Date.now()}_${idx + 1}`,
       name: t.name || `Tier ${idx + 1}`,
@@ -146,7 +313,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
       perks: [
         `Access to ${t.name}`,
         "Verified digital QR pass",
-        `Instant mobile check-in`
+        "Instant mobile check-in"
       ]
     }));
 
@@ -168,16 +335,23 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
       currency: selectedCurrency.symbol,
       currencyCode: selectedCurrency.code,
       accentColor: formData.accentColor,
-      imageUrl: formData.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
+      imageUrl: primaryFlyer,
+      galleryImages: allFlyers,
       bannerPattern: `linear-gradient(135deg, ${formData.accentColor} 0%, #11081a 100%)`,
       description: formData.description,
       tiers: eventTiers
     };
 
     saveNewEvent(newEvent);
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (_) {}
     onEventCreated(newEvent);
     onClose();
   };
+
+  const wordCount = (formData.description || "").trim().split(/\s+/).filter(Boolean).length;
+  const readingTime = Math.max(1, Math.ceil(wordCount / 180));
 
   return (
     <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1100 }}>
@@ -212,6 +386,40 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
           </button>
         </div>
 
+        {/* Saved Draft Alert Banner */}
+        {savedDraftAvailable && (
+          <div style={{ padding: "10px 24px", background: "linear-gradient(90deg, rgba(82,38,114,0.9), rgba(217,192,235,0.2))", borderBottom: "1px solid var(--brand-gold)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+            <div style={{ fontSize: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span>📝</span>
+              <span><strong>Unfinished Draft Found:</strong> You have unsaved event work from {savedDraftAvailable.formattedTime || "a previous session"}.</span>
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                type="button"
+                onClick={handleResumeDraft}
+                style={{ background: "var(--brand-gold)", color: "#11081a", border: "none", padding: "4px 12px", borderRadius: "4px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
+              >
+                ⚡ Resume Draft
+              </button>
+              <button
+                type="button"
+                onClick={handleDiscardDraft}
+                style={{ background: "transparent", color: "var(--text-muted)", border: "1px solid rgba(255,255,255,0.2)", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", cursor: "pointer" }}
+              >
+                ✕ Discard
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Draft Saved Toast Banner */}
+        {draftSavedToast && (
+          <div style={{ padding: "10px 24px", background: "rgba(16, 185, 129, 0.2)", borderBottom: "1px solid #10b981", color: "#10b981", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" }}>
+            <CheckCircleIcon size={16} />
+            <span>{draftSavedToast}</span>
+          </div>
+        )}
+
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} style={{ padding: "20px 24px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: "22px" }}>
           
@@ -227,7 +435,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Detty Rave Beach Carnival / Ring Road Music Concert"
+                  placeholder="e.g. Detty Rave Beach Carnival / Grand Corporate Gala / Royal Wedding"
                   style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
@@ -282,7 +490,6 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   <CalendarIcon size={14} style={{ color: "var(--brand-gold)" }} />
                   <span>Event Date (Click to Pop Up Calendar)</span>
                 </label>
-                {/* Interactive Date Picker with Day & Date */}
                 <DatePickerCalendar
                   value={formData.date}
                   onChange={(selectedFormattedDate) => setFormData(prev => ({ ...prev, date: selectedFormattedDate }))}
@@ -304,7 +511,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
             </div>
           </div>
 
-          {/* SECTION 3: Venue & Location (Search Button, Suggestions & Embedded Map) */}
+          {/* SECTION 3: Venue & Location Navigation */}
           <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
             <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
               3. Venue & Location Navigation
@@ -316,7 +523,6 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   <MapPinIcon size={14} style={{ color: "var(--brand-gold)" }} />
                   <span>Venue & Street Address (Search Location & Suggest)</span>
                 </label>
-                {/* Searchable Venue Finder with Embedded Map Navigation */}
                 <VenueLocationSearch
                   venueValue={formData.venue}
                   addressValue={formData.address}
@@ -343,9 +549,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
             </div>
           </div>
 
-          {/* SECTION 4: Ticket Pricing Tiers & Currency Selection (Up to 10 Tiers) */}
+          {/* SECTION 4: Ticket Pricing Tiers & Currency Selection */}
           <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
-            {/* Header with Title and Currency Selector */}
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
@@ -409,7 +614,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               </button>
             </div>
 
-            {/* Tiers List (Max 10) */}
+            {/* Tiers List */}
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {tiers.map((tier, index) => (
                 <div
@@ -467,7 +672,6 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                       />
                     </div>
 
-                    {/* Delete Tier Button */}
                     <button
                       type="button"
                       disabled={tiers.length <= 1}
@@ -503,7 +707,6 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               ))}
             </div>
 
-            {/* Add Tier Action Button (Up to 10) */}
             <div style={{ marginTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               {tiers.length < 10 ? (
                 <button
@@ -538,51 +741,471 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
             </div>
           </div>
 
-          {/* SECTION 5: Banner Image & Description */}
+          {/* SECTION 5: Flyer Image Upload (Up to 3 free, Upsell for 5-10) */}
           <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
-            <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
-              5. Media & Highlights
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
               <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Banner Image URL</label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "13px" }}
-                  value={formData.imageUrl}
-                  onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
-                />
+                <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  5. Event Flyers & Banners ({uploadedImages.length}/3 Free Flyers)
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                  Upload your event flyers directly from your device gallery or camera.
+                </div>
               </div>
 
+              {/* Premium Upsell Badge */}
+              <button
+                type="button"
+                onClick={() => setShowProModal(true)}
+                style={{
+                  background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(82,38,114,0.4))",
+                  border: "1px solid var(--brand-gold)",
+                  color: "var(--brand-gold)",
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  fontSize: "11px",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px"
+                }}
+              >
+                <span>⭐ Unlock 5–10 Flyers (Pro)</span>
+              </button>
+            </div>
+
+            {/* Flyer Upload Dropzone & Button */}
+            <div
+              onClick={() => {
+                if (uploadedImages.length >= 3) {
+                  setShowProModal(true);
+                } else {
+                  fileInputRef.current?.click();
+                }
+              }}
+              style={{
+                border: "2px dashed rgba(217, 192, 235, 0.3)",
+                borderRadius: "10px",
+                padding: "20px",
+                textAlign: "center",
+                background: "rgba(17,8,26,0.5)",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: "none" }}
+                onChange={handleFileUpload}
+              />
+              <div style={{ fontSize: "28px", marginBottom: "6px" }}>📸</div>
+              <div style={{ fontSize: "13px", fontWeight: "800", color: "#fff" }}>
+                Click to Upload Event Flyer from Device
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                Supports PNG, JPG, WEBP. Free plan allows up to <strong>3 event flyers</strong>.
+              </div>
+            </div>
+
+            {/* Uploaded Flyers List Preview */}
+            {uploadedImages.length > 0 && (
+              <div style={{ marginTop: "14px" }}>
+                <div style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase", fontWeight: "700", marginBottom: "8px" }}>
+                  Uploaded Flyers ({uploadedImages.length}):
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "10px" }}>
+                  {uploadedImages.map((img, idx) => (
+                    <div
+                      key={img.id || idx}
+                      style={{
+                        position: "relative",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: img.isPrimary ? "2px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.2)",
+                        background: "#11081a",
+                        aspectRatio: "3/4",
+                        display: "flex",
+                        flexDirection: "column"
+                      }}
+                    >
+                      <img
+                        src={img.url}
+                        alt={`Flyer ${idx + 1}`}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                      
+                      {/* Top Badges */}
+                      <div style={{ position: "absolute", top: "6px", left: "6px", right: "6px", display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "9px", fontWeight: "800", padding: "2px 6px", borderRadius: "4px", background: img.isPrimary ? "var(--brand-gold)" : "rgba(0,0,0,0.7)", color: img.isPrimary ? "#11081a" : "#fff" }}>
+                          {img.isPrimary ? "Main Banner" : `Flyer #${idx + 1}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(idx);
+                          }}
+                          style={{
+                            background: "rgba(0,0,0,0.8)",
+                            color: "#ff6b6b",
+                            border: "none",
+                            borderRadius: "50%",
+                            width: "20px",
+                            height: "20px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            fontSize: "11px"
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      {/* Bottom action to make primary */}
+                      {!img.isPrimary && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSetPrimaryImage(idx);
+                          }}
+                          style={{
+                            position: "absolute",
+                            bottom: "0",
+                            left: "0",
+                            right: "0",
+                            background: "rgba(0,0,0,0.85)",
+                            color: "var(--brand-gold)",
+                            border: "none",
+                            padding: "4px",
+                            fontSize: "10px",
+                            fontWeight: "700",
+                            cursor: "pointer",
+                            textAlign: "center"
+                          }}
+                        >
+                          Set as Main
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add more button or pro trigger */}
+                  {uploadedImages.length < 3 ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        borderRadius: "8px",
+                        border: "1px dashed rgba(217,192,235,0.3)",
+                        aspectRatio: "3/4",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(255,255,255,0.02)",
+                        cursor: "pointer",
+                        color: "var(--brand-lavender)",
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        gap: "6px"
+                      }}
+                    >
+                      <PlusIcon size={18} />
+                      <span>Add Flyer ({uploadedImages.length}/3)</span>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => setShowProModal(true)}
+                      style={{
+                        borderRadius: "8px",
+                        border: "1px dashed var(--brand-gold)",
+                        aspectRatio: "3/4",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(212,175,55,0.06)",
+                        cursor: "pointer",
+                        color: "var(--brand-gold)",
+                        fontSize: "11px",
+                        fontWeight: "800",
+                        padding: "8px",
+                        textAlign: "center",
+                        gap: "4px"
+                      }}
+                    >
+                      <span>⭐</span>
+                      <span>Unlock 5–10 Flyers with Pro</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* SECTION 6: Rich Event Description & Overview Dashboard */}
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
               <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Event Description</label>
+                <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  6. Event Overview & Story Dashboard
+                </div>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                  Explain what the event is about, highlight artists, dress code, and schedules.
+                </div>
+              </div>
+
+              {/* View Mode Switcher: Editor / Live Attendee Preview */}
+              <div style={{ display: "flex", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "2px" }}>
+                <button
+                  type="button"
+                  onClick={() => setDescActiveTab("editor")}
+                  style={{
+                    background: descActiveTab === "editor" ? "var(--primary-purple)" : "transparent",
+                    color: descActiveTab === "editor" ? "#fff" : "var(--text-dim)",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "4px 12px",
+                    fontSize: "11px",
+                    fontWeight: "800",
+                    cursor: "pointer"
+                  }}
+                >
+                  ✏️ Edit Dashboard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDescActiveTab("preview")}
+                  style={{
+                    background: descActiveTab === "preview" ? "var(--primary-purple)" : "transparent",
+                    color: descActiveTab === "preview" ? "#fff" : "var(--text-dim)",
+                    border: "none",
+                    borderRadius: "6px",
+                    padding: "4px 12px",
+                    fontSize: "11px",
+                    fontWeight: "800",
+                    cursor: "pointer"
+                  }}
+                >
+                  👁️ Attendee Preview
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Section Template Inserters */}
+            <div style={{ marginBottom: "10px", display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
+              <span style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase", fontWeight: "700" }}>
+                Insert Structure:
+              </span>
+              {[
+                { label: "+ Program Schedule", key: "schedule" },
+                { label: "+ Guest Artists", key: "performers" },
+                { label: "+ Dress Code", key: "dresscode" },
+                { label: "+ Food & Drinks", key: "perks" },
+                { label: "+ Security & Safety", key: "security" }
+              ].map(tpl => (
+                <button
+                  key={tpl.key}
+                  type="button"
+                  onClick={() => handleInsertDescTemplate(tpl.key)}
+                  style={{
+                    background: "rgba(217,192,235,0.08)",
+                    border: "1px solid rgba(217,192,235,0.2)",
+                    borderRadius: "6px",
+                    padding: "3px 8px",
+                    fontSize: "11px",
+                    color: "var(--brand-lavender)",
+                    cursor: "pointer"
+                  }}
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Editor or Attendee Preview */}
+            {descActiveTab === "editor" ? (
+              <div>
                 <textarea
-                  rows={3}
-                  style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "13px", resize: "vertical" }}
+                  rows={8}
+                  placeholder="Explain what attendees will experience, including live schedule, dress code, performers, and entry requirements..."
+                  style={{
+                    width: "100%",
+                    background: "rgba(17,8,26,0.8)",
+                    border: "1px solid rgba(217,192,235,0.25)",
+                    borderRadius: "8px",
+                    padding: "12px 14px",
+                    color: "#fff",
+                    outline: "none",
+                    fontSize: "13px",
+                    lineHeight: "1.6",
+                    resize: "vertical",
+                    fontFamily: "inherit"
+                  }}
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                 />
+                
+                {/* Stats Bar */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px", fontSize: "11px", color: "var(--text-dim)" }}>
+                  <span>{wordCount} words • ~{readingTime} min read</span>
+                  <span style={{ color: wordCount > 30 ? "var(--emerald-green)" : "var(--text-muted)" }}>
+                    {wordCount > 30 ? "✓ Detailed description ready for attendees" : "💡 Add more details to boost ticket buyer confidence"}
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                style={{
+                  background: "#11081a",
+                  border: "1px solid rgba(217,192,235,0.2)",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  minHeight: "180px",
+                  color: "#e2e8f0",
+                  fontSize: "13px",
+                  lineHeight: "1.7",
+                  whiteSpace: "pre-wrap"
+                }}
+              >
+                {formData.description || (
+                  <em style={{ color: "var(--text-dim)" }}>No description added yet. Switch to Edit Dashboard to write your event overview.</em>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Submit Split Button */}
-          <button
-            type="submit"
-            className="rx-btn rx-btn-gold"
-            style={{ width: "100%", marginTop: "4px", padding: "14px" }}
-          >
-            <span className="rx-btn-text" style={{ flex: 1, fontSize: "15px", fontWeight: "800" }}>
-              Publish Event & Go Live ({tiers.length} Tiers in {selectedCurrency.code})
-            </span>
-            <span className="rx-btn-icon">
-              <SparklesIcon size={18} />
-            </span>
-          </button>
+          {/* Action Buttons: Save Work & Continue Later + Publish Event */}
+          <div style={{ display: "flex", gap: "10px", marginTop: "8px", flexWrap: "wrap" }}>
+            {/* Save Work and Continue Later Button */}
+            <button
+              type="button"
+              onClick={handleSaveWorkAndContinue}
+              style={{
+                flex: "1 1 200px",
+                background: "rgba(217, 192, 235, 0.1)",
+                border: "1px solid rgba(217, 192, 235, 0.3)",
+                color: "#fff",
+                borderRadius: "8px",
+                padding: "14px 18px",
+                fontSize: "13px",
+                fontWeight: "800",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              <span>💾</span>
+              <span>Save Work & Continue Later</span>
+            </button>
+
+            {/* Publish Event & Go Live Button */}
+            <button
+              type="submit"
+              className="rx-btn rx-btn-gold"
+              style={{ flex: "2 1 260px", padding: "14px 18px" }}
+            >
+              <span className="rx-btn-text" style={{ flex: 1, fontSize: "14px", fontWeight: "900" }}>
+                Publish Event & Go Live ({tiers.length} Tiers in {selectedCurrency.code})
+              </span>
+              <span className="rx-btn-icon">
+                <SparklesIcon size={18} />
+              </span>
+            </button>
+          </div>
         </form>
       </div>
+
+      {/* PRO MONETIZATION UPSELL MODAL */}
+      {showProModal && (
+        <div
+          className="modal-backdrop"
+          style={{ zIndex: 12500 }}
+          onClick={() => setShowProModal(false)}
+        >
+          <div
+            className="modal-panel"
+            style={{ maxWidth: "480px", padding: "26px", textAlign: "center", borderRadius: "16px", border: "2px solid var(--brand-gold)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(212,175,55,0.15)", border: "1px solid var(--brand-gold)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", margin: "0 auto 16px" }}>
+              👑
+            </div>
+
+            <h3 style={{ fontSize: "1.4rem", fontWeight: "900", color: "#fff", marginBottom: "8px" }}>
+              Upgrade to Nà Mè Dèy Sell PRO
+            </h3>
+
+            <p style={{ fontSize: "13px", color: "var(--brand-lavender)", lineHeight: "1.6", marginBottom: "20px" }}>
+              Free organizers can upload up to <strong>3 flyers</strong>. Upgrade to PRO to unlock the full event gallery and supercharge your ticket sales!
+            </p>
+
+            <div style={{ background: "rgba(17,8,26,0.8)", border: "1px solid rgba(217,192,235,0.15)", borderRadius: "10px", padding: "16px", textAlign: "left", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fff" }}>
+                <span style={{ color: "var(--brand-gold)", fontWeight: "900" }}>✓</span>
+                <span><strong>5 to 10 High-Res Event Flyers</strong> & Promo Banner Carousel</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fff" }}>
+                <span style={{ color: "var(--brand-gold)", fontWeight: "900" }}>✓</span>
+                <span><strong>Featured Homepage Billboard</strong> & Priority City Spotlight</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fff" }}>
+                <span style={{ color: "var(--brand-gold)", fontWeight: "900" }}>✓</span>
+                <span><strong>Verified Gold Organizer Badge</strong> for maximum attendee trust</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fff" }}>
+                <span style={{ color: "var(--brand-gold)", fontWeight: "900" }}>✓</span>
+                <span><strong>Unlimited Gate Scanning Staff</strong> & Real-time Revenue Export</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "16px" }}>
+              <span style={{ fontSize: "24px", fontWeight: "900", color: "var(--brand-gold)", fontFamily: "Sora" }}>
+                ₦5,000
+              </span>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "6px" }}>
+                / month (or ₦2,500 single event boost)
+              </span>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  alert("🎉 Thank you for your interest! Nà Mè Dèy Sell PRO monetization is launching soon. Your account has been registered for free early-access bonus!");
+                  setShowProModal(false);
+                }}
+                className="rx-btn rx-btn-gold"
+                style={{ width: "100%", justifyContent: "center" }}
+              >
+                <span className="rx-btn-text" style={{ flex: 1 }}>
+                  Unlock PRO Features Now
+                </span>
+                <span className="rx-btn-icon">
+                  <ShieldCheckIcon size={18} />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowProModal(false)}
+                style={{ background: "transparent", border: "none", color: "var(--text-muted)", padding: "8px", fontSize: "12px", cursor: "pointer" }}
+              >
+                Continue with 3 Free Flyers
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
