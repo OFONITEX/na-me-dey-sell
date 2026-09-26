@@ -171,7 +171,7 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", fontSize: "12px", color: "var(--text-muted)" }}>
                       <span>📅 {t.eventDate}</span>
                       <span>📍 {t.city}</span>
-                      <span>🏷️ {t.tierName} ({formatNaira(t.tierPrice)})</span>
+                      <span>🏷️ {t.tierName} ({formatNaira(t.tierPrice, t.currency || "₦")})</span>
                     </div>
                   </div>
 

@@ -135,7 +135,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
                         <span style={{ fontSize: "15px", fontWeight: "800", color: "#fff" }}>{tier.name}</span>
                       </div>
                       <span style={{ fontFamily: "Sora", fontSize: "1.2rem", fontWeight: "900", color: "var(--brand-gold)" }}>
-                        {formatNaira(tier.price)}
+                        {formatNaira(tier.price, tier.currency || event.currency || "₦")}
                       </span>
                     </div>
 
@@ -166,7 +166,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
               Total ({quantity} {quantity === 1 ? "ticket" : "tickets"})
             </div>
             <div style={{ fontFamily: "Sora", fontSize: "1.4rem", fontWeight: "900", color: "var(--brand-gold)" }}>
-              {formatNaira(subtotal)}
+              {formatNaira(subtotal, selectedTierObj?.currency || event.currency || "₦")}
             </div>
           </div>
 

@@ -26,8 +26,13 @@ export function generateOrderId() {
   return `ORD-NG-${num}`;
 }
 
-export function formatNaira(amount) {
-  return "₦" + Number(amount).toLocaleString();
+export function formatPrice(amount, currency = "₦") {
+  const symbol = currency || "₦";
+  return `${symbol}${Number(amount || 0).toLocaleString()}`;
+}
+
+export function formatNaira(amount, currency = "₦") {
+  return formatPrice(amount, currency);
 }
 
 /**
@@ -191,7 +196,7 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
       tierId: tier.id,
       tierName: tier.name,
       tierPrice: tier.price,
-      currency: "₦",
+      currency: tier.currency || event.currency || "₦",
       xpReward: event.xpReward || 50,
       perks: tier.perks || [],
       seatNumber: `${tier.name.split(" ")[0].toUpperCase()}-${seatLetter}${seatNum}`,

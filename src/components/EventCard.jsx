@@ -108,7 +108,7 @@ export default function EventCard({ event, onSelect }) {
         <div className="rx-card-footer">
           <div className="rx-price-tag">
             <span className="rx-price-prefix">From</span>
-            <span className="rx-price-amount">{formatNaira(lowestPrice)}</span>
+            <span className="rx-price-amount">{formatNaira(lowestPrice, event.currency || event.tiers?.[0]?.currency || "₦")}</span>
           </div>
 
           <div className="rx-btn rx-btn-primary rx-btn-sm">

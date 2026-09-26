@@ -145,7 +145,7 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
               <div className="detail-cell">
                 <span className="cell-label">TICKET TIER</span>
                 <span className="cell-value tier-badge-highlight">{ticket.tierName}</span>
-                <span className="cell-sub">{formatNaira(ticket.tierPrice)} Paid</span>
+                <span className="cell-sub">{formatNaira(ticket.tierPrice, ticket.currency || "₦")} Paid</span>
               </div>
 
               <div className="detail-cell">

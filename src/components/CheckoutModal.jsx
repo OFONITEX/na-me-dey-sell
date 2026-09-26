@@ -23,6 +23,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
   const [promoSuccess, setPromoSuccess] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const currencySymbol = event?.currency || tier?.currency || "₦";
+
   const handleApplyPromo = () => {
     setPromoError("");
     setPromoSuccess("");
@@ -32,11 +34,11 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
     if (code === "NMDS20" || code === "VIBES20") {
       const discount = Math.round(subtotal * 0.2);
       setAppliedDiscount(discount);
-      setPromoSuccess(`Promo applied: 20% discount (-${formatNaira(discount)})`);
+      setPromoSuccess(`Promo applied: 20% discount (-${formatNaira(discount, currencySymbol)})`);
     } else if (code === "DETTY50") {
       const discount = Math.round(subtotal * 0.1);
       setAppliedDiscount(discount);
-      setPromoSuccess(`Promo applied: 10% discount (-${formatNaira(discount)})`);
+      setPromoSuccess(`Promo applied: 10% discount (-${formatNaira(discount, currencySymbol)})`);
     } else {
       setPromoError("Invalid code. Try 'NMDS20' or 'DETTY50'");
     }
@@ -133,7 +135,7 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
               </div>
             </div>
             <div style={{ fontFamily: "Sora", fontSize: "1.3rem", fontWeight: "900", color: "var(--brand-gold)" }}>
-              {formatNaira(subtotal)}
+              {formatNaira(subtotal, currencySymbol)}
             </div>
           </div>
 
@@ -298,12 +300,12 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
           <div style={{ borderTop: "1px solid rgba(217,192,235,0.12)", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
               <span>Subtotal</span>
-              <span>{formatNaira(subtotal)}</span>
+              <span>{formatNaira(subtotal, currencySymbol)}</span>
             </div>
             {appliedDiscount > 0 && (
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--emerald-green)" }}>
                 <span>Discount</span>
-                <span>-{formatNaira(appliedDiscount)}</span>
+                <span>-{formatNaira(appliedDiscount, currencySymbol)}</span>
               </div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
@@ -312,7 +314,7 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "900", color: "#fff", marginTop: "6px" }}>
               <span>Total Due</span>
-              <span style={{ fontFamily: "Sora", color: "var(--brand-gold)" }}>{formatNaira(finalTotal)}</span>
+              <span style={{ fontFamily: "Sora", color: "var(--brand-gold)" }}>{formatNaira(finalTotal, currencySymbol)}</span>
             </div>
           </div>
 
@@ -327,8 +329,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
               {isProcessing
                 ? "Connecting Monnify..."
                 : paymentMethod === "monnify"
-                ? `Pay ${formatNaira(finalTotal)} via Monnify`
-                : `Pay ${formatNaira(finalTotal)} Now`}
+                ? `Pay ${formatNaira(finalTotal, currencySymbol)} via Monnify`
+                : `Pay ${formatNaira(finalTotal, currencySymbol)} Now`}
             </span>
             <span className="rx-btn-icon">
               <ShieldCheckIcon size={18} />
