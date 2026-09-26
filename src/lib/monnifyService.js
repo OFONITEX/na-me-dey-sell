@@ -44,6 +44,21 @@ export async function getMonnifyConfig() {
     } catch (err) {
       console.warn("Could not query /api/monnify-config:", err);
     }
+
+    // 3. Fallback to localStorage if tester configured keys in browser
+    try {
+      const lsKey = window.localStorage.getItem("MONNIFY_API_KEY") || window.localStorage.getItem("NEXT_PUBLIC_MONNIFY_API_KEY");
+      const lsContract = window.localStorage.getItem("MONNIFY_CONTRACT_CODE") || window.localStorage.getItem("NEXT_PUBLIC_MONNIFY_CONTRACT_CODE");
+      if (lsKey && lsContract) {
+        cachedConfig = {
+          apiKey: lsKey.trim(),
+          contractCode: lsContract.trim(),
+          isSandbox: lsKey.startsWith("MK_TEST_"),
+          configured: true
+        };
+        return cachedConfig;
+      }
+    } catch (err) {}
   }
 
   return {
