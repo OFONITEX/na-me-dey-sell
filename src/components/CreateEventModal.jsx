@@ -14,7 +14,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
   const [formData, setFormData] = useState({
     title: "",
     subtitle: "",
-    category: "Concerts & Music",
+    category: "Concerts",
     date: "Thursday, 8th October, 2026",
     time: "07:00 PM - 02:00 AM",
     venue: "Camp Gee Arena & Events",
@@ -45,12 +45,16 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
   ]);
 
   const categories = [
-    "Concerts & Music",
-    "Parties & Nightlife",
-    "Food & Festivals",
-    "Campus & Comedy",
-    "Tech & Business",
-    "Arts & Culture"
+    "Corporate Events",
+    "Weddings",
+    "Festival",
+    "Parties / Nightlife",
+    "Concerts",
+    "Business Event",
+    "Tech Event",
+    "Arts / Culture",
+    "Marketing Event",
+    "Food Event"
   ];
 
   // Helper to add tier (max 10)
@@ -243,7 +247,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
                 <div>
-                  <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Category</label>
+                  <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Nature of Event</label>
                   <select
                     style={{ width: "100%", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "13px" }}
                     value={formData.category}

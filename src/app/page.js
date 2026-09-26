@@ -51,11 +51,16 @@ export default function Home() {
 
   const categories = [
     { id: "all", label: "All Events" },
-    { id: "Parties & Nightlife", label: "🎉 Parties & Nightlife" },
-    { id: "Concerts & Music", label: "🎵 Concerts & Live" },
-    { id: "Tech & Business", label: "🚀 Tech & Summits" },
-    { id: "Food & Festivals", label: "🍹 Food & Festivals" },
-    { id: "Campus & Comedy", label: "🎭 Comedy & Stage" }
+    { id: "corporate events", label: "🏢 Corporate Events" },
+    { id: "Weddings", label: "💍 Weddings" },
+    { id: "Festival", label: "🎉 Festival" },
+    { id: "parties/ nightlife", label: "🍾 Parties / Nightlife" },
+    { id: "concerts", label: "🎵 Concerts" },
+    { id: "business event", label: "💼 Business Events" },
+    { id: "tech event", label: "🚀 Tech Events" },
+    { id: "arts / culture", label: "🎨 Arts / Culture" },
+    { id: "marketing event", label: "📢 Marketing Events" },
+    { id: "Food event", label: "🍹 Food Events" }
   ];
 
   const cities = [
@@ -70,8 +75,21 @@ export default function Home() {
 
   // Filter events by search, category & city
   const filteredEvents = events.filter(evt => {
+    const evtCat = (evt.category || "").toLowerCase();
+    const actCat = activeCategory.toLowerCase();
     const matchesCategory =
-      activeCategory === "all" || evt.category.toLowerCase() === activeCategory.toLowerCase();
+      activeCategory === "all" ||
+      evtCat === actCat ||
+      evtCat.includes(actCat) ||
+      actCat.includes(evtCat) ||
+      (actCat.includes("parties") && evtCat.includes("parties")) ||
+      (actCat.includes("concert") && evtCat.includes("concert")) ||
+      (actCat.includes("food") && evtCat.includes("food")) ||
+      (actCat.includes("tech") && evtCat.includes("tech")) ||
+      (actCat.includes("business") && evtCat.includes("business")) ||
+      (actCat.includes("festival") && evtCat.includes("festival")) ||
+      (actCat.includes("wedding") && evtCat.includes("wedding")) ||
+      (actCat.includes("corporate") && evtCat.includes("corporate"));
 
     const matchesCity =
       selectedCity === "all" || evt.city.toLowerCase().includes(selectedCity.toLowerCase());
