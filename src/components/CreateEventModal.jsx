@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon } from "./Icons";
 import { saveNewEvent } from "../lib/ticketService";
+import CitySearchSelector from "./CitySearchSelector";
 
 export default function CreateEventModal({ onClose, onEventCreated }) {
   const [formData, setFormData] = useState({
@@ -12,7 +13,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
     date: "Dec 20, 2026",
     time: "07:00 PM - 03:00 AM",
     venue: "Landmark Beach Arena",
-    city: "Victoria Island, Lagos",
+    city: "Victoria Island, Lagos, Nigeria",
     address: "Water Corporation Road, Oniru",
     organizer: "Naija Entertainment Group",
     imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
@@ -36,16 +37,6 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
     "Food & Festivals",
     "Campus & Comedy",
     "Arts & Culture"
-  ];
-
-  const cityOptions = [
-    "Victoria Island, Lagos",
-    "Lekki Phase 1, Lagos",
-    "Central Business District, Abuja",
-    "Pleasure Park, Port Harcourt",
-    "Tropicana Center, Uyo",
-    "O2 Arena District, London",
-    "Labadi Beach, Accra"
   ];
 
   const handleSubmit = (e) => {
@@ -236,14 +227,13 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               </div>
 
               <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>City & State</label>
-                <select
-                  style={{ width: "100%", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "13px" }}
+                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
+                  City & Country (Worldwide)
+                </label>
+                <CitySearchSelector
                   value={formData.city}
-                  onChange={e => setFormData({ ...formData, city: e.target.value })}
-                >
-                  {cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                  onChange={(selectedCity) => setFormData({ ...formData, city: selectedCity })}
+                />
               </div>
             </div>
           </div>
