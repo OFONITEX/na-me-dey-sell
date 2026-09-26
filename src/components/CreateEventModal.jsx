@@ -337,7 +337,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
       accentColor: formData.accentColor,
       imageUrl: primaryFlyer,
       galleryImages: allFlyers,
-      bannerPattern: `linear-gradient(135deg, ${formData.accentColor} 0%, #11081a 100%)`,
+      bannerPattern: `linear-gradient(135deg, ${formData.accentColor} 0%, #070709 100%)`,
       description: formData.description,
       tiers: eventTiers
     };
@@ -369,9 +369,9 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{ padding: "18px 24px", background: "#1a0e28", borderBottom: "1px solid rgba(217, 192, 235, 0.15)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "18px 24px", background: "#0E0E14", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(82, 38, 114, 0.6)", border: "1px solid var(--brand-gold)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--brand-gold)" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid var(--brand-gold)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--brand-gold)" }}>
               <PlusIcon size={22} />
             </div>
             <div>
@@ -388,7 +388,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
 
         {/* Saved Draft Alert Banner */}
         {savedDraftAvailable && (
-          <div style={{ padding: "10px 24px", background: "linear-gradient(90deg, rgba(82,38,114,0.9), rgba(217,192,235,0.2))", borderBottom: "1px solid var(--brand-gold)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+          <div style={{ padding: "10px 24px", background: "linear-gradient(90deg, rgba(212,175,55,0.25), rgba(14,14,20,0.9))", borderBottom: "1px solid var(--brand-gold)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
             <div style={{ fontSize: "12px", color: "#fff", display: "flex", alignItems: "center", gap: "6px" }}>
               <span>📝</span>
               <span><strong>Unfinished Draft Found:</strong> You have unsaved event work from {savedDraftAvailable.formattedTime || "a previous session"}.</span>
@@ -397,7 +397,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               <button
                 type="button"
                 onClick={handleResumeDraft}
-                style={{ background: "var(--brand-gold)", color: "#11081a", border: "none", padding: "4px 12px", borderRadius: "4px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
+                style={{ background: "var(--brand-gold)", color: "#070709", border: "none", padding: "4px 12px", borderRadius: "4px", fontSize: "11px", fontWeight: "800", cursor: "pointer" }}
               >
                 ⚡ Resume Draft
               </button>
@@ -424,7 +424,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
         <form onSubmit={handleSubmit} style={{ padding: "20px 24px", overflowY: "auto", flex: 1, display: "flex", flexDirection: "column", gap: "22px" }}>
           
           {/* SECTION 1: Event Basics */}
-          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
             <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
               1. Event Basics
             </div>
@@ -436,7 +436,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   type="text"
                   required
                   placeholder="e.g. Detty Rave Beach Carnival / Grand Corporate Gala / Royal Wedding"
-                  style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
+                  style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                 />
@@ -447,7 +447,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 <input
                   type="text"
                   placeholder="e.g. Live stage concert & cultural food showcase"
-                  style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
+                  style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
                   value={formData.subtitle}
                   onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
                 />
@@ -457,7 +457,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 <div>
                   <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Nature of Event</label>
                   <select
-                    style={{ width: "100%", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "13px" }}
+                    style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "13px" }}
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value })}
                   >
@@ -469,7 +469,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Organizer / Brand</label>
                   <input
                     type="text"
-                    style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
+                    style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
                     value={formData.organizer}
                     onChange={e => setFormData({ ...formData, organizer: e.target.value })}
                   />
@@ -479,7 +479,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
           </div>
 
           {/* SECTION 2: Date & Time (Calendar Popup with Day & Date) */}
-          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
             <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
               2. Date & Time
             </div>
@@ -503,7 +503,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 <input
                   type="text"
                   placeholder="e.g. 06:00 PM - 02:00 AM"
-                  style={{ width: "100%", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
+                  style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "10px 14px", color: "#fff", outline: "none", fontSize: "14px" }}
                   value={formData.time}
                   onChange={e => setFormData({ ...formData, time: e.target.value })}
                 />
@@ -512,7 +512,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
           </div>
 
           {/* SECTION 3: Venue & Location Navigation */}
-          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
             <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
               3. Venue & Location Navigation
             </div>
@@ -550,7 +550,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
           </div>
 
           {/* SECTION 4: Ticket Pricing Tiers & Currency Selection */}
-          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
@@ -562,8 +562,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               </div>
 
               {/* Currency Selector */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(17,8,26,0.9)", border: "1px solid rgba(217,192,235,0.25)", borderRadius: "8px", padding: "4px 8px" }}>
-                <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--brand-lavender)", textTransform: "uppercase" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#0E0E14", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "4px 8px" }}>
+                <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--brand-gold-bright)", textTransform: "uppercase" }}>
                   Currency:
                 </span>
                 <select
@@ -583,7 +583,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   }}
                 >
                   {SUPPORTED_CURRENCIES.map(curr => (
-                    <option key={curr.code} value={curr.code} style={{ background: "#11081a", color: "#fff" }}>
+                    <option key={curr.code} value={curr.code} style={{ background: "#070709", color: "#fff" }}>
                       {curr.flag} {curr.code} ({curr.symbol})
                     </option>
                   ))}
@@ -592,8 +592,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
             </div>
 
             {/* Quick Action: Load Stadium / Arena Preset */}
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "8px", marginBottom: "12px", padding: "8px 12px", background: "rgba(82, 38, 114, 0.25)", border: "1px dashed rgba(217, 192, 235, 0.3)", borderRadius: "8px" }}>
-              <span style={{ fontSize: "12px", color: "var(--brand-lavender)" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "8px", marginBottom: "12px", padding: "8px 12px", background: "rgba(212, 175, 55, 0.1)", border: "1px dashed rgba(212, 175, 55, 0.3)", borderRadius: "8px" }}>
+              <span style={{ fontSize: "12px", color: "var(--brand-gold-bright)" }}>
                 Need standard arena sections?
               </span>
               <button
@@ -620,8 +620,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 <div
                   key={tier.id || index}
                   style={{
-                    background: "rgba(17,8,26,0.8)",
-                    border: "1px solid rgba(217,192,235,0.15)",
+                    background: "#0E0E14",
+                    border: "1px solid rgba(212,175,55,0.2)",
                     borderRadius: "8px",
                     padding: "12px",
                     display: "flex",
@@ -638,7 +638,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                         type="text"
                         required
                         placeholder="e.g. Regular / VIP"
-                        style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 10px", color: "#fff", outline: "none", fontSize: "13px" }}
+                        style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.2)", borderRadius: "6px", padding: "8px 10px", color: "#fff", outline: "none", fontSize: "13px" }}
                         value={tier.name}
                         onChange={e => handleUpdateTier(index, "name", e.target.value)}
                       />
@@ -652,7 +652,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                         type="number"
                         min="0"
                         required
-                        style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 10px", color: "var(--brand-gold)", fontWeight: "700", outline: "none", fontSize: "13px" }}
+                        style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.2)", borderRadius: "6px", padding: "8px 10px", color: "var(--brand-gold)", fontWeight: "700", outline: "none", fontSize: "13px" }}
                         value={tier.price}
                         onChange={e => handleUpdateTier(index, "price", e.target.value)}
                       />
@@ -666,7 +666,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                         type="number"
                         min="1"
                         required
-                        style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 10px", color: "#fff", outline: "none", fontSize: "13px" }}
+                        style={{ width: "100%", background: "#070709", border: "1px solid rgba(212,175,55,0.2)", borderRadius: "6px", padding: "8px 10px", color: "#fff", outline: "none", fontSize: "13px" }}
                         value={tier.capacity}
                         onChange={e => handleUpdateTier(index, "capacity", e.target.value)}
                       />
@@ -698,7 +698,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                     <input
                       type="text"
                       placeholder="Perks / Seating description (e.g. Stage front, complimentary drink, VIP gate access)"
-                      style={{ width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(217,192,235,0.1)", padding: "4px 2px", color: "var(--text-muted)", fontSize: "11px", outline: "none" }}
+                      style={{ width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(212,175,55,0.15)", padding: "4px 2px", color: "var(--text-muted)", fontSize: "11px", outline: "none" }}
                       value={tier.description || ""}
                       onChange={e => handleUpdateTier(index, "description", e.target.value)}
                     />
@@ -716,9 +716,9 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "6px",
-                    background: "rgba(217, 192, 235, 0.12)",
-                    border: "1px solid rgba(217, 192, 235, 0.3)",
-                    color: "var(--brand-lavender)",
+                    background: "rgba(212, 175, 55, 0.12)",
+                    border: "1px solid rgba(212, 175, 55, 0.3)",
+                    color: "var(--brand-gold)",
                     borderRadius: "6px",
                     padding: "8px 16px",
                     fontSize: "12px",
@@ -742,7 +742,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
           </div>
 
           {/* SECTION 5: Flyer Image Upload (Up to 3 free, Upsell for 5-10) */}
-          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
@@ -758,7 +758,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 type="button"
                 onClick={() => setShowProModal(true)}
                 style={{
-                  background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(82,38,114,0.4))",
+                  background: "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(14,14,20,0.9))",
                   border: "1px solid var(--brand-gold)",
                   color: "var(--brand-gold)",
                   borderRadius: "20px",
@@ -785,11 +785,11 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                 }
               }}
               style={{
-                border: "2px dashed rgba(217, 192, 235, 0.3)",
+                border: "2px dashed rgba(212, 175, 55, 0.35)",
                 borderRadius: "10px",
                 padding: "20px",
                 textAlign: "center",
-                background: "rgba(17,8,26,0.5)",
+                background: "#070709",
                 cursor: "pointer",
                 transition: "all 0.2s ease"
               }}
@@ -825,8 +825,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                         position: "relative",
                         borderRadius: "8px",
                         overflow: "hidden",
-                        border: img.isPrimary ? "2px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.2)",
-                        background: "#11081a",
+                        border: img.isPrimary ? "2px solid var(--brand-gold)" : "1px solid rgba(212,175,55,0.25)",
+                        background: "#070709",
                         aspectRatio: "3/4",
                         display: "flex",
                         flexDirection: "column"
@@ -840,7 +840,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                       
                       {/* Top Badges */}
                       <div style={{ position: "absolute", top: "6px", left: "6px", right: "6px", display: "flex", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: "9px", fontWeight: "800", padding: "2px 6px", borderRadius: "4px", background: img.isPrimary ? "var(--brand-gold)" : "rgba(0,0,0,0.7)", color: img.isPrimary ? "#11081a" : "#fff" }}>
+                        <span style={{ fontSize: "9px", fontWeight: "800", padding: "2px 6px", borderRadius: "4px", background: img.isPrimary ? "var(--brand-gold)" : "rgba(0,0,0,0.7)", color: img.isPrimary ? "#070709" : "#fff" }}>
                           {img.isPrimary ? "Main Banner" : `Flyer #${idx + 1}`}
                         </span>
                         <button
@@ -902,7 +902,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                       onClick={() => fileInputRef.current?.click()}
                       style={{
                         borderRadius: "8px",
-                        border: "1px dashed rgba(217,192,235,0.3)",
+                        border: "1px dashed rgba(212,175,55,0.35)",
                         aspectRatio: "3/4",
                         display: "flex",
                         flexDirection: "column",
@@ -910,7 +910,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                         justifyContent: "center",
                         background: "rgba(255,255,255,0.02)",
                         cursor: "pointer",
-                        color: "var(--brand-lavender)",
+                        color: "var(--brand-gold-bright)",
                         fontSize: "11px",
                         fontWeight: "700",
                         gap: "6px"
@@ -930,7 +930,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: "rgba(212,175,55,0.06)",
+                        background: "rgba(212,175,55,0.1)",
                         cursor: "pointer",
                         color: "var(--brand-gold)",
                         fontSize: "11px",
@@ -950,7 +950,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
           </div>
 
           {/* SECTION 6: Rich Event Description & Overview Dashboard */}
-          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(217,192,235,0.08)" }}>
+          <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "12px" }}>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
@@ -962,13 +962,13 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               </div>
 
               {/* View Mode Switcher: Editor / Live Attendee Preview */}
-              <div style={{ display: "flex", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", padding: "2px" }}>
+              <div style={{ display: "flex", background: "#070709", border: "1px solid rgba(212,175,55,0.25)", borderRadius: "8px", padding: "2px" }}>
                 <button
                   type="button"
                   onClick={() => setDescActiveTab("editor")}
                   style={{
-                    background: descActiveTab === "editor" ? "var(--primary-purple)" : "transparent",
-                    color: descActiveTab === "editor" ? "#fff" : "var(--text-dim)",
+                    background: descActiveTab === "editor" ? "var(--brand-gold)" : "transparent",
+                    color: descActiveTab === "editor" ? "#070709" : "var(--text-dim)",
                     border: "none",
                     borderRadius: "6px",
                     padding: "4px 12px",
@@ -983,8 +983,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   type="button"
                   onClick={() => setDescActiveTab("preview")}
                   style={{
-                    background: descActiveTab === "preview" ? "var(--primary-purple)" : "transparent",
-                    color: descActiveTab === "preview" ? "#fff" : "var(--text-dim)",
+                    background: descActiveTab === "preview" ? "var(--brand-gold)" : "transparent",
+                    color: descActiveTab === "preview" ? "#070709" : "var(--text-dim)",
                     border: "none",
                     borderRadius: "6px",
                     padding: "4px 12px",
@@ -1015,12 +1015,12 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   type="button"
                   onClick={() => handleInsertDescTemplate(tpl.key)}
                   style={{
-                    background: "rgba(217,192,235,0.08)",
-                    border: "1px solid rgba(217,192,235,0.2)",
+                    background: "rgba(212,175,55,0.1)",
+                    border: "1px solid rgba(212,175,55,0.25)",
                     borderRadius: "6px",
                     padding: "3px 8px",
                     fontSize: "11px",
-                    color: "var(--brand-lavender)",
+                    color: "var(--brand-gold-bright)",
                     cursor: "pointer"
                   }}
                 >
@@ -1037,8 +1037,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
                   placeholder="Explain what attendees will experience, including live schedule, dress code, performers, and entry requirements..."
                   style={{
                     width: "100%",
-                    background: "rgba(17,8,26,0.8)",
-                    border: "1px solid rgba(217,192,235,0.25)",
+                    background: "#070709",
+                    border: "1px solid rgba(212,175,55,0.25)",
                     borderRadius: "8px",
                     padding: "12px 14px",
                     color: "#fff",
@@ -1063,8 +1063,8 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
             ) : (
               <div
                 style={{
-                  background: "#11081a",
-                  border: "1px solid rgba(217,192,235,0.2)",
+                  background: "#070709",
+                  border: "1px solid rgba(212,175,55,0.25)",
                   borderRadius: "8px",
                   padding: "16px",
                   minHeight: "180px",
@@ -1089,9 +1089,9 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               onClick={handleSaveWorkAndContinue}
               style={{
                 flex: "1 1 200px",
-                background: "rgba(217, 192, 235, 0.1)",
-                border: "1px solid rgba(217, 192, 235, 0.3)",
-                color: "#fff",
+                background: "rgba(212, 175, 55, 0.12)",
+                border: "1px solid rgba(212, 175, 55, 0.3)",
+                color: "var(--brand-gold)",
                 borderRadius: "8px",
                 padding: "14px 18px",
                 fontSize: "13px",
@@ -1145,11 +1145,11 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
               Upgrade to Nà Mè Dèy Sell PRO
             </h3>
 
-            <p style={{ fontSize: "13px", color: "var(--brand-lavender)", lineHeight: "1.6", marginBottom: "20px" }}>
+            <p style={{ fontSize: "13px", color: "var(--brand-gold-bright)", lineHeight: "1.6", marginBottom: "20px" }}>
               Free organizers can upload up to <strong>3 flyers</strong>. Upgrade to PRO to unlock the full event gallery and supercharge your ticket sales!
             </p>
 
-            <div style={{ background: "rgba(17,8,26,0.8)", border: "1px solid rgba(217,192,235,0.15)", borderRadius: "10px", padding: "16px", textAlign: "left", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "10px", padding: "16px", textAlign: "left", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fff" }}>
                 <span style={{ color: "var(--brand-gold)", fontWeight: "900" }}>✓</span>
                 <span><strong>5 to 10 High-Res Event Flyers</strong> & Promo Banner Carousel</span>

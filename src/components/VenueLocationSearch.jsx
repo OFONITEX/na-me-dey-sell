@@ -103,8 +103,8 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(17,8,26,0.7)",
-          border: "1px solid rgba(217,192,235,0.25)",
+          background: "#070709",
+          border: "1px solid rgba(212, 175, 55, 0.25)",
           borderRadius: "6px",
           padding: "10px 14px",
           color: "#fff",
@@ -114,19 +114,19 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px", overflow: "hidden" }}>
-          <MapPinIcon size={16} style={{ color: "var(--warm-amber)", flexShrink: 0 }} />
+          <MapPinIcon size={16} style={{ color: "var(--brand-gold)", flexShrink: 0 }} />
           <div style={{ overflow: "hidden" }}>
             <div style={{ fontWeight: "700", color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {venueValue || "Search Venue / Location"}
             </div>
             {addressValue && (
-              <div style={{ fontSize: "11px", color: "var(--brand-lavender)", opacity: 0.8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <div style={{ fontSize: "11px", color: "var(--brand-gold-bright)", opacity: 0.8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {addressValue}
               </div>
             )}
           </div>
         </div>
-        <span style={{ fontSize: "11px", background: "rgba(217,192,235,0.15)", color: "var(--brand-gold)", padding: "3px 8px", borderRadius: "4px", flexShrink: 0, fontWeight: "700" }}>
+        <span style={{ fontSize: "11px", background: "rgba(212, 175, 55, 0.15)", color: "var(--brand-gold)", padding: "3px 8px", borderRadius: "4px", flexShrink: 0, fontWeight: "700" }}>
           🔍 Search & Map
         </span>
       </button>
@@ -144,7 +144,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(217,192,235,0.15)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a0e28" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(212, 175, 55, 0.25)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#0E0E14" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <MapPinIcon size={18} style={{ color: "var(--brand-gold)" }} />
                 <div>
@@ -166,7 +166,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
             </div>
 
             {/* Search Input Bar with Explicit Search Button */}
-            <div style={{ padding: "14px 20px", background: "rgba(26,14,40,0.6)", borderBottom: "1px solid rgba(217,192,235,0.1)" }}>
+            <div style={{ padding: "14px 20px", background: "rgba(14, 14, 18, 0.8)", borderBottom: "1px solid rgba(212, 175, 55, 0.2)" }}>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -176,7 +176,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                 }}
                 style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
               >
-                <div style={{ display: "flex", alignItems: "center", background: "#11081a", border: "1.5px solid var(--brand-gold)", borderRadius: "8px", padding: "8px 12px", gap: "10px", flex: 1, minWidth: "220px" }}>
+                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1.5px solid var(--brand-gold)", borderRadius: "8px", padding: "8px 12px", gap: "10px", flex: 1, minWidth: "220px" }}>
                   <SearchIcon size={16} style={{ color: "var(--brand-gold)" }} />
                   <input
                     ref={searchInputRef}
@@ -200,7 +200,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                   type="submit"
                   style={{
                     background: "var(--brand-gold)",
-                    color: "#11081a",
+                    color: "#070709",
                     border: "none",
                     borderRadius: "8px",
                     padding: "8px 18px",
@@ -236,9 +236,9 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                       setPreviewQuery(chip.query);
                     }}
                     style={{
-                      background: "rgba(217, 192, 235, 0.1)",
-                      border: "1px solid rgba(217, 192, 235, 0.2)",
-                      color: "var(--brand-lavender)",
+                      background: "rgba(212, 175, 55, 0.1)",
+                      border: "1px solid rgba(212, 175, 55, 0.25)",
+                      color: "var(--brand-gold-bright)",
                       padding: "3px 8px",
                       borderRadius: "12px",
                       fontSize: "11px",
@@ -295,8 +295,8 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                         alignItems: "flex-start",
                         padding: "8px 10px",
                         borderRadius: "6px",
-                        background: isCurSelected ? "rgba(82, 38, 114, 0.7)" : "rgba(17,8,26,0.6)",
-                        border: isCurSelected ? "1px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.12)",
+                        background: isCurSelected ? "rgba(212, 175, 55, 0.25)" : "#070709",
+                        border: isCurSelected ? "1px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.15)",
                         color: "#fff",
                         cursor: "pointer",
                         textAlign: "left"
@@ -306,7 +306,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                         <span style={{ fontSize: "12px", fontWeight: "800", color: isCurSelected ? "var(--brand-gold)" : "#fff" }}>
                           {v.name}
                         </span>
-                        <span style={{ fontSize: "9px", background: "rgba(217,192,235,0.15)", color: "var(--brand-lavender)", padding: "1px 5px", borderRadius: "3px" }}>
+                        <span style={{ fontSize: "9px", background: "rgba(212, 175, 55, 0.15)", color: "var(--brand-gold-bright)", padding: "1px 5px", borderRadius: "3px" }}>
                           {v.category.split(" ")[0]}
                         </span>
                       </div>
@@ -330,8 +330,8 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                       alignItems: "flex-start",
                       padding: "8px 10px",
                       borderRadius: "6px",
-                      background: "rgba(17,8,26,0.8)",
-                      border: "1px solid rgba(245, 208, 97, 0.3)",
+                      background: "#070709",
+                      border: "1px solid rgba(245, 208, 97, 0.35)",
                       color: "#fff",
                       cursor: "pointer",
                       textAlign: "left"
@@ -347,7 +347,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                 ))}
 
                 {isSearchingOnline && (
-                  <div style={{ fontSize: "11px", color: "var(--brand-lavender)", textAlign: "center", padding: "6px" }}>
+                  <div style={{ fontSize: "11px", color: "var(--brand-gold-bright)", textAlign: "center", padding: "6px" }}>
                     Searching global map...
                   </div>
                 )}
@@ -359,12 +359,12 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                   <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase" }}>
                     📍 Map Navigation
                   </span>
-                  <span style={{ fontSize: "10px", color: "var(--brand-lavender)" }}>
+                  <span style={{ fontSize: "10px", color: "var(--brand-gold-bright)" }}>
                     Interactive Pin
                   </span>
                 </div>
 
-                <div style={{ flex: 1, minHeight: "220px", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "8px", overflow: "hidden", position: "relative" }}>
+                <div style={{ flex: 1, minHeight: "220px", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "8px", overflow: "hidden", position: "relative" }}>
                   <iframe
                     title="Venue Map Navigation"
                     width="100%"
@@ -383,7 +383,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
             </div>
 
             {/* Custom Manual Address Footer */}
-            <div style={{ padding: "12px 20px", borderTop: "1px solid rgba(217,192,235,0.15)", background: "#1a0e28", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ padding: "12px 20px", borderTop: "1px solid rgba(212, 175, 55, 0.2)", background: "#0E0E14", display: "flex", flexDirection: "column", gap: "6px" }}>
               <div style={{ fontSize: "11px", color: "var(--text-dim)", textTransform: "uppercase", fontWeight: "700" }}>
                 Or input custom venue details manually:
               </div>
@@ -391,14 +391,14 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                 <input
                   type="text"
                   placeholder="Venue Name (e.g. Camp Gee)"
-                  style={{ background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 10px", color: "#fff", fontSize: "12px", outline: "none" }}
+                  style={{ background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 10px", color: "#fff", fontSize: "12px", outline: "none" }}
                   value={customVenue}
                   onChange={(e) => setCustomVenue(e.target.value)}
                 />
                 <input
                   type="text"
                   placeholder="Street / Location (e.g. Ring Road)"
-                  style={{ background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 10px", color: "#fff", fontSize: "12px", outline: "none" }}
+                  style={{ background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 10px", color: "#fff", fontSize: "12px", outline: "none" }}
                   value={customAddress}
                   onChange={(e) => setCustomAddress(e.target.value)}
                 />
@@ -406,7 +406,7 @@ export default function VenueLocationSearch({ venueValue, addressValue, onChange
                   type="button"
                   onClick={handleApplyCustom}
                   style={{
-                    background: "var(--primary-purple)",
+                    background: "rgba(212, 175, 55, 0.2)",
                     border: "1px solid var(--brand-gold)",
                     color: "var(--brand-gold)",
                     borderRadius: "6px",

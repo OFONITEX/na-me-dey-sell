@@ -1,28 +1,43 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 :root {
-  /* Rigitix & Nà Mè Dèy Sell Brand Tokens */
-  --primary-purple: #522672;
-  --secondary-violet: #8236CF;
-  --brand-lavender: #D9C0EB;
-  --brand-lavender-light: #F7F5F9;
-  --warm-amber: #ff8a65;
-  --brand-gold: #F5D061;
-  --brand-gold-dark: #D4AF37;
-  --electric-pink: #EB018E;
-  --emerald-green: #10b981;
-  
-  --bg-dark: #11081a;
-  --bg-dark-surface: #1a0e28;
-  --bg-card: #201233;
-  --bg-card-hover: #2a1844;
+  /* ==========================================================================
+     Nà Mè Dèy Sell Signature Black & Gold Luxury Brand Tokens
+     ========================================================================== */
+  --brand-gold: #D4AF37;        /* Metallic Royal Gold */
+  --brand-gold-bright: #F5D061; /* Vibrant Accent Gold */
+  --brand-gold-light: #FCE794;  /* Radiant Champagne Gold */
+  --brand-gold-dark: #A67C1E;   /* Deep Burnished Gold */
+  --brand-gold-glow: rgba(212, 175, 55, 0.45);
+  --brand-gold-subtle: rgba(212, 175, 55, 0.12);
 
+  /* Deep Obsidian & Jet Black Surfaces */
+  --bg-dark: #070709;           /* Pure Obsidian Black */
+  --bg-dark-surface: #0E0E13;   /* Midnight Deep Surface */
+  --bg-card: #121218;           /* Elevated Matte Black Card */
+  --bg-card-hover: #191922;      /* Hover Elevation Surface */
+  --bg-card-accent: #17150F;     /* Subtle Gold-infused Black */
+
+  /* Typography: Crisp Pure White & Warm Champagne */
   --text-white: #ffffff;
-  --text-muted: #cbbad9;
-  --text-dim: #8b799e;
+  --text-muted: #E2D9BC;        /* Warm Champagne Muted Text */
+  --text-dim: #948B75;          /* Bronze Tinted Subdued Text */
 
-  --border-subtle: rgba(217, 192, 235, 0.15);
-  --border-glow: 0 0 25px rgba(130, 54, 207, 0.35);
+  /* Gold Border System */
+  --border-subtle: rgba(212, 175, 55, 0.2);
+  --border-gold: rgba(245, 208, 97, 0.45);
+  --border-glow: 0 0 25px rgba(212, 175, 55, 0.35);
+
+  /* Vibrant Accents */
+  --warm-amber: #E5B53B;
+  --emerald-green: #10b981;
+  --electric-pink: #EB018E;
+
+  /* Aliases mapped to Black & Gold for 100% component compatibility */
+  --primary-purple: #D4AF37;
+  --secondary-violet: #F5D061;
+  --brand-lavender: #E2D9BC;
+  --brand-lavender-light: #FBF8EE;
 
   --radius-sm: 6px;
   --radius-md: 12px;
@@ -54,7 +69,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Rigitix Signature Split Action Buttons (.rx-btn)
+   Signature Split Action Buttons (.rx-btn) - Black & Gold Edition
    ========================================================================== */
 .rx-btn {
   display: inline-flex;
@@ -69,12 +84,12 @@ h1, h2, h3, h4, h5, .font-heading {
   cursor: pointer;
   border: none;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .rx-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(82, 38, 114, 0.45);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
 }
 
 .rx-btn:active {
@@ -87,7 +102,7 @@ h1, h2, h3, h4, h5, .font-heading {
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .rx-btn-icon {
@@ -105,33 +120,35 @@ h1, h2, h3, h4, h5, .font-heading {
 
 /* Button Variants */
 .rx-btn-primary .rx-btn-text {
-  background: var(--primary-purple);
-  color: #ffffff;
+  background: linear-gradient(135deg, #F5D061 0%, #D4AF37 100%);
+  color: #070709;
 }
 .rx-btn-primary .rx-btn-icon {
-  background: var(--warm-amber);
-  color: #ffffff;
+  background: #070709;
+  color: #F5D061;
 }
 
 .rx-btn-gold .rx-btn-text {
-  background: linear-gradient(135deg, #F5D061 0%, #D4AF37 100%);
-  color: #11081a;
+  background: linear-gradient(135deg, #FFF0A3 0%, #D4AF37 100%);
+  color: #070709;
   font-weight: 900;
 }
 .rx-btn-gold .rx-btn-icon {
-  background: #11081a;
+  background: #070709;
   color: #F5D061;
 }
 
 .rx-btn-secondary .rx-btn-text {
-  background: rgba(217, 192, 235, 0.15);
+  background: rgba(212, 175, 55, 0.12);
   color: #ffffff;
-  border: 1px solid rgba(217, 192, 235, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   backdrop-filter: blur(8px);
 }
 .rx-btn-secondary .rx-btn-icon {
-  background: var(--primary-purple);
-  color: #ffffff;
+  background: #14141A;
+  color: var(--brand-gold);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-left: none;
 }
 
 .rx-btn-sm .rx-btn-text {
@@ -143,17 +160,17 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Header & Sticky Glassmorphism Navigation
+   Header & Sticky Glassmorphism Navigation - Black & Gold
    ========================================================================== */
 .rx-nav-sticky {
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: rgba(17, 8, 26, 0.92);
+  background: rgba(7, 7, 9, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(217, 192, 235, 0.12);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
   transition: all 0.3s ease;
 }
 
@@ -179,7 +196,7 @@ h1, h2, h3, h4, h5, .font-heading {
   height: 44px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(245, 208, 97, 0.25));
+  filter: drop-shadow(0 4px 12px rgba(245, 208, 97, 0.35));
   transition: transform 0.2s ease;
 }
 
@@ -189,7 +206,7 @@ h1, h2, h3, h4, h5, .font-heading {
 
 .brand-tagline-pill {
   background: rgba(245, 208, 97, 0.12);
-  border: 1px solid rgba(245, 208, 97, 0.3);
+  border: 1px solid rgba(245, 208, 97, 0.35);
   color: var(--brand-gold);
   font-size: 10px;
   font-weight: 800;
@@ -231,8 +248,8 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .nav-link-item:hover {
-  color: #ffffff;
-  background: rgba(217, 192, 235, 0.08);
+  color: var(--brand-gold);
+  background: rgba(212, 175, 55, 0.08);
 }
 
 .nav-actions {
@@ -243,8 +260,8 @@ h1, h2, h3, h4, h5, .font-heading {
 
 .btn-ticket-wallet {
   position: relative;
-  background: rgba(82, 38, 114, 0.4);
-  border: 1px solid rgba(217, 192, 235, 0.25);
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   color: #ffffff;
   padding: 10px 18px;
   border-radius: 6px;
@@ -258,14 +275,14 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .btn-ticket-wallet:hover {
-  background: var(--primary-purple);
-  border-color: var(--brand-lavender);
-  box-shadow: 0 4px 20px rgba(82, 38, 114, 0.5);
+  background: rgba(212, 175, 55, 0.25);
+  border-color: var(--brand-gold);
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
 }
 
 .badge-ticket-counter {
-  background: var(--warm-amber);
-  color: #ffffff;
+  background: var(--brand-gold);
+  color: #070709;
   font-size: 11px;
   font-weight: 900;
   padding: 2px 7px;
@@ -274,7 +291,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Hero Section
+   Hero Section - Sleek Black & Radiant Gold
    ========================================================================== */
 .rx-hero {
   position: relative;
@@ -286,7 +303,7 @@ h1, h2, h3, h4, h5, .font-heading {
   text-align: center;
   padding: 70px 24px 60px;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 20%, rgba(82, 38, 114, 0.45) 0%, rgba(17, 8, 26, 0.98) 70%);
+  background: radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.18) 0%, rgba(14, 14, 18, 0.95) 55%, #070709 100%);
 }
 
 .rx-hero-glow-1 {
@@ -295,7 +312,7 @@ h1, h2, h3, h4, h5, .font-heading {
   left: 20%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(130, 54, 207, 0.25) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.22) 0%, transparent 70%);
   filter: blur(80px);
   pointer-events: none;
 }
@@ -306,7 +323,7 @@ h1, h2, h3, h4, h5, .font-heading {
   right: 15%;
   width: 450px;
   height: 450px;
-  background: radial-gradient(circle, rgba(255, 138, 101, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(245, 208, 97, 0.15) 0%, transparent 70%);
   filter: blur(80px);
   pointer-events: none;
 }
@@ -315,15 +332,16 @@ h1, h2, h3, h4, h5, .font-heading {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(82, 38, 114, 0.5);
-  border: 1px solid rgba(245, 208, 97, 0.35);
+  background: rgba(20, 18, 14, 0.85);
+  border: 1px solid rgba(245, 208, 97, 0.4);
   padding: 6px 16px;
   border-radius: 999px;
   margin-bottom: 24px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--brand-lavender);
+  color: var(--brand-gold);
   backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .rx-announcement-pill .accent-dot {
@@ -356,11 +374,11 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-highlight-lavender {
-  color: var(--brand-lavender);
+  color: var(--brand-gold-light);
 }
 
 .rx-highlight-gold {
-  background: linear-gradient(135deg, #F5D061 0%, #D4AF37 100%);
+  background: linear-gradient(135deg, #FFF0A3 0%, #F5D061 50%, #D4AF37 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -397,10 +415,11 @@ h1, h2, h3, h4, h5, .font-heading {
   max-width: 760px;
   margin: 0 auto;
   padding: 20px;
-  background: rgba(26, 14, 40, 0.6);
-  border: 1px solid rgba(217, 192, 235, 0.15);
+  background: rgba(14, 14, 18, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
 .rx-stat-item {
@@ -410,15 +429,15 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-stat-item:nth-child(2) {
-  border-left: 1px solid rgba(217, 192, 235, 0.15);
-  border-right: 1px solid rgba(217, 192, 235, 0.15);
+  border-left: 1px solid rgba(212, 175, 55, 0.2);
+  border-right: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .rx-stat-num {
   font-family: 'Sora', sans-serif;
   font-size: 1.8rem;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--brand-gold);
   letter-spacing: -0.02em;
 }
 
@@ -438,7 +457,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Search & Filter Bar with City Selector
+   Search & Filter Bar with City Selector - Black & Gold
    ========================================================================== */
 .rx-filter-section {
   max-width: 1320px;
@@ -450,14 +469,14 @@ h1, h2, h3, h4, h5, .font-heading {
 
 .rx-filter-box {
   background: var(--bg-card);
-  border: 1px solid rgba(217, 192, 235, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   border-radius: var(--radius-md);
   padding: 14px 20px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.08);
 }
 
 .rx-search-input-wrap {
@@ -466,8 +485,8 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(17, 8, 26, 0.6);
-  border: 1px solid rgba(217, 192, 235, 0.15);
+  background: rgba(7, 7, 9, 0.75);
+  border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 6px;
   padding: 10px 14px;
 }
@@ -490,8 +509,8 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(17, 8, 26, 0.6);
-  border: 1px solid rgba(217, 192, 235, 0.15);
+  background: rgba(7, 7, 9, 0.75);
+  border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 6px;
   padding: 10px 14px;
   color: var(--text-muted);
@@ -502,14 +521,14 @@ h1, h2, h3, h4, h5, .font-heading {
   background: transparent;
   border: none;
   outline: none;
-  color: #ffffff;
+  color: var(--brand-gold);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .rx-city-select option {
-  background: var(--bg-dark);
+  background: #0E0E13;
   color: #ffffff;
 }
 
@@ -526,8 +545,8 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-category-pill {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(217, 192, 235, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.18);
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 700;
@@ -539,19 +558,21 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-category-pill:hover {
-  background: rgba(217, 192, 235, 0.15);
+  background: rgba(212, 175, 55, 0.15);
   color: #ffffff;
+  border-color: var(--brand-gold);
 }
 
 .rx-category-pill.active {
-  background: var(--primary-purple);
-  color: #ffffff;
-  border-color: var(--brand-lavender);
-  box-shadow: 0 4px 15px rgba(82, 38, 114, 0.4);
+  background: linear-gradient(135deg, #F5D061 0%, #D4AF37 100%);
+  color: #070709;
+  font-weight: 900;
+  border-color: #F5D061;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.45);
 }
 
 /* ==========================================================================
-   Rigitix Creative Notched Ticket Card (.rx-creative-card & .rx-ticket-notches)
+   Creative Notched Ticket Card - Black & Gold Edition
    ========================================================================== */
 .rx-events-grid {
   display: grid;
@@ -565,27 +586,27 @@ h1, h2, h3, h4, h5, .font-heading {
 .rx-creative-card {
   position: relative;
   background: var(--bg-card);
-  border: 1px solid rgba(217, 192, 235, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.22);
   border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   cursor: pointer;
 }
 
 .rx-creative-card:hover {
   transform: translateY(-6px) scale(1.015);
-  box-shadow: 0 20px 50px rgba(82, 38, 114, 0.35), 0 0 20px rgba(245, 208, 97, 0.15);
-  border-color: rgba(217, 192, 235, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 175, 55, 0.3);
+  border-color: rgba(212, 175, 55, 0.55);
 }
 
 .rx-card-top {
   position: relative;
   height: 220px;
   overflow: hidden;
-  background: #11081a;
+  background: #08080B;
 }
 
 .rx-card-img {
@@ -602,23 +623,23 @@ h1, h2, h3, h4, h5, .font-heading {
 .rx-card-gradient-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(17, 8, 26, 0.95) 0%, rgba(17, 8, 26, 0.3) 50%, rgba(0,0,0,0.4) 100%);
+  background: linear-gradient(to top, rgba(7, 7, 9, 0.95) 0%, rgba(7, 7, 9, 0.3) 50%, rgba(0,0,0,0.4) 100%);
 }
 
 .rx-live-badge {
   position: absolute;
   top: 14px;
   left: 14px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #ffffff;
+  color: var(--brand-gold);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -626,16 +647,16 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-live-badge-icon {
-  color: var(--warm-amber);
+  color: var(--brand-gold);
 }
 
 .rx-category-badge {
   position: absolute;
   top: 14px;
   right: 14px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 10px;
@@ -668,7 +689,7 @@ h1, h2, h3, h4, h5, .font-heading {
   gap: 5px;
 }
 
-/* The Iconic Rigitix Ticket Notches with Dashed Perforation */
+/* The Iconic Ticket Notches with Dashed Perforation */
 .rx-ticket-notches {
   position: relative;
   height: 16px;
@@ -686,7 +707,7 @@ h1, h2, h3, h4, h5, .font-heading {
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  box-shadow: inset 0 0 5px rgba(0,0,0,0.4);
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.7);
 }
 
 .rx-notch-left {
@@ -700,7 +721,7 @@ h1, h2, h3, h4, h5, .font-heading {
 .rx-perforated-line {
   width: 100%;
   margin: 0 16px;
-  border-top: 2px dashed rgba(217, 192, 235, 0.2);
+  border-top: 2px dashed rgba(212, 175, 55, 0.25);
 }
 
 /* Card Body */
@@ -722,7 +743,7 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--warm-amber);
+  color: var(--brand-gold);
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -771,7 +792,7 @@ h1, h2, h3, h4, h5, .font-heading {
   overflow: hidden;
 }
 
-/* Social Proof & RSVP "Going?" row like Rigitix */
+/* Social Proof & RSVP "Going?" row */
 .rx-social-proof-row {
   display: flex;
   align-items: center;
@@ -779,7 +800,7 @@ h1, h2, h3, h4, h5, .font-heading {
   gap: 12px;
   margin-bottom: 18px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(217, 192, 235, 0.1);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 }
 
 .rx-rsvp-btn {
@@ -794,28 +815,29 @@ h1, h2, h3, h4, h5, .font-heading {
   letter-spacing: 0.08em;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid rgba(217, 192, 235, 0.2);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-muted);
 }
 
 .rx-rsvp-btn:hover {
-  background: rgba(82, 38, 114, 0.4);
-  color: #ffffff;
-  border-color: var(--brand-lavender);
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--brand-gold);
+  border-color: var(--brand-gold);
 }
 
 .rx-rsvp-btn.attending {
-  background: var(--primary-purple);
-  border-color: var(--brand-gold);
-  color: #ffffff;
-  box-shadow: 0 0 12px rgba(245, 208, 97, 0.3);
+  background: var(--brand-gold);
+  border-color: var(--brand-gold-bright);
+  color: #070709;
+  font-weight: 900;
+  box-shadow: 0 0 12px rgba(245, 208, 97, 0.4);
 }
 
 .rx-going-count-label {
   font-size: 11px;
   font-weight: 700;
-  color: var(--warm-amber);
+  color: var(--brand-gold);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -851,11 +873,11 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Trending Events Spotlight Slider Section
+   Trending Events Spotlight Section
    ========================================================================== */
 .rx-trending-section {
   padding: 40px 0 60px;
-  background: linear-gradient(180deg, rgba(82, 38, 114, 0.15) 0%, rgba(17, 8, 26, 0.8) 100%);
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.06) 0%, rgba(7, 7, 9, 0.95) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -902,7 +924,7 @@ h1, h2, h3, h4, h5, .font-heading {
   max-width: 1320px;
   margin: 0 auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-purple) transparent;
+  scrollbar-color: var(--brand-gold) transparent;
 }
 
 .rx-trending-slider > .rx-creative-card {
@@ -912,7 +934,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Why Choose Nà Mè Dèy Sell (Rigitix Feature Highlights)
+   Why Choose Nà Mè Dèy Sell Feature Highlights
    ========================================================================== */
 .rx-features-section {
   max-width: 1320px;
@@ -929,7 +951,7 @@ h1, h2, h3, h4, h5, .font-heading {
 
 .rx-feature-card {
   background: var(--bg-card);
-  border: 1px solid rgba(217, 192, 235, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: var(--radius-md);
   padding: 30px 24px;
   display: flex;
@@ -941,17 +963,17 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-feature-card:hover {
-  border-color: rgba(245, 208, 97, 0.4);
+  border-color: rgba(245, 208, 97, 0.5);
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(82, 38, 114, 0.3);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
 }
 
 .rx-feature-icon-box {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: rgba(82, 38, 114, 0.5);
-  border: 1px solid rgba(217, 192, 235, 0.2);
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -971,11 +993,11 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 /* ==========================================================================
-   Footer
+   Footer - Obsidian Black & Gold
    ========================================================================== */
 .rx-footer {
-  background: #09040d;
-  border-top: 1px solid rgba(217, 192, 235, 0.12);
+  background: #040406;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
   padding: 60px 24px 30px;
 }
 
@@ -1010,7 +1032,7 @@ h1, h2, h3, h4, h5, .font-heading {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--brand-lavender);
+  color: var(--brand-gold);
   margin-bottom: 16px;
 }
 
@@ -1030,7 +1052,7 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .rx-footer-link:hover {
-  color: #ffffff;
+  color: var(--brand-gold);
 }
 
 .rx-footer-bottom {
@@ -1040,7 +1062,7 @@ h1, h2, h3, h4, h5, .font-heading {
   align-items: center;
   gap: 20px;
   padding-top: 24px;
-  border-top: 1px solid rgba(217, 192, 235, 0.08);
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
   font-size: 12px;
   color: var(--text-dim);
 }
@@ -1052,9 +1074,9 @@ h1, h2, h3, h4, h5, .font-heading {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(10, 4, 16, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(4, 4, 6, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1063,10 +1085,10 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .modal-panel {
-  background: var(--bg-card);
-  border: 1px solid rgba(217, 192, 235, 0.25);
+  background: #0E0E14;
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: var(--radius-lg);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.15);
   width: 100%;
   max-width: 640px;
   position: relative;
@@ -1083,8 +1105,8 @@ h1, h2, h3, h4, h5, .font-heading {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.3);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1095,23 +1117,24 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .modal-close-btn:hover {
-  background: var(--primary-purple);
+  background: var(--brand-gold);
+  color: #070709;
   transform: scale(1.05);
 }
 
-/* Digital Ticket Pass Card (Rigitix Mobile Pass Style) */
+/* Digital Ticket Pass Card - Obsidian Black & Gold */
 .digital-pass-card {
-  background: #11081a;
-  border: 1px solid rgba(245, 208, 97, 0.3);
+  background: #0B0B0F;
+  border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.2);
 }
 
 .pass-header {
   padding: 24px;
   position: relative;
-  background: linear-gradient(135deg, #2D1B4E 0%, #522672 50%, #ff8a65 100%);
+  background: linear-gradient(135deg, #181408 0%, #2A2108 50%, #D4AF37 100%);
 }
 
 .pass-header-top {
@@ -1129,7 +1152,7 @@ h1, h2, h3, h4, h5, .font-heading {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--brand-gold);
+  color: #FFF0A3;
 }
 
 .pass-status-chip {
@@ -1162,21 +1185,21 @@ h1, h2, h3, h4, h5, .font-heading {
 
 .pass-event-org {
   font-size: 12px;
-  color: var(--brand-lavender);
+  color: #E2D9BC;
   font-weight: 600;
 }
 
 .pass-body {
   padding: 24px;
-  background: var(--bg-card);
+  background: #0E0E14;
 }
 
 .ticket-id-highlight-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(17, 8, 26, 0.7);
-  border: 1px solid rgba(245, 208, 97, 0.25);
+  background: rgba(7, 7, 9, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 20px;
@@ -1199,9 +1222,9 @@ h1, h2, h3, h4, h5, .font-heading {
 }
 
 .btn-copy-id {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--brand-gold);
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 11px;
@@ -1250,7 +1273,7 @@ h1, h2, h3, h4, h5, .font-heading {
 .pass-perforation {
   position: relative;
   height: 20px;
-  background: var(--bg-card);
+  background: #0E0E14;
   display: flex;
   align-items: center;
 }
@@ -1259,7 +1282,7 @@ h1, h2, h3, h4, h5, .font-heading {
   position: absolute;
   width: 26px;
   height: 26px;
-  background: rgba(10, 4, 16, 0.95);
+  background: var(--bg-dark);
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
@@ -1271,12 +1294,12 @@ h1, h2, h3, h4, h5, .font-heading {
 .perforation-dash-line {
   width: 100%;
   margin: 0 20px;
-  border-top: 2px dashed rgba(217, 192, 235, 0.25);
+  border-top: 2px dashed rgba(212, 175, 55, 0.3);
 }
 
 .pass-stub {
   padding: 24px;
-  background: #170c24;
+  background: #08080C;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1288,7 +1311,7 @@ h1, h2, h3, h4, h5, .font-heading {
   padding: 14px;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .qr-hint {
@@ -1303,8 +1326,8 @@ h1, h2, h3, h4, h5, .font-heading {
   display: flex;
   gap: 10px;
   padding: 16px 24px;
-  background: var(--bg-card);
-  border-top: 1px solid rgba(217, 192, 235, 0.1);
+  background: #0E0E14;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 /* Scanner Styles */
@@ -1317,7 +1340,7 @@ h1, h2, h3, h4, h5, .font-heading {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 2px solid rgba(82, 38, 114, 0.6);
+  border: 2px solid rgba(212, 175, 55, 0.5);
 }
 
 .scanner-laser-line {
@@ -1325,8 +1348,8 @@ h1, h2, h3, h4, h5, .font-heading {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #10b981, transparent);
-  box-shadow: 0 0 15px #10b981;
+  background: linear-gradient(90deg, transparent, var(--brand-gold), transparent);
+  box-shadow: 0 0 15px var(--brand-gold);
   animation: scanLaser 2s linear infinite alternate;
 }
 
@@ -1338,7 +1361,7 @@ h1, h2, h3, h4, h5, .font-heading {
 .scanner-target-crosshairs {
   width: 160px;
   height: 160px;
-  border: 2px dashed rgba(245, 208, 97, 0.7);
+  border: 2px dashed rgba(245, 208, 97, 0.8);
   border-radius: 16px;
   position: relative;
 }

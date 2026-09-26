@@ -52,11 +52,11 @@ export default function Navbar({
                   top: "100%",
                   left: 0,
                   width: "220px",
-                  background: "#1a0e28",
-                  border: "1px solid rgba(217, 192, 235, 0.2)",
+                  background: "#0E0E14",
+                  border: "1px solid rgba(212, 175, 55, 0.3)",
                   borderRadius: "12px",
                   padding: "8px",
-                  boxShadow: "0 15px 35px rgba(0,0,0,0.6)",
+                  boxShadow: "0 15px 35px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.15)",
                   zIndex: 100
                 }}
               >
@@ -74,7 +74,7 @@ export default function Navbar({
                     setSolutionsOpen(false);
                     onOpenCreateEvent();
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(82, 38, 114, 0.4)"}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.15)"}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
                   For Organizers
@@ -89,7 +89,7 @@ export default function Navbar({
                     cursor: "pointer"
                   }}
                   onClick={() => setSolutionsOpen(false)}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(82, 38, 114, 0.4)"}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.15)"}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
                   For Promoters & Affiliates
@@ -104,7 +104,7 @@ export default function Navbar({
                     cursor: "pointer"
                   }}
                   onClick={() => setSolutionsOpen(false)}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(82, 38, 114, 0.4)"}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.15)"}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
                   For Vendors
@@ -122,11 +122,11 @@ export default function Navbar({
                     justifyContent: "space-between"
                   }}
                   onClick={() => setSolutionsOpen(false)}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(82, 38, 114, 0.4)"}
+                  onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.15)"}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
                   <span>NMDS XP Rewards</span>
-                  <span style={{ fontSize: "9px", background: "#EB018E", color: "#fff", padding: "2px 5px", borderRadius: "3px" }}>HOT</span>
+                  <span style={{ fontSize: "9px", background: "#D4AF37", color: "#070709", padding: "2px 5px", borderRadius: "3px", fontWeight: "900" }}>HOT</span>
                 </div>
               </div>
             )}
@@ -144,7 +144,7 @@ export default function Navbar({
             className="nav-link-item"
             onClick={onOpenScanner}
             title="Gate Staff Ticket Validator"
-            style={{ border: "1px solid rgba(217, 192, 235, 0.2)", borderRadius: "6px" }}
+            style={{ border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "6px" }}
           >
             <QrCodeIcon size={16} />
             <span className="hidden sm:inline">Gate Scanner</span>

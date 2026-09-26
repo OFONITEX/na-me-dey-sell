@@ -68,7 +68,7 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
       <div className="modal-panel" style={{ maxWidth: "520px" }} onClick={e => e.stopPropagation()}>
         {/* Navigation if multiple tickets in order */}
         {totalTickets > 1 && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", background: "#1a0e28", borderBottom: "1px solid rgba(217,192,235,0.15)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", background: "#0E0E14", borderBottom: "1px solid rgba(212, 175, 55, 0.2)" }}>
             <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: "700" }}>
               Pass {currentIndex + 1} of {totalTickets} in this booking
             </span>
@@ -175,7 +175,7 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
               <QRCodeSVG
                 value={`NMDS:${ticket.ticketId}|ORD:${ticket.orderId}|EVT:${ticket.eventId}`}
                 size={140}
-                darkColor="#11081a"
+                darkColor="#070709"
                 lightColor="#ffffff"
               />
             </div>

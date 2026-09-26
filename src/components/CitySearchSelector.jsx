@@ -64,8 +64,8 @@ export default function CitySearchSelector({ value, onChange }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(17,8,26,0.7)",
-          border: "1px solid rgba(217,192,235,0.25)",
+          background: "#070709",
+          border: "1px solid rgba(212, 175, 55, 0.25)",
           borderRadius: "6px",
           padding: "10px 14px",
           color: "#fff",
@@ -81,7 +81,7 @@ export default function CitySearchSelector({ value, onChange }) {
             {value || "Select City or Country"}
           </span>
         </div>
-        <span style={{ fontSize: "11px", background: "rgba(217,192,235,0.15)", color: "var(--brand-gold)", padding: "3px 8px", borderRadius: "4px", flexShrink: 0, fontWeight: "700" }}>
+        <span style={{ fontSize: "11px", background: "rgba(212, 175, 55, 0.15)", color: "var(--brand-gold)", padding: "3px 8px", borderRadius: "4px", flexShrink: 0, fontWeight: "700" }}>
           🔍 Change
         </span>
       </button>
@@ -99,7 +99,7 @@ export default function CitySearchSelector({ value, onChange }) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(217,192,235,0.15)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a0e28" }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#0E0E14" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <MapPinIcon size={18} style={{ color: "var(--brand-gold)" }} />
                 <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "800", color: "#fff" }}>
@@ -116,8 +116,8 @@ export default function CitySearchSelector({ value, onChange }) {
             </div>
 
             {/* Search Input Bar */}
-            <div style={{ padding: "14px 20px 8px 20px", background: "rgba(26,14,40,0.6)" }}>
-              <div style={{ display: "flex", alignItems: "center", background: "#11081a", border: "1.5px solid var(--brand-gold)", borderRadius: "8px", padding: "8px 12px", gap: "10px" }}>
+            <div style={{ padding: "14px 20px 8px 20px", background: "#08080C" }}>
+              <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1.5px solid var(--brand-gold)", borderRadius: "8px", padding: "8px 12px", gap: "10px" }}>
                 <SearchIcon size={16} style={{ color: "var(--brand-gold)" }} />
                 <input
                   ref={inputRef}
@@ -155,9 +155,9 @@ export default function CitySearchSelector({ value, onChange }) {
                     type="button"
                     onClick={() => setActiveRegion(reg)}
                     style={{
-                      background: activeRegion === reg ? "var(--brand-gold)" : "rgba(82, 38, 114, 0.4)",
-                      color: activeRegion === reg ? "#11081a" : "#fff",
-                      border: activeRegion === reg ? "1px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.15)",
+                      background: activeRegion === reg ? "var(--brand-gold)" : "rgba(212, 175, 55, 0.1)",
+                      color: activeRegion === reg ? "#070709" : "#fff",
+                      border: activeRegion === reg ? "1px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                       borderRadius: "999px",
                       padding: "4px 10px",
                       fontSize: "11px",
@@ -175,7 +175,7 @@ export default function CitySearchSelector({ value, onChange }) {
 
             {/* Custom Location Instant Option when typing */}
             {searchTerm.trim() && (
-              <div style={{ padding: "8px 20px", background: "rgba(82, 38, 114, 0.35)", borderBottom: "1px solid rgba(217,192,235,0.1)" }}>
+              <div style={{ padding: "8px 20px", background: "rgba(212, 175, 55, 0.1)", borderBottom: "1px solid rgba(212, 175, 55, 0.2)" }}>
                 <button
                   type="button"
                   onClick={() => handleApplyCustom()}
@@ -196,7 +196,7 @@ export default function CitySearchSelector({ value, onChange }) {
                   <span style={{ fontSize: "12px", fontWeight: "700" }}>
                     ✨ Use custom: &ldquo;{searchTerm.trim()}&rdquo;
                   </span>
-                  <span style={{ fontSize: "10px", background: "var(--brand-gold)", color: "#11081a", padding: "2px 8px", borderRadius: "4px", fontWeight: "800" }}>
+                  <span style={{ fontSize: "10px", background: "var(--brand-gold)", color: "#070709", padding: "2px 8px", borderRadius: "4px", fontWeight: "800" }}>
                     Select
                   </span>
                 </button>
@@ -220,7 +220,7 @@ export default function CitySearchSelector({ value, onChange }) {
                           justifyContent: "space-between",
                           padding: "8px 12px",
                           borderRadius: "6px",
-                          background: isSelected ? "rgba(82, 38, 114, 0.6)" : "transparent",
+                          background: isSelected ? "rgba(212, 175, 55, 0.2)" : "transparent",
                           border: isSelected ? "1px solid var(--brand-gold)" : "1px solid transparent",
                           color: "#fff",
                           cursor: "pointer",
@@ -234,7 +234,7 @@ export default function CitySearchSelector({ value, onChange }) {
                             <div style={{ fontSize: "13px", fontWeight: "700", color: isSelected ? "var(--brand-gold)" : "#fff" }}>
                               {item.city}
                             </div>
-                            <div style={{ fontSize: "11px", color: "var(--brand-lavender)", opacity: 0.85 }}>
+                            <div style={{ fontSize: "11px", color: "var(--brand-gold-bright)", opacity: 0.85 }}>
                               {item.state ? `${item.state} • ` : ""}{item.country}
                             </div>
                           </div>
@@ -268,7 +268,7 @@ export default function CitySearchSelector({ value, onChange }) {
             </div>
 
             {/* Custom Input Footer */}
-            <div style={{ padding: "12px 20px", borderTop: "1px solid rgba(217,192,235,0.15)", background: "#1a0e28" }}>
+            <div style={{ padding: "12px 20px", borderTop: "1px solid rgba(212, 175, 55, 0.2)", background: "#0E0E14" }}>
               <div style={{ fontSize: "11px", color: "var(--text-dim)", textTransform: "uppercase", fontWeight: "700", marginBottom: "6px" }}>
                 Or type any custom location:
               </div>
@@ -276,7 +276,7 @@ export default function CitySearchSelector({ value, onChange }) {
                 <input
                   type="text"
                   placeholder="e.g. Asaba, Delta State or Houston, Texas"
-                  style={{ flex: 1, background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 12px", color: "#fff", fontSize: "12px", outline: "none" }}
+                  style={{ flex: 1, background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 12px", color: "#fff", fontSize: "12px", outline: "none" }}
                   value={customInput}
                   onChange={(e) => setCustomInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -287,7 +287,7 @@ export default function CitySearchSelector({ value, onChange }) {
                   type="button"
                   onClick={handleApplyCustom}
                   style={{
-                    background: "var(--primary-purple)",
+                    background: "rgba(212, 175, 55, 0.2)",
                     border: "1px solid var(--brand-gold)",
                     color: "var(--brand-gold)",
                     borderRadius: "6px",

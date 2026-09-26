@@ -71,10 +71,10 @@ export const INITIAL_EVENTS = [
     liveSoldText: "56 tickets sold today",
     xpReward: 100,
     goingCount: 389,
-    accentColor: "#8236CF",
-    secondaryColor: "#10b981",
+    accentColor: "#D4AF37",
+    secondaryColor: "#F5D061",
     imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
-    bannerPattern: "linear-gradient(135deg, #11081a 0%, #3b1464 50%, #06b6d4 100%)",
+    bannerPattern: "linear-gradient(135deg, #070709 0%, #1a160d 50%, #D4AF37 100%)",
     description: "Join over 2,000 founders, tech executives, angel investors, and engineers. Includes high-stakes startup pitch sessions, autonomous agent panels, networking lounges, and an exclusive sunset investor cocktail.",
     tiers: [
       {
@@ -306,10 +306,10 @@ export const INITIAL_EVENTS = [
     liveSoldText: "32 corporate tables reserved",
     xpReward: 120,
     goingCount: 290,
-    accentColor: "#522672",
-    secondaryColor: "#D4AF37",
+    accentColor: "#D4AF37",
+    secondaryColor: "#F5D061",
     imageUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
-    bannerPattern: "linear-gradient(135deg, #11081a 0%, #2e1065 50%, #d97706 100%)",
+    bannerPattern: "linear-gradient(135deg, #070709 0%, #1a160d 50%, #D4AF37 100%)",
     description: "The pinnacle of corporate networking and excellence in West Africa. Join 500+ CEOs, ambassadors, and institutional investors for a 5-course gourmet dining experience, keynote presentations, and the annual honors gala.",
     tiers: [
       {

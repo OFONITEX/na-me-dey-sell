@@ -43,7 +43,7 @@ export default function OrganizerScannerModal({ tickets, onRefreshTickets, onClo
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-panel" style={{ maxWidth: "660px" }} onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ padding: "20px 24px", background: "#1a0e28", borderBottom: "1px solid rgba(217, 192, 235, 0.15)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px 24px", background: "#0E0E14", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(16, 185, 129, 0.2)", border: "1px solid var(--emerald-green)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--emerald-green)" }}>
               <QrCodeIcon size={20} />
@@ -51,7 +51,7 @@ export default function OrganizerScannerModal({ tickets, onRefreshTickets, onClo
             <div>
               <h3 style={{ fontSize: "1.3rem", fontWeight: "900", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
                 <span>Gate Pass Scanner</span>
-                <span style={{ fontSize: "10px", background: "var(--primary-purple)", color: "var(--brand-gold)", padding: "2px 8px", borderRadius: "4px" }}>
+                <span style={{ fontSize: "10px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", padding: "2px 8px", borderRadius: "4px" }}>
                   Staff Mode
                 </span>
               </h3>
@@ -66,16 +66,16 @@ export default function OrganizerScannerModal({ tickets, onRefreshTickets, onClo
         </div>
 
         {/* Live Gate Check-in Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", padding: "16px 24px", background: "#11081a", borderBottom: "1px solid rgba(217,192,235,0.1)" }}>
-          <div style={{ background: "rgba(17,8,26,0.8)", border: "1px solid rgba(217,192,235,0.12)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", padding: "16px 24px", background: "#08080C", borderBottom: "1px solid rgba(212, 175, 55, 0.15)" }}>
+          <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
             <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Passes Issued</div>
             <div style={{ fontFamily: "Sora", fontSize: "1.5rem", fontWeight: "900", color: "#fff", marginTop: "2px" }}>{totalSold}</div>
           </div>
-          <div style={{ background: "rgba(17,8,26,0.8)", border: "1px solid rgba(217,192,235,0.12)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+          <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
             <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Admitted</div>
             <div style={{ fontFamily: "Sora", fontSize: "1.5rem", fontWeight: "900", color: "var(--emerald-green)", marginTop: "2px" }}>{checkedInCount}</div>
           </div>
-          <div style={{ background: "rgba(17,8,26,0.8)", border: "1px solid rgba(217,192,235,0.12)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
+          <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
             <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Check-in Rate</div>
             <div style={{ fontFamily: "Sora", fontSize: "1.5rem", fontWeight: "900", color: "var(--brand-gold)", marginTop: "2px" }}>{checkInRate}%</div>
           </div>
@@ -100,7 +100,7 @@ export default function OrganizerScannerModal({ tickets, onRefreshTickets, onClo
               Or Enter Ticket ID Manually
             </label>
             <div style={{ display: "flex", gap: "8px" }}>
-              <div style={{ flex: 1, display: "flex", alignItems: "center", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
+              <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
                 <SearchIcon size={16} style={{ color: "var(--text-dim)" }} />
                 <input
                   type="text"
@@ -136,8 +136,8 @@ export default function OrganizerScannerModal({ tickets, onRefreshTickets, onClo
                   type="button"
                   onClick={() => handleQuickTest(t.ticketId)}
                   style={{
-                    background: "rgba(82, 38, 114, 0.3)",
-                    border: "1px solid rgba(217,192,235,0.2)",
+                    background: "rgba(212, 175, 55, 0.12)",
+                    border: "1px solid rgba(212, 175, 55, 0.25)",
                     color: "var(--brand-gold)",
                     padding: "6px 12px",
                     borderRadius: "6px",

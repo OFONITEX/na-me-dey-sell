@@ -34,7 +34,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
           style={{
             position: "relative",
             minHeight: "220px",
-            background: `linear-gradient(to bottom, rgba(17,8,26,0.3), #1a0e28), url(${currentHeroImage}) center/cover no-repeat`,
+            background: `linear-gradient(to bottom, rgba(7,7,9,0.35), #0E0E14), url(${currentHeroImage}) center/cover no-repeat`,
             padding: "24px 28px",
             display: "flex",
             flexDirection: "column",
@@ -48,17 +48,17 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
 
           <div style={{ position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
-              <span style={{ background: "var(--primary-purple)", color: "#fff", fontSize: "11px", fontWeight: "800", padding: "4px 10px", borderRadius: "4px", textTransform: "uppercase" }}>
+              <span style={{ background: "rgba(212, 175, 55, 0.2)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", fontSize: "11px", fontWeight: "800", padding: "4px 10px", borderRadius: "4px", textTransform: "uppercase" }}>
                 {event.category}
               </span>
               {event.badge && (
-                <span style={{ background: "rgba(255, 138, 101, 0.2)", border: "1px solid var(--warm-amber)", color: "var(--warm-amber)", fontSize: "11px", fontWeight: "800", padding: "3px 8px", borderRadius: "4px" }}>
+                <span style={{ background: "rgba(245, 208, 97, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", fontSize: "11px", fontWeight: "800", padding: "3px 8px", borderRadius: "4px" }}>
                   {event.badge}
                 </span>
               )}
             </div>
             <h2 style={{ fontSize: "1.8rem", fontWeight: "900", color: "#fff", marginBottom: "6px" }}>{event.title}</h2>
-            <div style={{ fontSize: "13px", color: "var(--brand-lavender)", fontWeight: "600" }}>
+            <div style={{ fontSize: "13px", color: "var(--brand-gold-bright)", fontWeight: "600" }}>
               Organized by <strong style={{ color: "#fff" }}>{event.organizer}</strong>
             </div>
 
@@ -80,7 +80,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
                       overflow: "hidden",
                       border: currentHeroImage === imgUrl ? "2px solid var(--brand-gold)" : "1px solid rgba(255,255,255,0.3)",
                       padding: 0,
-                      background: "#11081a",
+                      background: "#070709",
                       cursor: "pointer",
                       boxShadow: currentHeroImage === imgUrl ? "0 0 8px rgba(212,175,55,0.6)" : "none"
                     }}
@@ -97,24 +97,24 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
         <div style={{ padding: "24px", overflowY: "auto", maxHeight: "calc(90vh - 300px)", display: "flex", flexDirection: "column", gap: "20px" }}>
           {/* Schedule & Venue row */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>
-            <div style={{ background: "rgba(17,8,26,0.6)", border: "1px solid rgba(217, 192, 235, 0.15)", borderRadius: "8px", padding: "12px", display: "flex", gap: "10px", alignItems: "center" }}>
-              <CalendarIcon size={18} style={{ color: "var(--warm-amber)" }} />
+            <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", display: "flex", gap: "10px", alignItems: "center" }}>
+              <CalendarIcon size={18} style={{ color: "var(--brand-gold)" }} />
               <div>
                 <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Date</div>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: "#fff" }}>{event.date}</div>
               </div>
             </div>
 
-            <div style={{ background: "rgba(17,8,26,0.6)", border: "1px solid rgba(217, 192, 235, 0.15)", borderRadius: "8px", padding: "12px", display: "flex", gap: "10px", alignItems: "center" }}>
-              <ClockIcon size={18} style={{ color: "var(--warm-amber)" }} />
+            <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", display: "flex", gap: "10px", alignItems: "center" }}>
+              <ClockIcon size={18} style={{ color: "var(--brand-gold)" }} />
               <div>
                 <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Time</div>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: "#fff" }}>{event.time}</div>
               </div>
             </div>
 
-            <div style={{ background: "rgba(17,8,26,0.6)", border: "1px solid rgba(217, 192, 235, 0.15)", borderRadius: "8px", padding: "12px", display: "flex", gap: "10px", alignItems: "center", gridColumn: "1 / -1" }}>
-              <MapPinIcon size={18} style={{ color: "var(--warm-amber)" }} />
+            <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", display: "flex", gap: "10px", alignItems: "center", gridColumn: "1 / -1" }}>
+              <MapPinIcon size={18} style={{ color: "var(--brand-gold)" }} />
               <div>
                 <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Venue & City</div>
                 <div style={{ fontSize: "13px", fontWeight: "700", color: "#fff" }}>{event.venue} — {event.address}, {event.city}</div>
@@ -148,8 +148,8 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
                     key={tier.id}
                     onClick={() => setSelectedTierId(tier.id)}
                     style={{
-                      border: isSelected ? "2px solid var(--brand-gold)" : "1px solid rgba(217, 192, 235, 0.15)",
-                      background: isSelected ? "rgba(82, 38, 114, 0.35)" : "rgba(17,8,26,0.5)",
+                      border: isSelected ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
+                      background: isSelected ? "rgba(212, 175, 55, 0.15)" : "#0E0E14",
                       borderRadius: "10px",
                       padding: "16px",
                       cursor: "pointer",
@@ -179,7 +179,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
                     {tier.perks && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginLeft: "28px" }}>
                         {tier.perks.map((p, idx) => (
-                          <span key={idx} style={{ fontSize: "10px", color: "var(--brand-lavender)", background: "rgba(217,192,235,0.1)", padding: "2px 8px", borderRadius: "4px" }}>
+                          <span key={idx} style={{ fontSize: "10px", color: "var(--brand-gold-bright)", background: "rgba(212, 175, 55, 0.15)", padding: "2px 8px", borderRadius: "4px" }}>
                             ✓ {p}
                           </span>
                         ))}
@@ -193,7 +193,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
         </div>
 
         {/* Modal Footer with Quantity Stepper & Proceed Button */}
-        <div style={{ padding: "18px 24px", background: "#11081a", borderTop: "1px solid rgba(217, 192, 235, 0.15)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+        <div style={{ padding: "18px 24px", background: "#0E0E14", borderTop: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
           <div>
             <div style={{ fontSize: "10px", fontWeight: "800", textTransform: "uppercase", color: "var(--text-dim)" }}>
               Total ({quantity} {quantity === 1 ? "ticket" : "tickets"})
@@ -204,7 +204,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px" }}>
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}

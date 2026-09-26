@@ -27,9 +27,9 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-panel" style={{ maxWidth: "680px" }} onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ padding: "20px 24px", background: "#1a0e28", borderBottom: "1px solid rgba(217, 192, 235, 0.15)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px 24px", background: "#0E0E14", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(82, 38, 114, 0.5)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--brand-gold)" }}>
+            <div style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid var(--brand-gold)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--brand-gold)" }}>
               <TicketIcon size={20} />
             </div>
             <div>
@@ -45,8 +45,8 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
         </div>
 
         {/* Filter and search bar */}
-        <div style={{ padding: "16px 24px", background: "#11081a", borderBottom: "1px solid rgba(217,192,235,0.1)", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
-          <div style={{ flex: 1, minWidth: "220px", display: "flex", alignItems: "center", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(217,192,235,0.15)", borderRadius: "6px", padding: "8px 12px", gap: "8px" }}>
+        <div style={{ padding: "16px 24px", background: "#08080C", borderBottom: "1px solid rgba(212, 175, 55, 0.15)", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
+          <div style={{ flex: 1, minWidth: "220px", display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 12px", gap: "8px" }}>
             <SearchIcon size={15} style={{ color: "var(--text-dim)" }} />
             <input
               type="text"
@@ -60,9 +60,9 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
           <div style={{ display: "flex", gap: "6px" }}>
             <button
               style={{
-                background: filter === "all" ? "var(--primary-purple)" : "rgba(255,255,255,0.06)",
-                border: filter === "all" ? "1px solid var(--brand-lavender)" : "1px solid rgba(217,192,235,0.12)",
-                color: "#fff",
+                background: filter === "all" ? "var(--brand-gold)" : "rgba(255,255,255,0.06)",
+                border: filter === "all" ? "1px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.15)",
+                color: filter === "all" ? "#070709" : "#fff",
                 padding: "6px 12px",
                 borderRadius: "999px",
                 fontSize: "11px",
@@ -75,9 +75,9 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
             </button>
             <button
               style={{
-                background: filter === "active" ? "var(--primary-purple)" : "rgba(255,255,255,0.06)",
-                border: filter === "active" ? "1px solid var(--brand-lavender)" : "1px solid rgba(217,192,235,0.12)",
-                color: "#fff",
+                background: filter === "active" ? "var(--brand-gold)" : "rgba(255,255,255,0.06)",
+                border: filter === "active" ? "1px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.15)",
+                color: filter === "active" ? "#070709" : "#fff",
                 padding: "6px 12px",
                 borderRadius: "999px",
                 fontSize: "11px",
@@ -90,9 +90,9 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
             </button>
             <button
               style={{
-                background: filter === "checked_in" ? "var(--primary-purple)" : "rgba(255,255,255,0.06)",
-                border: filter === "checked_in" ? "1px solid var(--brand-lavender)" : "1px solid rgba(217,192,235,0.12)",
-                color: "#fff",
+                background: filter === "checked_in" ? "var(--brand-gold)" : "rgba(255,255,255,0.06)",
+                border: filter === "checked_in" ? "1px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.15)",
+                color: filter === "checked_in" ? "#070709" : "#fff",
                 padding: "6px 12px",
                 borderRadius: "999px",
                 fontSize: "11px",
@@ -126,8 +126,8 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
                   key={t.ticketId}
                   onClick={() => onSelectTicket(t)}
                   style={{
-                    background: "rgba(17,8,26,0.6)",
-                    border: "1px solid rgba(217,192,235,0.18)",
+                    background: "#0E0E14",
+                    border: "1px solid rgba(212, 175, 55, 0.2)",
                     borderRadius: "10px",
                     padding: "16px 20px",
                     display: "flex",
@@ -141,7 +141,7 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
                     e.currentTarget.style.transform = "translateX(4px)";
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = "rgba(217,192,235,0.18)";
+                    e.currentTarget.style.borderColor = "rgba(212, 175, 55, 0.2)";
                     e.currentTarget.style.transform = "none";
                   }}
                 >

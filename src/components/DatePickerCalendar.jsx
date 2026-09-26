@@ -97,8 +97,8 @@ export default function DatePickerCalendar({ value, onChange }) {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: "rgba(17,8,26,0.7)",
-          border: "1px solid rgba(217,192,235,0.25)",
+          background: "#070709",
+          border: "1px solid rgba(212, 175, 55, 0.25)",
           borderRadius: "6px",
           padding: "10px 14px",
           color: "#fff",
@@ -113,7 +113,7 @@ export default function DatePickerCalendar({ value, onChange }) {
             {value || "Select Event Date"}
           </span>
         </div>
-        <span style={{ fontSize: "11px", background: "rgba(217,192,235,0.15)", color: "var(--brand-lavender)", padding: "3px 8px", borderRadius: "4px", flexShrink: 0 }}>
+        <span style={{ fontSize: "11px", background: "rgba(212, 175, 55, 0.15)", color: "var(--brand-gold-bright)", padding: "3px 8px", borderRadius: "4px", flexShrink: 0 }}>
           📅 Open Calendar
         </span>
       </button>
@@ -148,7 +148,7 @@ export default function DatePickerCalendar({ value, onChange }) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(217,192,235,0.15)", paddingBottom: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", paddingBottom: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <CalendarIcon size={18} style={{ color: "var(--brand-gold)" }} />
                 <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "900", color: "#fff" }}>
@@ -169,28 +169,28 @@ export default function DatePickerCalendar({ value, onChange }) {
               <button
                 type="button"
                 onClick={() => handleQuickPreset(0)}
-                style={{ background: "rgba(82, 38, 114, 0.4)", border: "1px solid rgba(217,192,235,0.2)", color: "#fff", borderRadius: "999px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", whiteSpace: "nowrap" }}
+                style={{ background: "rgba(212, 175, 55, 0.12)", border: "1px solid rgba(212, 175, 55, 0.25)", color: "#fff", borderRadius: "999px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 Today
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickPreset(1)}
-                style={{ background: "rgba(82, 38, 114, 0.4)", border: "1px solid rgba(217,192,235,0.2)", color: "#fff", borderRadius: "999px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", whiteSpace: "nowrap" }}
+                style={{ background: "rgba(212, 175, 55, 0.12)", border: "1px solid rgba(212, 175, 55, 0.25)", color: "#fff", borderRadius: "999px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 Tomorrow
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickPreset(7)}
-                style={{ background: "rgba(82, 38, 114, 0.4)", border: "1px solid rgba(217,192,235,0.2)", color: "#fff", borderRadius: "999px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", whiteSpace: "nowrap" }}
+                style={{ background: "rgba(212, 175, 55, 0.12)", border: "1px solid rgba(212, 175, 55, 0.25)", color: "#fff", borderRadius: "999px", padding: "4px 10px", fontSize: "10px", fontWeight: "700", cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 Next Week
               </button>
             </div>
 
             {/* Month & Year Navigation */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#11081a", padding: "8px 12px", borderRadius: "6px", border: "1px solid rgba(217,192,235,0.15)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#070709", padding: "8px 12px", borderRadius: "6px", border: "1px solid rgba(212, 175, 55, 0.2)" }}>
               <button
                 type="button"
                 onClick={handlePrevMonth}
@@ -240,9 +240,9 @@ export default function DatePickerCalendar({ value, onChange }) {
                     style={{
                       aspectRatio: "1",
                       borderRadius: "6px",
-                      border: selected ? "2px solid var(--brand-gold)" : today ? "1px solid var(--brand-lavender)" : "1px solid transparent",
-                      background: selected ? "var(--brand-gold)" : today ? "rgba(82, 38, 114, 0.4)" : "rgba(17,8,26,0.5)",
-                      color: selected ? "#11081a" : today ? "var(--brand-gold)" : "#fff",
+                      border: selected ? "2px solid var(--brand-gold)" : today ? "1px solid var(--brand-gold)" : "1px solid transparent",
+                      background: selected ? "var(--brand-gold)" : today ? "rgba(212, 175, 55, 0.2)" : "rgba(10, 10, 14, 0.7)",
+                      color: selected ? "#070709" : today ? "var(--brand-gold)" : "#fff",
                       fontSize: "12px",
                       fontWeight: selected || today ? "900" : "500",
                       cursor: "pointer",
@@ -259,14 +259,14 @@ export default function DatePickerCalendar({ value, onChange }) {
             </div>
 
             {/* Bottom Current Selection Display & Native Picker Button */}
-            <div style={{ borderTop: "1px solid rgba(217,192,235,0.12)", paddingTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.15)", paddingTop: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: "11px", color: "var(--brand-gold)", fontWeight: "700" }}>
                 {selectedDate ? formatDateDisplay(selectedDate) : "Pick any day"}
               </div>
               <button
                 type="button"
                 onClick={() => hiddenNativeRef.current?.showPicker ? hiddenNativeRef.current.showPicker() : hiddenNativeRef.current?.click()}
-                style={{ background: "transparent", border: "none", color: "var(--brand-lavender)", fontSize: "10px", cursor: "pointer", textDecoration: "underline" }}
+                style={{ background: "transparent", border: "none", color: "var(--brand-gold-bright)", fontSize: "10px", cursor: "pointer", textDecoration: "underline" }}
               >
                 Use Device Calendar
               </button>

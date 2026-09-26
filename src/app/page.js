@@ -124,7 +124,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#11081a]">
+    <div className="min-h-screen bg-[#070709]" style={{ backgroundColor: "#070709" }}>
       {/* Sticky Navigation */}
       <Navbar
         ticketsCount={tickets.length}
@@ -148,7 +148,7 @@ export default function Home() {
         </div>
 
         <h1 className="rx-hero-title">
-          Your event life, <span className="rx-highlight-lavender">simplified.</span>
+          Your event life, <span className="rx-highlight-gold">simplified.</span>
         </h1>
 
         <p className="rx-hero-subtitle">
@@ -254,7 +254,7 @@ export default function Home() {
               <span>Happening Right Now</span>
             </div>
             <h2 className="rx-section-title">
-              Trending <span style={{ color: "var(--brand-lavender)", fontStyle: "italic" }}>Events</span>.
+              Trending <span style={{ color: "var(--brand-gold-bright)", fontStyle: "italic" }}>Events</span>.
             </h2>
           </div>
           <a

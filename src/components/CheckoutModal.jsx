@@ -107,11 +107,11 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-panel" style={{ maxWidth: "580px" }} onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ padding: "20px 24px", background: "#1a0e28", borderBottom: "1px solid rgba(217, 192, 235, 0.15)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px 24px", background: "#0E0E14", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h3 style={{ fontSize: "1.3rem", fontWeight: "900", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
               <span>Secure Checkout</span>
-              <span style={{ fontSize: "10px", background: "var(--primary-purple)", color: "var(--brand-gold)", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
+              <span style={{ fontSize: "10px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
                 Nà Mè Dèy Sell
               </span>
             </h3>
@@ -127,10 +127,10 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
         {/* Form */}
         <form onSubmit={handleCompleteOrder} style={{ padding: "24px", overflowY: "auto", maxHeight: "calc(85vh - 100px)", display: "flex", flexDirection: "column", gap: "18px" }}>
           {/* Order Summary Strip */}
-          <div style={{ background: "rgba(82, 38, 114, 0.25)", border: "1px solid rgba(217, 192, 235, 0.2)", borderRadius: "8px", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ background: "rgba(212, 175, 55, 0.1)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "8px", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: "14px", fontWeight: "800", color: "#fff" }}>{event.title}</div>
-              <div style={{ fontSize: "12px", color: "var(--brand-lavender)", marginTop: "2px" }}>
+              <div style={{ fontSize: "12px", color: "var(--brand-gold-bright)", marginTop: "2px" }}>
                 {event.date} • {tier.name} (×{quantity})
               </div>
             </div>
@@ -148,8 +148,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <div>
                 <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Full Name</label>
-                <div style={{ display: "flex", alignItems: "center", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
-                  <UserIcon size={16} style={{ color: "var(--text-dim)" }} />
+                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
+                  <UserIcon size={16} style={{ color: "var(--brand-gold)" }} />
                   <input
                     type="text"
                     required
@@ -162,8 +162,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
               <div>
                 <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Email Address (Pass Sent Here)</label>
-                <div style={{ display: "flex", alignItems: "center", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
-                  <MailIcon size={16} style={{ color: "var(--text-dim)" }} />
+                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
+                  <MailIcon size={16} style={{ color: "var(--brand-gold)" }} />
                   <input
                     type="email"
                     required
@@ -176,8 +176,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
               <div>
                 <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Phone Number (SMS QR Backup)</label>
-                <div style={{ display: "flex", alignItems: "center", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
-                  <PhoneIcon size={16} style={{ color: "var(--text-dim)" }} />
+                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
+                  <PhoneIcon size={16} style={{ color: "var(--brand-gold)" }} />
                   <input
                     type="tel"
                     required
@@ -208,8 +208,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                 type="button"
                 onClick={() => setPaymentMethod("monnify")}
                 style={{
-                  background: paymentMethod === "monnify" ? "rgba(82, 38, 114, 0.7)" : "rgba(17,8,26,0.6)",
-                  border: paymentMethod === "monnify" ? "2px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.15)",
+                  background: paymentMethod === "monnify" ? "rgba(212, 175, 55, 0.2)" : "#070709",
+                  border: paymentMethod === "monnify" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                   borderRadius: "8px",
                   padding: "12px 8px",
                   color: "#fff",
@@ -221,7 +221,7 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                   position: "relative"
                 }}
               >
-                <span style={{ position: "absolute", top: "-8px", right: "6px", background: "var(--emerald-green)", color: "#11081a", fontSize: "9px", fontWeight: "900", padding: "1px 6px", borderRadius: "999px" }}>
+                <span style={{ position: "absolute", top: "-8px", right: "6px", background: "var(--emerald-green)", color: "#070709", fontSize: "9px", fontWeight: "900", padding: "1px 6px", borderRadius: "999px" }}>
                   POPULAR
                 </span>
                 <span style={{ fontSize: "20px" }}>💠</span>
@@ -233,8 +233,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                 type="button"
                 onClick={() => setPaymentMethod("paystack")}
                 style={{
-                  background: paymentMethod === "paystack" ? "rgba(82, 38, 114, 0.5)" : "rgba(17,8,26,0.6)",
-                  border: paymentMethod === "paystack" ? "2px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.15)",
+                  background: paymentMethod === "paystack" ? "rgba(212, 175, 55, 0.2)" : "#070709",
+                  border: paymentMethod === "paystack" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                   borderRadius: "8px",
                   padding: "12px 8px",
                   color: "#fff",
@@ -254,8 +254,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                 type="button"
                 onClick={() => setPaymentMethod("bank_transfer")}
                 style={{
-                  background: paymentMethod === "bank_transfer" ? "rgba(82, 38, 114, 0.5)" : "rgba(17,8,26,0.6)",
-                  border: paymentMethod === "bank_transfer" ? "2px solid var(--brand-gold)" : "1px solid rgba(217,192,235,0.15)",
+                  background: paymentMethod === "bank_transfer" ? "rgba(212, 175, 55, 0.2)" : "#070709",
+                  border: paymentMethod === "bank_transfer" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                   borderRadius: "8px",
                   padding: "12px 8px",
                   color: "#fff",
@@ -275,8 +275,8 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
           {/* Promo code */}
           <div style={{ display: "flex", gap: "8px" }}>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", background: "rgba(17,8,26,0.7)", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "6px", padding: "8px 12px", gap: "8px" }}>
-              <TagIcon size={15} style={{ color: "var(--text-dim)" }} />
+            <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 12px", gap: "8px" }}>
+              <TagIcon size={15} style={{ color: "var(--brand-gold)" }} />
               <input
                 type="text"
                 placeholder="Discount code (try NMDS20)"
@@ -288,7 +288,7 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
             <button
               type="button"
               onClick={handleApplyPromo}
-              style={{ background: "rgba(217,192,235,0.15)", border: "1px solid rgba(217,192,235,0.25)", color: "#fff", padding: "8px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
+              style={{ background: "rgba(212, 175, 55, 0.15)", border: "1px solid rgba(212, 175, 55, 0.3)", color: "var(--brand-gold)", padding: "8px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
             >
               Apply
             </button>
@@ -297,7 +297,7 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
           {promoError && <div style={{ fontSize: "12px", color: "#ef4444" }}>{promoError}</div>}
 
           {/* Price Breakdown */}
-          <div style={{ borderTop: "1px solid rgba(217,192,235,0.12)", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.15)", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
               <span>Subtotal</span>
               <span>{formatNaira(subtotal, currencySymbol)}</span>
