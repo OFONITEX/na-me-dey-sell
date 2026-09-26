@@ -23,12 +23,6 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
   const [promoSuccess, setPromoSuccess] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Monnify custom credentials state (optional override from UI)
-  const [showMonnifyConfig, setShowMonnifyConfig] = useState(false);
-  const [monnifyApiKey, setMonnifyApiKey] = useState("");
-  const [monnifyContractCode, setMonnifyContractCode] = useState("");
-  const [monnifyIsSandbox, setMonnifyIsSandbox] = useState(true);
-
   const handleApplyPromo = () => {
     setPromoError("");
     setPromoSuccess("");
@@ -83,9 +77,6 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
         customerEmail: attendee.email,
         customerPhone: attendee.phone,
         paymentDescription: `Tickets for ${event.title} (${tier.name} × ${quantity})`,
-        apiKey: monnifyApiKey || undefined,
-        contractCode: monnifyContractCode || undefined,
-        isSandbox: monnifyIsSandbox,
         metadata: {
           eventId: event.id,
           tierId: tier.id,
@@ -203,56 +194,11 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
               <span style={{ fontSize: "12px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 Select Payment Gateway
               </span>
-              <button
-                type="button"
-                onClick={() => setShowMonnifyConfig(!showMonnifyConfig)}
-                style={{ background: "transparent", border: "none", color: "var(--brand-lavender)", fontSize: "11px", cursor: "pointer", textDecoration: "underline" }}
-              >
-                ⚙️ {showMonnifyConfig ? "Hide Monnify API Config" : "Configure Monnify Keys"}
-              </button>
+              <span style={{ fontSize: "11px", color: "var(--emerald-green)", display: "flex", alignItems: "center", gap: "5px", fontWeight: "600" }}>
+                <ShieldCheckIcon size={14} />
+                <span>256-Bit Encrypted</span>
+              </span>
             </div>
-
-            {/* Optional Monnify Key Settings Box */}
-            {showMonnifyConfig && (
-              <div style={{ background: "rgba(82, 38, 114, 0.35)", border: "1px solid rgba(245, 208, 97, 0.4)", borderRadius: "8px", padding: "14px", marginBottom: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ fontSize: "11px", color: "var(--brand-gold)", fontWeight: "700" }}>
-                  💡 Using your existing Monnify Account:
-                </div>
-                <div style={{ fontSize: "11px", color: "var(--text-muted)", lineHeight: "1.4" }}>
-                  You can paste your existing Monnify credentials below, or save them in <code>.env.local</code>. Transactions are automatically assigned unique <code>NMDS-TXN-...</code> references so they never collide with your other platform.
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                  <div>
-                    <label style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase" }}>Monnify API Key</label>
-                    <input
-                      type="text"
-                      placeholder="MK_PROD_... or MK_TEST_..."
-                      style={{ width: "100%", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "4px", padding: "6px 10px", color: "#fff", fontSize: "11px" }}
-                      value={monnifyApiKey}
-                      onChange={e => setMonnifyApiKey(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase" }}>Contract Code</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 1234567890"
-                      style={{ width: "100%", background: "#11081a", border: "1px solid rgba(217,192,235,0.2)", borderRadius: "4px", padding: "6px 10px", color: "#fff", fontSize: "11px" }}
-                      value={monnifyContractCode}
-                      onChange={e => setMonnifyContractCode(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <label style={{ fontSize: "11px", color: "#fff", display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
-                  <input
-                    type="checkbox"
-                    checked={monnifyIsSandbox}
-                    onChange={e => setMonnifyIsSandbox(e.target.checked)}
-                  />
-                  <span>Use Sandbox/Test Mode (Uncheck for Live Payments)</span>
-                </label>
-              </div>
-            )}
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
               {/* Monnify Button (Highlighted Primary) */}
