@@ -5,13 +5,14 @@ import { CloseIcon, CalendarIcon, ClockIcon, MapPinIcon, CheckIcon, ShieldCheckI
 import { formatNaira } from "../lib/ticketService";
 
 export default function EventDetailModal({ event, onClose, onProceedToCheckout }) {
-  const [selectedTierId, setSelectedTierId] = useState(event?.tiers[0]?.id || "");
+  const safeTiers = event?.tiers?.length ? event.tiers : [{ id: "tier_default", name: "General Admission", price: 0, currency: "₦", capacity: 100, soldCount: 0, description: "Standard entry", perks: ["General access"] }];
+  const [selectedTierId, setSelectedTierId] = useState(safeTiers[0]?.id || "");
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(event?.imageUrl || "");
 
   if (!event) return null;
 
-  const selectedTier = event.tiers.find(t => t.id === selectedTierId) || event.tiers[0];
+  const selectedTier = safeTiers.find(t => t.id === selectedTierId) || safeTiers[0];
   const remaining = Math.max(0, (selectedTier?.capacity || 100) - (selectedTier?.soldCount || 0));
   const subtotal = selectedTier ? selectedTier.price * quantity : 0;
 
@@ -139,7 +140,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
             </h4>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {event.tiers.map(tier => {
+              {safeTiers.map(tier => {
                 const isSelected = selectedTierId === tier.id;
                 const tierRemaining = Math.max(0, (tier.capacity || 100) - (tier.soldCount || 0));
 
@@ -199,7 +200,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
               Total ({quantity} {quantity === 1 ? "ticket" : "tickets"})
             </div>
             <div style={{ fontFamily: "Sora", fontSize: "1.4rem", fontWeight: "900", color: "var(--brand-gold)" }}>
-              {formatNaira(subtotal, selectedTierObj?.currency || event.currency || "₦")}
+              {formatNaira(subtotal, selectedTier?.currency || event.currency || "₦")}
             </div>
           </div>
 

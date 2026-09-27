@@ -74,6 +74,15 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
     setIsProcessing(true);
 
+    if (finalTotal === 0) {
+      finalizeOrder({
+        paymentReference: `NMDS-FREE-${Date.now()}`,
+        paymentStatus: "PAID",
+        amountPaid: 0
+      });
+      return;
+    }
+
     if (paymentMethod === "monnify") {
       // Trigger Monnify Checkout
       payWithMonnify({

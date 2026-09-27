@@ -19,7 +19,7 @@ export default function EventCard({ event, onSelect }) {
     }
   };
 
-  const lowestPrice = Math.min(...event.tiers.map(t => t.price));
+  const lowestPrice = event?.tiers?.length ? Math.min(...event.tiers.map(t => t.price)) : 0;
 
   return (
     <div className="rx-creative-card" onClick={() => onSelect(event)}>

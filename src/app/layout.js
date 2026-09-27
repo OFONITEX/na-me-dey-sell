@@ -33,6 +33,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="icon" type="image/png" href="/logo-gold.png" />
+        <script src="https://sdk.monnify.com/plugin/monnify.js" async></script>
       </head>
       <body>{children}</body>
     </html>

@@ -158,16 +158,22 @@ export async function payWithMonnify({
       return;
     }
 
+    const cleanEmail = (customerEmail || "").trim().toLowerCase() || "attendee@namedeysell.com";
+    const cleanName = (customerName || "Event Attendee").trim();
+    const cleanPhone = (customerPhone || "").trim();
+
     SDK.initialize({
       amount: Number(amount),
       currency: "NGN",
       reference: paymentReference,
-      customerFullName: customerName,
-      customerEmail: customerEmail,
-      customerMobileNumber: customerPhone,
+      customerName: cleanName,
+      customerFullName: cleanName,
+      customerEmail: cleanEmail,
+      customerMobileNumber: cleanPhone,
+      customerPhone: cleanPhone,
       apiKey: activeApiKey,
       contractCode: activeContractCode,
-      paymentDescription: paymentDescription || "Nà Mè Dèy Sell Event Ticket",
+      paymentDescription: (paymentDescription || "Nà Mè Dèy Sell Event Ticket").substring(0, 100),
       isTestMode: activeSandbox,
       metadata: {
         platform: "Na Me Dey Sell",
