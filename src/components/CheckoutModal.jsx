@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CloseIcon, UserIcon, MailIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, TagIcon, CheckCircleIcon, SparklesIcon } from "./Icons";
+import { CloseIcon, UserIcon, MailIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, TagIcon, CheckCircleIcon, SparklesIcon, ArrowRightIcon } from "./Icons";
 import { issueTickets, formatNaira } from "../lib/ticketService";
 import { payWithMonnify } from "../lib/monnifyService";
 import { triggerConfetti } from "../lib/confetti";
@@ -105,86 +105,132 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-panel" style={{ maxWidth: "580px" }} onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div style={{ padding: "20px 24px", background: "#0E0E14", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        className="modal-panel"
+        style={{
+          maxWidth: "580px",
+          maxHeight: "92vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          border: "1px solid rgba(212, 175, 55, 0.35)",
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(212, 175, 55, 0.15)"
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header - Fixed at Top */}
+        <div
+          style={{
+            padding: "18px 24px",
+            background: "#0E0E14",
+            borderBottom: "1px solid rgba(212, 175, 55, 0.2)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexShrink: 0
+          }}
+        >
           <div>
-            <h3 style={{ fontSize: "1.3rem", fontWeight: "900", color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: "900", color: "#fff", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
               <span>Secure Checkout</span>
-              <span style={{ fontSize: "10px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
+              <span style={{ fontSize: "10px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 Nà Mè Dèy Sell
               </span>
             </h3>
-            <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
-              Instant verifiable digital ticket issued directly to your pass wallet
+            <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "3px", marginBottom: 0 }}>
+              Step 2 of 2: Review details & proceed to Monnify gateway
             </p>
           </div>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button className="modal-close-btn" onClick={onClose} aria-label="Close checkout">
             <CloseIcon size={18} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleCompleteOrder} style={{ padding: "24px", overflowY: "auto", maxHeight: "calc(85vh - 100px)", display: "flex", flexDirection: "column", gap: "18px" }}>
+        {/* Scrollable Form Body */}
+        <form
+          id="checkout-form"
+          onSubmit={handleCompleteOrder}
+          style={{
+            padding: "20px 24px",
+            overflowY: "auto",
+            flex: "1 1 auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px"
+          }}
+        >
           {/* Order Summary Strip */}
-          <div style={{ background: "rgba(212, 175, 55, 0.1)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "8px", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              background: "rgba(212, 175, 55, 0.08)",
+              border: "1px solid rgba(212, 175, 55, 0.25)",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}
+          >
             <div>
               <div style={{ fontSize: "14px", fontWeight: "800", color: "#fff" }}>{event.title}</div>
               <div style={{ fontSize: "12px", color: "var(--brand-gold-bright)", marginTop: "2px" }}>
                 {event.date} • {tier.name} (×{quantity})
               </div>
             </div>
-            <div style={{ fontFamily: "Sora", fontSize: "1.3rem", fontWeight: "900", color: "var(--brand-gold)" }}>
+            <div style={{ fontFamily: "Sora", fontSize: "1.25rem", fontWeight: "900", color: "var(--brand-gold)" }}>
               {formatNaira(subtotal, currencySymbol)}
             </div>
           </div>
 
           {/* Attendee Details */}
           <div>
-            <div style={{ fontSize: "12px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
               Attendee Information
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <div>
                 <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Full Name</label>
-                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
-                  <UserIcon size={16} style={{ color: "var(--brand-gold)" }} />
+                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "9px 12px", gap: "10px" }}>
+                  <UserIcon size={16} style={{ color: "var(--brand-gold)", flexShrink: 0 }} />
                   <input
                     type="text"
                     required
-                    style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "14px" }}
+                    style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "13px" }}
                     value={attendee.name}
                     onChange={e => setAttendee({ ...attendee, name: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Email Address (Pass Sent Here)</label>
-                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
-                  <MailIcon size={16} style={{ color: "var(--brand-gold)" }} />
-                  <input
-                    type="email"
-                    required
-                    style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "14px" }}
-                    value={attendee.email}
-                    onChange={e => setAttendee({ ...attendee, email: e.target.value })}
-                  />
+              {/* 2-Column Grid for Email & Phone */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <div>
+                  <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Email (Pass Delivery)</label>
+                  <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "9px 12px", gap: "10px" }}>
+                    <MailIcon size={16} style={{ color: "var(--brand-gold)", flexShrink: 0 }} />
+                    <input
+                      type="email"
+                      required
+                      style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "13px" }}
+                      value={attendee.email}
+                      onChange={e => setAttendee({ ...attendee, email: e.target.value })}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Phone Number (SMS QR Backup)</label>
-                <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "10px 14px", gap: "10px" }}>
-                  <PhoneIcon size={16} style={{ color: "var(--brand-gold)" }} />
-                  <input
-                    type="tel"
-                    required
-                    style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "14px" }}
-                    value={attendee.phone}
-                    onChange={e => setAttendee({ ...attendee, phone: e.target.value })}
-                  />
+                <div>
+                  <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Phone Number</label>
+                  <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "9px 12px", gap: "10px" }}>
+                    <PhoneIcon size={16} style={{ color: "var(--brand-gold)", flexShrink: 0 }} />
+                    <input
+                      type="tel"
+                      required
+                      style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "13px" }}
+                      value={attendee.phone}
+                      onChange={e => setAttendee({ ...attendee, phone: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -192,18 +238,18 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
           {/* Payment Method Selector */}
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-              <span style={{ fontSize: "12px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+              <span style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 Select Payment Gateway
               </span>
-              <span style={{ fontSize: "11px", color: "var(--emerald-green)", display: "flex", alignItems: "center", gap: "5px", fontWeight: "600" }}>
-                <ShieldCheckIcon size={14} />
-                <span>256-Bit Encrypted</span>
+              <span style={{ fontSize: "10px", color: "var(--emerald-green)", display: "flex", alignItems: "center", gap: "4px", fontWeight: "600" }}>
+                <ShieldCheckIcon size={13} />
+                <span>256-Bit SSL Encrypted</span>
               </span>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
-              {/* Monnify Button (Highlighted Primary) */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
+              {/* Monnify Button (Primary Default) */}
               <button
                 type="button"
                 onClick={() => setPaymentMethod("monnify")}
@@ -211,20 +257,20 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                   background: paymentMethod === "monnify" ? "rgba(212, 175, 55, 0.2)" : "#070709",
                   border: paymentMethod === "monnify" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                   borderRadius: "8px",
-                  padding: "12px 8px",
+                  padding: "10px 6px",
                   color: "#fff",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: "6px",
+                  gap: "4px",
                   cursor: "pointer",
                   position: "relative"
                 }}
               >
-                <span style={{ position: "absolute", top: "-8px", right: "6px", background: "var(--emerald-green)", color: "#070709", fontSize: "9px", fontWeight: "900", padding: "1px 6px", borderRadius: "999px" }}>
+                <span style={{ position: "absolute", top: "-7px", right: "6px", background: "var(--emerald-green)", color: "#070709", fontSize: "8px", fontWeight: "900", padding: "1px 5px", borderRadius: "999px" }}>
                   POPULAR
                 </span>
-                <span style={{ fontSize: "20px" }}>💠</span>
+                <span style={{ fontSize: "18px" }}>💠</span>
                 <span style={{ fontSize: "12px", fontWeight: "900", color: "var(--brand-gold)" }}>Monnify</span>
                 <span style={{ fontSize: "9px", color: "var(--text-muted)" }}>Transfer/Card/USSD</span>
               </button>
@@ -236,16 +282,16 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                   background: paymentMethod === "paystack" ? "rgba(212, 175, 55, 0.2)" : "#070709",
                   border: paymentMethod === "paystack" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                   borderRadius: "8px",
-                  padding: "12px 8px",
+                  padding: "10px 6px",
                   color: "#fff",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: "6px",
+                  gap: "4px",
                   cursor: "pointer"
                 }}
               >
-                <span style={{ fontSize: "20px" }}>⚡</span>
+                <span style={{ fontSize: "18px" }}>⚡</span>
                 <span style={{ fontSize: "12px", fontWeight: "800" }}>Paystack</span>
                 <span style={{ fontSize: "9px", color: "var(--text-dim)" }}>Card / Apple Pay</span>
               </button>
@@ -257,16 +303,16 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
                   background: paymentMethod === "bank_transfer" ? "rgba(212, 175, 55, 0.2)" : "#070709",
                   border: paymentMethod === "bank_transfer" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
                   borderRadius: "8px",
-                  padding: "12px 8px",
+                  padding: "10px 6px",
                   color: "#fff",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: "6px",
+                  gap: "4px",
                   cursor: "pointer"
                 }}
               >
-                <span style={{ fontSize: "20px" }}>🏦</span>
+                <span style={{ fontSize: "18px" }}>🏦</span>
                 <span style={{ fontSize: "12px", fontWeight: "800" }}>Direct Transfer</span>
                 <span style={{ fontSize: "9px", color: "var(--text-dim)" }}>Dedicated Account</span>
               </button>
@@ -276,7 +322,7 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
           {/* Promo code */}
           <div style={{ display: "flex", gap: "8px" }}>
             <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 12px", gap: "8px" }}>
-              <TagIcon size={15} style={{ color: "var(--brand-gold)" }} />
+              <TagIcon size={14} style={{ color: "var(--brand-gold)" }} />
               <input
                 type="text"
                 placeholder="Discount code (try NMDS20)"
@@ -288,16 +334,16 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
             <button
               type="button"
               onClick={handleApplyPromo}
-              style={{ background: "rgba(212, 175, 55, 0.15)", border: "1px solid rgba(212, 175, 55, 0.3)", color: "var(--brand-gold)", padding: "8px 16px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
+              style={{ background: "rgba(212, 175, 55, 0.15)", border: "1px solid rgba(212, 175, 55, 0.3)", color: "var(--brand-gold)", padding: "8px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
             >
               Apply
             </button>
           </div>
-          {promoSuccess && <div style={{ fontSize: "12px", color: "var(--emerald-green)" }}>{promoSuccess}</div>}
-          {promoError && <div style={{ fontSize: "12px", color: "#ef4444" }}>{promoError}</div>}
+          {promoSuccess && <div style={{ fontSize: "11px", color: "var(--emerald-green)" }}>{promoSuccess}</div>}
+          {promoError && <div style={{ fontSize: "11px", color: "#ef4444" }}>{promoError}</div>}
 
           {/* Price Breakdown */}
-          <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.15)", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.15)", paddingTop: "10px", display: "flex", flexDirection: "column", gap: "4px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
               <span>Subtotal</span>
               <span>{formatNaira(subtotal, currencySymbol)}</span>
@@ -310,33 +356,68 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
             )}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
               <span>Gateway Processing Fee</span>
-              <span style={{ color: "var(--emerald-green)" }}>FREE (0%)</span>
+              <span style={{ color: "var(--emerald-green)", fontWeight: "700" }}>FREE (0%)</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "16px", fontWeight: "900", color: "#fff", marginTop: "6px" }}>
-              <span>Total Due</span>
-              <span style={{ fontFamily: "Sora", color: "var(--brand-gold)" }}>{formatNaira(finalTotal, currencySymbol)}</span>
+          </div>
+        </form>
+
+        {/* STICKY FOOTER ACTION BAR - ALWAYS 100% VISIBLE WITHOUT SCROLLING */}
+        <div
+          style={{
+            padding: "16px 24px",
+            background: "#08080C",
+            borderTop: "1px solid rgba(212, 175, 55, 0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+            flexShrink: 0,
+            boxShadow: "0 -8px 24px rgba(0,0,0,0.6)"
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              Total Due
+            </div>
+            <div style={{ fontFamily: "Sora", fontSize: "1.35rem", fontWeight: "900", color: "var(--brand-gold)", lineHeight: 1.1 }}>
+              {formatNaira(finalTotal, currencySymbol)}
             </div>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
+            form="checkout-form"
             disabled={isProcessing}
             className="rx-btn rx-btn-gold"
-            style={{ width: "100%", justifyContent: "center" }}
+            style={{
+              padding: "13px 22px",
+              minWidth: "220px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              fontSize: "13px",
+              fontWeight: "900",
+              cursor: isProcessing ? "not-allowed" : "pointer",
+              boxShadow: "0 0 24px rgba(212, 175, 55, 0.4)"
+            }}
           >
-            <span className="rx-btn-text" style={{ flex: 1 }}>
-              {isProcessing
-                ? "Connecting Monnify..."
-                : paymentMethod === "monnify"
-                ? `Pay ${formatNaira(finalTotal, currencySymbol)} via Monnify`
-                : `Pay ${formatNaira(finalTotal, currencySymbol)} Now`}
-            </span>
-            <span className="rx-btn-icon">
-              <ShieldCheckIcon size={18} />
-            </span>
+            {isProcessing ? (
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>Opening Monnify...</span>
+              </span>
+            ) : (
+              <>
+                <span>
+                  {paymentMethod === "monnify" ? "Pay via Monnify" : "Complete Payment"}
+                </span>
+                <span className="rx-btn-icon" style={{ marginLeft: "4px" }}>
+                  <ArrowRightIcon size={14} />
+                </span>
+              </>
+            )}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

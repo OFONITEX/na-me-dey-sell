@@ -73,7 +73,7 @@ export async function getMonnifyConfig() {
  * Dynamically loads the Monnify inline JS SDK into the document
  */
 export function loadMonnifySDK() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (typeof window === "undefined") return resolve(null);
     if (window.MonnifySDK) return resolve(window.MonnifySDK);
 
@@ -82,10 +82,10 @@ export function loadMonnifySDK() {
     if (existingScript) {
       if (window.MonnifySDK) return resolve(window.MonnifySDK);
       existingScript.addEventListener("load", () => resolve(window.MonnifySDK));
-      existingScript.addEventListener("error", () => reject(new Error("Failed to load Monnify SDK")));
+      existingScript.addEventListener("error", () => resolve(null));
       setTimeout(() => {
-        if (window.MonnifySDK) resolve(window.MonnifySDK);
-      }, 500);
+        resolve(window.MonnifySDK || null);
+      }, 2000);
       return;
     }
 
@@ -93,7 +93,14 @@ export function loadMonnifySDK() {
     script.src = MONNIFY_SDK_URL;
     script.async = true;
     script.onload = () => resolve(window.MonnifySDK);
-    script.onerror = () => reject(new Error("Failed to load Monnify SDK script"));
+    script.onerror = () => {
+      console.warn("Could not load Monnify SDK from CDN, using resilient fallback");
+      resolve(null);
+    };
+    // 3.5s timeout safety so payment never hangs
+    setTimeout(() => {
+      resolve(window.MonnifySDK || null);
+    }, 3500);
     document.head.appendChild(script);
   });
 }
