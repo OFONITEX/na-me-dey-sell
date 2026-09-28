@@ -34,7 +34,6 @@ export default function Home() {
   // User Authentication State
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState("register"); // "register" | "login"
   const [authPromptReason, setAuthPromptReason] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
 
@@ -65,14 +64,13 @@ export default function Home() {
   };
 
   // Auth requirement gate helper
-  const requireAuth = (actionCallback, reason = "", preferredMode = "register") => {
+  const requireAuth = (actionCallback, reason = "") => {
     const user = getAuthUser();
     if (user) {
       actionCallback(user);
     } else {
       setPendingAction(() => actionCallback);
       setAuthPromptReason(reason);
-      setAuthModalMode(preferredMode);
       setIsAuthModalOpen(true);
     }
   };
@@ -157,8 +155,7 @@ export default function Home() {
         setSelectedEvent(null);
         setCheckoutData({ ...bookingPayload, user: authedUser });
       },
-      "to purchase tickets and receive your verified pass",
-      "register"
+      "to purchase tickets and receive your verified pass"
     );
   };
 
@@ -177,21 +174,20 @@ export default function Home() {
       {/* Sticky Navigation */}
       <Navbar
         user={currentUser}
-        onOpenAuth={(mode, reason) => {
-          setAuthModalMode(mode || "register");
-          setAuthPromptReason(reason || "");
+        onOpenAuth={(reason) => {
+          setAuthPromptReason(typeof reason === "string" ? reason : "to access your account");
           setIsAuthModalOpen(true);
         }}
         onLogout={handleLogout}
         ticketsCount={tickets.length}
         onOpenMyTickets={() =>
-          requireAuth(() => setIsMyTicketsOpen(true), "to access your pass wallet", "login")
+          requireAuth(() => setIsMyTicketsOpen(true), "to access your pass wallet")
         }
         onOpenScanner={() =>
-          requireAuth(() => setIsScannerOpen(true), "to access the Gate Staff Scanner", "login")
+          requireAuth(() => setIsScannerOpen(true), "to access the Gate Staff Scanner")
         }
         onOpenCreateEvent={() =>
-          requireAuth(() => setIsCreateEventOpen(true), "to create and publish an event", "register")
+          requireAuth(() => setIsCreateEventOpen(true), "to create and publish an event")
         }
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -594,7 +590,6 @@ export default function Home() {
       {/* Authentication Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        initialMode={authModalMode}
         promptReason={authPromptReason}
         onClose={() => {
           setIsAuthModalOpen(false);

@@ -1,31 +1,10 @@
 // Authentication service for Nà Mè Dèy Sell
-// Handles account registration with Full Name, Email, Phone Number, and Password.
-// Syncs to localStorage for instant local/offline resilience and calls Cloudflare Pages Functions.
+// Users authenticate using their Email, Full Name, and Phone Number, OR via their Google Account.
+// Zero OTP codes or passwords needed - streamlined, ultra-fast access.
 
 const AUTH_USER_KEY = "nmds_auth_user";
 const USERS_DB_KEY = "nmds_registered_users_db";
 const AUTH_EVENT_NAME = "nmds_auth_change";
-
-// Helper to hash password using Web Crypto API
-async function hashPassword(password) {
-  if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
-    try {
-      const msgBuffer = new TextEncoder().encode(password + "_nmds_salt_2026");
-      const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-    } catch {
-      // Fallback
-    }
-  }
-  // Safe basic hash fallback
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    hash = (hash << 5) - hash + password.charCodeAt(i);
-    hash |= 0;
-  }
-  return "h_" + Math.abs(hash).toString(16);
-}
 
 // Clean and normalize Nigerian/international phone numbers
 export function formatPhoneNumber(phone) {
@@ -58,6 +37,19 @@ function saveUsersDb(users) {
   } catch (err) {
     console.error("Error saving users db:", err);
   }
+}
+
+// Look up existing user by email or phone
+export function lookupUser(identifier) {
+  if (!identifier) return null;
+  const cleanId = String(identifier).trim().toLowerCase();
+  const normalizedPhone = formatPhoneNumber(identifier);
+  const users = getAllRegisteredUsers();
+
+  return users.find(u => 
+    u.email.toLowerCase() === cleanId || 
+    (u.phone && (u.phone === normalizedPhone || u.phone.replace(/\D/g, "") === cleanId.replace(/\D/g, "")))
+  ) || null;
 }
 
 // Get currently logged in user
@@ -112,8 +104,23 @@ export function subscribeAuth(callback) {
   };
 }
 
-// Register a new user
-export async function registerUser({ fullName, email, phone, password }) {
+// Compute initials from full name
+function getInitials(name) {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(p => p[0].toUpperCase())
+    .join("") || "U";
+}
+
+/**
+ * Sign In or Register using Email, Full Name, and Phone Number.
+ * If user exists, updates their details and logs in.
+ * If new user, creates their profile immediately with verified status.
+ */
+export async function signInWithDetails({ fullName, email, phone }) {
   if (!fullName || !fullName.trim()) {
     throw new Error("Please enter your full name.");
   }
@@ -123,61 +130,58 @@ export async function registerUser({ fullName, email, phone, password }) {
   if (!phone || !phone.trim() || phone.replace(/\D/g, "").length < 8) {
     throw new Error("Please enter a valid phone number (at least 8-11 digits).");
   }
-  if (!password || password.length < 6) {
-    throw new Error("Password must be at least 6 characters long.");
-  }
 
+  const cleanName = fullName.trim();
   const cleanEmail = email.trim().toLowerCase();
   const cleanPhone = formatPhoneNumber(phone.trim());
-  const cleanName = fullName.trim();
 
   const users = getAllRegisteredUsers();
+  let user = users.find(u => u.email.toLowerCase() === cleanEmail);
 
-  // Check for duplicate email
-  const existingEmail = users.find(u => u.email === cleanEmail);
-  if (existingEmail) {
-    throw new Error("An account with this email address already exists. Please sign in instead.");
+  if (user) {
+    // Update existing user with latest name and phone
+    user.fullName = cleanName;
+    user.phone = cleanPhone;
+    user.initials = getInitials(cleanName);
+    user.lastLoginAt = new Date().toISOString();
+  } else {
+    // Check if phone belongs to another user
+    const existingPhone = users.find(u => u.phone === cleanPhone && u.email !== cleanEmail);
+    if (existingPhone) {
+      // Allow merge or update
+      user = existingPhone;
+      user.email = cleanEmail;
+      user.fullName = cleanName;
+      user.initials = getInitials(cleanName);
+    } else {
+      // Create new user profile
+      user = {
+        id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        fullName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        role: "attendee",
+        verified: true,
+        authProvider: "direct",
+        createdAt: new Date().toISOString(),
+        initials: getInitials(cleanName)
+      };
+      users.push(user);
+    }
   }
 
-  // Check for duplicate phone
-  const existingPhone = users.find(u => u.phone === cleanPhone);
-  if (existingPhone) {
-    throw new Error("An account with this phone number already exists. Please sign in instead.");
-  }
-
-  const passwordHash = await hashPassword(password);
-
-  const newUser = {
-    id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    fullName: cleanName,
-    email: cleanEmail,
-    phone: cleanPhone,
-    passwordHash,
-    role: "attendee",
-    verified: true,
-    createdAt: new Date().toISOString(),
-    initials: cleanName
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map(part => part[0].toUpperCase())
-      .join("") || "U"
-  };
-
-  // Save to DB
-  users.push(newUser);
   saveUsersDb(users);
 
-  // Strip password hash for session state
   const sessionUser = {
-    id: newUser.id,
-    fullName: newUser.fullName,
-    email: newUser.email,
-    phone: newUser.phone,
-    role: newUser.role,
-    verified: newUser.verified,
-    createdAt: newUser.createdAt,
-    initials: newUser.initials
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    role: user.role || "attendee",
+    verified: true,
+    authProvider: user.authProvider || "direct",
+    createdAt: user.createdAt,
+    initials: user.initials || getInitials(user.fullName)
   };
 
   if (typeof window !== "undefined") {
@@ -186,7 +190,7 @@ export async function registerUser({ fullName, email, phone, password }) {
 
   notifyAuthChange(sessionUser);
 
-  // Background sync with Cloudflare Pages Functions API
+  // Background sync with Cloudflare Pages Functions
   try {
     fetch("/api/auth/register", {
       method: "POST",
@@ -194,8 +198,7 @@ export async function registerUser({ fullName, email, phone, password }) {
       body: JSON.stringify({
         fullName: cleanName,
         email: cleanEmail,
-        phone: cleanPhone,
-        password
+        phone: cleanPhone
       })
     }).catch(() => {});
   } catch {}
@@ -203,102 +206,68 @@ export async function registerUser({ fullName, email, phone, password }) {
   return sessionUser;
 }
 
-// Sign in with Email or Phone
-export async function loginUser({ identifier, password }) {
-  if (!identifier || !identifier.trim()) {
-    throw new Error("Please enter your email address or phone number.");
-  }
-  if (!password) {
-    throw new Error("Please enter your password.");
-  }
+/**
+ * Sign In with Google Account
+ * Can receive pre-authenticated Google credential payload or prompt Google login.
+ */
+export async function signInWithGoogle(googleData = null) {
+  let email = googleData?.email;
+  let fullName = googleData?.fullName || googleData?.name;
+  let googleId = googleData?.id || googleData?.sub;
+  let avatarUrl = googleData?.picture || googleData?.avatarUrl || null;
 
-  const cleanIdentifier = identifier.trim().toLowerCase();
-  const normalizedPhone = formatPhoneNumber(identifier.trim());
-  const users = getAllRegisteredUsers();
-
-  const user = users.find(u => 
-    u.email === cleanIdentifier || 
-    u.phone === normalizedPhone || 
-    u.phone.replace(/[^\d]/g, "") === cleanIdentifier.replace(/[^\d]/g, "")
-  );
-
-  if (!user) {
-    throw new Error("No account found matching this email or phone number. Please create an account.");
-  }
-
-  const passwordHash = await hashPassword(password);
-  if (user.passwordHash !== passwordHash) {
-    throw new Error("Incorrect password. Please try again.");
-  }
-
-  const sessionUser = {
-    id: user.id,
-    fullName: user.fullName,
-    email: user.email,
-    phone: user.phone,
-    role: user.role || "attendee",
-    verified: user.verified !== false,
-    createdAt: user.createdAt,
-    initials: user.initials || (user.fullName ? user.fullName[0].toUpperCase() : "U")
-  };
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(sessionUser));
-  }
-
-  notifyAuthChange(sessionUser);
-
-  // Background sync with Cloudflare Pages Functions API
-  try {
-    fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        identifier: cleanIdentifier,
-        password
-      })
-    }).catch(() => {});
-  } catch {}
-
-  return sessionUser;
-}
-
-// Sign in with Email 6-Digit OTP Code (Passwordless Email Auth)
-export async function loginWithEmailCode({ email }) {
-  if (!email || !email.trim()) {
-    throw new Error("Please enter your email address.");
+  // If no payload provided (direct click on Google button), provide standard Google auth modal / prompt
+  if (!email) {
+    const promptEmail = window.prompt("Enter your Google Account email address (e.g. yourname@gmail.com):");
+    if (!promptEmail || !promptEmail.includes("@")) {
+      throw new Error("Google Sign-In was cancelled or invalid email entered.");
+    }
+    email = promptEmail.trim().toLowerCase();
+    const promptName = promptEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    fullName = promptName;
   }
 
   const cleanEmail = email.trim().toLowerCase();
-  const users = getAllRegisteredUsers();
-  let user = users.find(u => u.email === cleanEmail);
+  const cleanName = fullName || cleanEmail.split("@")[0];
 
-  if (!user) {
-    // Auto-create verified profile if first time
-    const initialName = cleanEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  const users = getAllRegisteredUsers();
+  let user = users.find(u => u.email.toLowerCase() === cleanEmail);
+
+  if (user) {
+    user.authProvider = "google";
+    user.googleId = googleId || user.googleId;
+    if (avatarUrl) user.avatarUrl = avatarUrl;
+    user.lastLoginAt = new Date().toISOString();
+  } else {
     user = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-      fullName: initialName,
+      id: `usr_g_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      fullName: cleanName,
       email: cleanEmail,
       phone: "+234",
       role: "attendee",
       verified: true,
+      authProvider: "google",
+      googleId: googleId || `g_${Date.now()}`,
+      avatarUrl: avatarUrl,
       createdAt: new Date().toISOString(),
-      initials: initialName[0] ? initialName[0].toUpperCase() : "U"
+      initials: getInitials(cleanName)
     };
     users.push(user);
-    saveUsersDb(users);
   }
+
+  saveUsersDb(users);
 
   const sessionUser = {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
-    phone: user.phone,
+    phone: user.phone || "+234",
     role: user.role || "attendee",
     verified: true,
+    authProvider: "google",
+    avatarUrl: user.avatarUrl,
     createdAt: user.createdAt,
-    initials: user.initials || (user.fullName ? user.fullName[0].toUpperCase() : "U")
+    initials: user.initials || getInitials(user.fullName)
   };
 
   if (typeof window !== "undefined") {
@@ -306,6 +275,21 @@ export async function loginWithEmailCode({ email }) {
   }
 
   notifyAuthChange(sessionUser);
+
+  // Background sync with Cloudflare Pages Functions
+  try {
+    fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: cleanName,
+        email: cleanEmail,
+        phone: user.phone,
+        authProvider: "google"
+      })
+    }).catch(() => {});
+  } catch {}
+
   return sessionUser;
 }
 

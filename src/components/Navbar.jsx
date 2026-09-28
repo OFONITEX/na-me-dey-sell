@@ -408,7 +408,7 @@ export default function Navbar({
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <button
                 type="button"
-                onClick={() => onOpenAuth("login", "to access your account")}
+                onClick={() => onOpenAuth("to sign in to your account")}
                 className="nav-link-item"
                 style={{
                   padding: "8px 14px",
@@ -425,7 +425,7 @@ export default function Navbar({
 
               <button
                 type="button"
-                onClick={() => onOpenAuth("register", "to access passes, tickets and events")}
+                onClick={() => onOpenAuth("to get started and book tickets")}
                 style={{
                   padding: "8px 14px",
                   fontSize: "12px",

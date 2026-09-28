@@ -6,155 +6,111 @@ import {
   UserIcon,
   MailIcon,
   PhoneIcon,
-  LockIcon,
-  EyeIcon,
-  EyeOffIcon,
   ArrowRightIcon,
   CheckCircleIcon,
   AlertTriangleIcon,
   SparklesIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  GoogleIcon
 } from "./Icons";
-import { registerUser, loginUser, loginWithEmailCode } from "../lib/authService";
-import { sendAuthOtpEmail, verifyAuthOtp } from "../lib/emailService";
+import { signInWithDetails, signInWithGoogle, lookupUser } from "../lib/authService";
 import { triggerConfetti } from "../lib/confetti";
 
 export default function AuthModal({
   isOpen,
-  initialMode = "register", // "register" | "email_otp" | "login"
   promptReason = "", // e.g. "to complete your ticket purchase"
   onClose,
   onSuccess
 }) {
-  const [mode, setMode] = useState(initialMode); // "register" | "email_otp" | "login"
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-
-  // Register Form State
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
 
-  // Login Form State (Password)
-  const [loginIdentifier, setLoginIdentifier] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // Email OTP Authentication State
-  const [otpEmail, setOtpEmail] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [otpStep, setOtpStep] = useState("input"); // "input" | "verify"
-  const [otpDevCode, setOtpDevCode] = useState("");
+  // In-modal Google Account selector state
+  const [showGoogleCard, setShowGoogleCard] = useState(false);
+  const [googleEmailInput, setGoogleEmailInput] = useState("");
+  const [googleNameInput, setGoogleNameInput] = useState("");
 
   if (!isOpen) return null;
 
-  const handleRegisterSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMessage("");
-    setSuccessMessage("");
-    setIsLoading(true);
-
-    try {
-      const user = await registerUser({
-        fullName,
-        email,
-        phone,
-        password
-      });
-
-      triggerConfetti();
-      setSuccessMessage(`Welcome aboard, ${user.fullName.split(" ")[0]}! Your account is ready.`);
-
-      setTimeout(() => {
-        if (onSuccess) onSuccess(user);
-        if (onClose) onClose();
-      }, 1000);
-    } catch (err) {
-      setErrorMessage(err.message || "Failed to create account. Please check your inputs.");
-    } finally {
-      setIsLoading(false);
+  // Auto-fill full name and phone if returning user enters their known email
+  const handleEmailChange = (val) => {
+    setEmail(val);
+    if (val && val.includes("@")) {
+      const existing = lookupUser(val);
+      if (existing) {
+        if (!fullName && existing.fullName) setFullName(existing.fullName);
+        if (!phone && existing.phone && existing.phone !== "+234") setPhone(existing.phone);
+      }
     }
   };
 
-  const handleLoginSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
     setIsLoading(true);
 
     try {
-      const user = await loginUser({
-        identifier: loginIdentifier,
-        password: loginPassword
+      const user = await signInWithDetails({
+        fullName,
+        email,
+        phone
       });
 
-      setSuccessMessage(`Welcome back, ${user.fullName.split(" ")[0]}!`);
+      triggerConfetti();
+      setSuccessMessage(`Welcome, ${user.fullName.split(" ")[0]}! Access confirmed.`);
 
       setTimeout(() => {
         if (onSuccess) onSuccess(user);
         if (onClose) onClose();
       }, 700);
     } catch (err) {
-      setErrorMessage(err.message || "Sign in failed. Check your email/phone and password.");
+      setErrorMessage(err.message || "Please check your full name, email, and phone number.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
+  const executeGoogleAuth = async (googlePayload = null) => {
     setErrorMessage("");
     setSuccessMessage("");
+    setIsGoogleLoading(true);
 
-    if (!otpEmail || !otpEmail.includes("@")) {
-      setErrorMessage("Please enter a valid email address.");
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      const res = await sendAuthOtpEmail(otpEmail);
-      setOtpDevCode(res.code);
-      setOtpStep("verify");
-      setSuccessMessage(`6-digit verification code sent to ${otpEmail}!`);
-    } catch (err) {
-      setErrorMessage(err.message || "Failed to dispatch verification code.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    setErrorMessage("");
-    setSuccessMessage("");
-
-    if (!otpCode || otpCode.trim().length !== 6) {
-      setErrorMessage("Please enter the complete 6-digit code.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const isValid = verifyAuthOtp(otpEmail, otpCode);
-      if (!isValid && otpCode.trim() !== otpDevCode) {
-        throw new Error("Invalid or expired 6-digit code. Please try again or request a new code.");
-      }
-
-      const user = await loginWithEmailCode({ email: otpEmail });
+      const user = await signInWithGoogle(googlePayload);
       triggerConfetti();
-      setSuccessMessage(`Email verified! Welcome, ${user.fullName.split(" ")[0]}.`);
+      setSuccessMessage(`Signed in with Google! Welcome, ${user.fullName.split(" ")[0]}.`);
 
       setTimeout(() => {
         if (onSuccess) onSuccess(user);
         if (onClose) onClose();
-      }, 800);
+      }, 700);
     } catch (err) {
-      setErrorMessage(err.message || "Email verification failed.");
+      if (!err.message?.includes("cancelled")) {
+        setErrorMessage(err.message || "Google Sign-In failed.");
+      }
     } finally {
-      setIsLoading(false);
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleButtonClick = () => {
+    // If attendee already typed their email in the form, sign in directly with Google
+    if (email && email.includes("@")) {
+      executeGoogleAuth({
+        email,
+        fullName: fullName || email.split("@")[0]
+      });
+    } else {
+      setGoogleEmailInput("");
+      setGoogleNameInput(fullName || "");
+      setShowGoogleCard(true);
     }
   };
 
@@ -180,7 +136,7 @@ export default function AuthModal({
       <div
         style={{
           width: "100%",
-          maxWidth: "490px",
+          maxWidth: "480px",
           background: "linear-gradient(180deg, #13131A 0%, #0B0B0F 100%)",
           border: "1px solid rgba(212, 175, 55, 0.35)",
           borderRadius: "20px",
@@ -239,11 +195,7 @@ export default function AuthModal({
                 margin: 0
               }}
             >
-              {mode === "register"
-                ? "Create Your Account"
-                : mode === "email_otp"
-                ? "Email Authentication"
-                : "Welcome Back"}
+              Sign In or Register
             </h2>
             <p
               style={{
@@ -253,11 +205,7 @@ export default function AuthModal({
                 marginBottom: 0
               }}
             >
-              {mode === "register"
-                ? "Sign up with your Full Name, Email and Phone number."
-                : mode === "email_otp"
-                ? "Sign in passwordlessly with a 6-digit code sent to your email."
-                : "Sign in with your Email / Phone number and Password."}
+              Sign in with your Google account or enter your name, email, and phone.
             </p>
           </div>
 
@@ -308,95 +256,10 @@ export default function AuthModal({
           >
             <ShieldCheckIcon size={16} style={{ flexShrink: 0, color: "#D4AF37" }} />
             <span>
-              Please <strong>create an account</strong> or <strong>sign in</strong> {promptReason}.
+              Please <strong>sign in with your details</strong> {promptReason}.
             </span>
           </div>
         )}
-
-        {/* 3-Tab Switcher: Register / Email OTP / Password */}
-        <div
-          style={{
-            display: "flex",
-            margin: "0 28px 20px",
-            background: "rgba(0, 0, 0, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "10px",
-            padding: "4px",
-            gap: "4px"
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              setMode("register");
-              setErrorMessage("");
-              setSuccessMessage("");
-            }}
-            style={{
-              flex: 1,
-              padding: "9px 0",
-              fontSize: "12px",
-              fontWeight: "700",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              background: mode === "register" ? "linear-gradient(135deg, #D4AF37 0%, #A67C1E 100%)" : "transparent",
-              color: mode === "register" ? "#070709" : "#E2D9BC",
-              boxShadow: mode === "register" ? "0 4px 12px rgba(212, 175, 55, 0.3)" : "none"
-            }}
-          >
-            Create Account
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMode("email_otp");
-              setErrorMessage("");
-              setSuccessMessage("");
-            }}
-            style={{
-              flex: 1,
-              padding: "9px 0",
-              fontSize: "12px",
-              fontWeight: "700",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              background: mode === "email_otp" ? "linear-gradient(135deg, #D4AF37 0%, #A67C1E 100%)" : "transparent",
-              color: mode === "email_otp" ? "#070709" : "#E2D9BC",
-              boxShadow: mode === "email_otp" ? "0 4px 12px rgba(212, 175, 55, 0.3)" : "none"
-            }}
-          >
-            Email Code (OTP)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setErrorMessage("");
-              setSuccessMessage("");
-            }}
-            style={{
-              flex: 1,
-              padding: "9px 0",
-              fontSize: "12px",
-              fontWeight: "700",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              background: mode === "login" ? "linear-gradient(135deg, #D4AF37 0%, #A67C1E 100%)" : "transparent",
-              color: mode === "login" ? "#070709" : "#E2D9BC",
-              boxShadow: mode === "login" ? "0 4px 12px rgba(212, 175, 55, 0.3)" : "none"
-            }}
-          >
-            Password Sign In
-          </button>
-        </div>
 
         {/* Error Alert */}
         {errorMessage && (
@@ -442,9 +305,236 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* MODE 1: Register Form */}
-        {mode === "register" && (
-          <form onSubmit={handleRegisterSubmit} style={{ padding: "0 28px 28px" }}>
+        <div style={{ padding: "0 28px 28px" }}>
+          {/* OPTION 1: Continue with Google */}
+          {showGoogleCard ? (
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1px solid #dadce0",
+                borderRadius: "14px",
+                padding: "20px",
+                color: "#202124",
+                marginBottom: "16px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+                animation: "modalFadeIn 0.2s ease-out"
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "14px"
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <GoogleIcon size={24} />
+                  <div>
+                    <div style={{ fontSize: "15px", fontWeight: "700", color: "#202124" }}>
+                      Sign in with Google
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#5f6368" }}>
+                      Choose or enter your Google email
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowGoogleCard(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#5f6368",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    fontWeight: "600"
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!googleEmailInput || !googleEmailInput.includes("@")) {
+                    setErrorMessage("Please enter a valid Google email address.");
+                    return;
+                  }
+                  executeGoogleAuth({
+                    email: googleEmailInput,
+                    fullName: googleNameInput || googleEmailInput.split("@")[0]
+                  });
+                }}
+              >
+                <div style={{ marginBottom: "10px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#5f6368",
+                      marginBottom: "4px"
+                    }}
+                  >
+                    GOOGLE EMAIL ADDRESS *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    autoFocus
+                    placeholder="e.g. adebayo.t@gmail.com"
+                    value={googleEmailInput}
+                    onChange={(e) => setGoogleEmailInput(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      padding: "0 12px",
+                      border: "1px solid #dadce0",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      color: "#202124",
+                      background: "#ffffff",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "14px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      color: "#5f6368",
+                      marginBottom: "4px"
+                    }}
+                  >
+                    FULL NAME (OPTIONAL)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Your Full Name"
+                    value={googleNameInput}
+                    onChange={(e) => setGoogleNameInput(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      padding: "0 12px",
+                      border: "1px solid #dadce0",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      color: "#202124",
+                      background: "#ffffff",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowGoogleCard(false)}
+                    style={{
+                      flex: "0 0 80px",
+                      height: "42px",
+                      background: "#f1f3f4",
+                      color: "#3c4043",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      cursor: "pointer"
+                    }}
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={isGoogleLoading}
+                    style={{
+                      flex: 1,
+                      height: "42px",
+                      background: "#1a73e8",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px"
+                    }}
+                  >
+                    <GoogleIcon size={16} />
+                    <span>{isGoogleLoading ? "Connecting..." : "Sign in with Google"}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleGoogleButtonClick}
+              disabled={isGoogleLoading}
+              style={{
+                width: "100%",
+                height: "48px",
+                background: "#ffffff",
+                color: "#1F1F1F",
+                border: "1px solid #E0E0E0",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: "700",
+                fontFamily: "'Inter', sans-serif",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "12px",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                transition: "all 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F8F8F8";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <GoogleIcon size={20} />
+              <span>{isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}</span>
+            </button>
+          )}
+
+          {/* Divider */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              margin: "20px 0",
+              color: "#948B75",
+              fontSize: "11px",
+              fontWeight: "800",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase"
+            }}
+          >
+            <div style={{ flex: 1, height: "1px", background: "rgba(212, 175, 55, 0.2)" }} />
+            <span style={{ padding: "0 12px" }}>or with your details</span>
+            <div style={{ flex: 1, height: "1px", background: "rgba(212, 175, 55, 0.2)" }} />
+          </div>
+
+          {/* OPTION 2: Sign in with Email, Full Name, and Phone Number */}
+          <form onSubmit={handleSubmit}>
             {/* Full Name */}
             <div style={{ marginBottom: "14px" }}>
               <label
@@ -512,7 +602,7 @@ export default function AuthModal({
                   required
                   placeholder="e.g. chukwuma@gmail.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => handleEmailChange(e.target.value)}
                   style={{
                     width: "100%",
                     height: "46px",
@@ -530,12 +620,12 @@ export default function AuthModal({
                 />
               </div>
               <div style={{ fontSize: "11px", color: "rgba(226, 217, 188, 0.7)", marginTop: "4px" }}>
-                Your ticket pass &amp; barcode will be automatically sent to this email.
+                Your ticket ID, admission slip, and barcode will be delivered to this email.
               </div>
             </div>
 
             {/* Phone Number */}
-            <div style={{ marginBottom: "14px" }}>
+            <div style={{ marginBottom: "22px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC" }}>
                   Phone Number <span style={{ color: "#D4AF37" }}>*</span>
@@ -570,55 +660,6 @@ export default function AuthModal({
               </div>
             </div>
 
-            {/* Password */}
-            <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC", marginBottom: "6px" }}>
-                Password <span style={{ color: "#D4AF37" }}>*</span>
-              </label>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
-                  <LockIcon size={18} />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  placeholder="Create a password (min. 6 characters)"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "46px",
-                    padding: "0 46px 0 42px",
-                    background: "rgba(255, 255, 255, 0.04)",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    borderRadius: "10px",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    outline: "none",
-                    transition: "border 0.2s"
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#D4AF37")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "12px",
-                    background: "transparent",
-                    border: "none",
-                    color: "rgba(226, 217, 188, 0.7)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
-                  {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
-                </button>
-              </div>
-            </div>
-
             {/* Submit Button */}
             <button
               type="submit"
@@ -627,246 +668,18 @@ export default function AuthModal({
               style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
             >
               <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
-                {isLoading ? "Creating Account..." : "Create Account & Continue"}
+                {isLoading ? "Signing in..." : "Continue to Account"}
               </span>
               <span className="rx-btn-icon">
                 <ArrowRightIcon size={16} />
               </span>
             </button>
-          </form>
-        )}
 
-        {/* MODE 2: Email OTP Authentication */}
-        {mode === "email_otp" && (
-          <div style={{ padding: "0 28px 28px" }}>
-            {otpStep === "input" ? (
-              <form onSubmit={handleSendOtp}>
-                <div style={{ marginBottom: "18px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      color: "#E2D9BC",
-                      marginBottom: "6px"
-                    }}
-                  >
-                    Your Email Address <span style={{ color: "#D4AF37" }}>*</span>
-                  </label>
-                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                    <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
-                      <MailIcon size={18} />
-                    </div>
-                    <input
-                      type="email"
-                      required
-                      placeholder="Enter your email address"
-                      value={otpEmail}
-                      onChange={(e) => setOtpEmail(e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "46px",
-                        padding: "0 14px 0 42px",
-                        background: "rgba(255, 255, 255, 0.04)",
-                        border: "1px solid rgba(255, 255, 255, 0.12)",
-                        borderRadius: "10px",
-                        color: "#ffffff",
-                        fontSize: "14px",
-                        outline: "none",
-                        transition: "border 0.2s"
-                      }}
-                      onFocus={(e) => (e.target.style.borderColor = "#D4AF37")}
-                      onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
-                    />
-                  </div>
-                  <div style={{ fontSize: "11px", color: "rgba(226, 217, 188, 0.7)", marginTop: "6px" }}>
-                    We&apos;ll send a 6-digit verification code to this inbox. No password needed!
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="rx-btn rx-btn-primary"
-                  style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
-                >
-                  <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
-                    {isLoading ? "Sending Code..." : "Send 6-Digit Email Code"}
-                  </span>
-                  <span className="rx-btn-icon">
-                    <ArrowRightIcon size={16} />
-                  </span>
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyOtp}>
-                <div style={{ marginBottom: "16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC" }}>
-                      Enter 6-Digit Code <span style={{ color: "#D4AF37" }}>*</span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setOtpStep("input")}
-                      style={{ background: "transparent", border: "none", color: "#F5D061", fontSize: "11px", cursor: "pointer", textDecoration: "underline" }}
-                    >
-                      Change email
-                    </button>
-                  </div>
-
-                  <input
-                    type="text"
-                    maxLength={6}
-                    required
-                    placeholder="• • • • • •"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                    style={{
-                      width: "100%",
-                      height: "54px",
-                      textAlign: "center",
-                      letterSpacing: "8px",
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: "24px",
-                      fontWeight: "900",
-                      background: "rgba(212, 175, 55, 0.08)",
-                      border: "2px solid #D4AF37",
-                      borderRadius: "10px",
-                      color: "#FFFFFF",
-                      outline: "none"
-                    }}
-                  />
-
-                  {otpDevCode && (
-                    <div style={{ fontSize: "11px", color: "var(--brand-gold-bright)", marginTop: "6px", textAlign: "center" }}>
-                      💡 Instant Code: <strong>{otpDevCode}</strong> (sent to {otpEmail})
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="rx-btn rx-btn-primary"
-                  style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
-                >
-                  <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
-                    {isLoading ? "Verifying..." : "Verify Code & Sign In"}
-                  </span>
-                  <span className="rx-btn-icon">
-                    <CheckCircleIcon size={16} />
-                  </span>
-                </button>
-              </form>
-            )}
-          </div>
-        )}
-
-        {/* MODE 3: Password Sign In */}
-        {mode === "login" && (
-          <form onSubmit={handleLoginSubmit} style={{ padding: "0 28px 28px" }}>
-            {/* Identifier: Email or Phone */}
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC", marginBottom: "6px" }}>
-                Email or Phone Number <span style={{ color: "#D4AF37" }}>*</span>
-              </label>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
-                  <MailIcon size={18} />
-                </div>
-                <input
-                  type="text"
-                  required
-                  placeholder="Enter email or registered phone number"
-                  value={loginIdentifier}
-                  onChange={(e) => setLoginIdentifier(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "46px",
-                    padding: "0 14px 0 42px",
-                    background: "rgba(255, 255, 255, 0.04)",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    borderRadius: "10px",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    outline: "none",
-                    transition: "border 0.2s"
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#D4AF37")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
-                />
-              </div>
+            <div style={{ textAlign: "center", marginTop: "12px", fontSize: "11px", color: "var(--text-dim)" }}>
+              No passwords or OTP codes required • Instant access
             </div>
-
-            {/* Password */}
-            <div style={{ marginBottom: "20px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC" }}>
-                  Password <span style={{ color: "#D4AF37" }}>*</span>
-                </label>
-              </div>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
-                  <LockIcon size={18} />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  placeholder="Enter your password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "46px",
-                    padding: "0 46px 0 42px",
-                    background: "rgba(255, 255, 255, 0.04)",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    borderRadius: "10px",
-                    color: "#ffffff",
-                    fontSize: "14px",
-                    outline: "none",
-                    transition: "border 0.2s"
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = "#D4AF37")}
-                  onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: "absolute",
-                    right: "12px",
-                    background: "transparent",
-                    border: "none",
-                    color: "rgba(226, 217, 188, 0.7)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
-                  {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="rx-btn rx-btn-primary"
-              style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
-            >
-              <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
-                {isLoading ? "Signing In..." : "Sign In to Account"}
-              </span>
-              <span className="rx-btn-icon">
-                <ArrowRightIcon size={16} />
-              </span>
-            </button>
           </form>
-        )}
+        </div>
       </div>
     </div>
   );
