@@ -1365,3 +1365,75 @@ h1, h2, h3, h4, h5, .font-heading {
   border-radius: 16px;
   position: relative;
 }
+
+/* ==========================================================================
+   Print Styling for Official Admission Ticket Slips
+   ========================================================================== */
+@media print {
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #printable-ticket, #printable-ticket * {
+    visibility: visible;
+  }
+  #printable-ticket {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 750px !important;
+    margin: 0 auto;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: 2px solid #222222 !important;
+    border-radius: 12px !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+  .pass-header {
+    background: #f8f8f8 !important;
+    border-bottom: 2px solid #dddddd !important;
+  }
+  .pass-event-title {
+    color: #000000 !important;
+  }
+  .pass-event-org {
+    color: #555555 !important;
+  }
+  .pass-body {
+    background: #ffffff !important;
+  }
+  .ticket-id-highlight-box {
+    background: #f4f4f4 !important;
+    border: 1px solid #cccccc !important;
+  }
+  .ticket-id-number {
+    color: #000000 !important;
+  }
+  .detail-cell {
+    background: #fbfbfb !important;
+    border: 1px solid #e5e5e5 !important;
+  }
+  .cell-label {
+    color: #666666 !important;
+  }
+  .cell-value {
+    color: #000000 !important;
+  }
+  .cell-sub {
+    color: #444444 !important;
+  }
+  .pass-stub {
+    background: #fafafa !important;
+    border-top: 2px dashed #999999 !important;
+  }
+  .pass-actions-bar, .modal-close-btn, .modal-backdrop {
+    display: none !important;
+  }
+}
+

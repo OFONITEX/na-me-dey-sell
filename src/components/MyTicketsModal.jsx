@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CloseIcon, SearchIcon, TicketIcon, CalendarIcon, MapPinIcon, QrCodeIcon, SparklesIcon } from "./Icons";
+import { CloseIcon, SearchIcon, TicketIcon, CalendarIcon, MapPinIcon, QrCodeIcon, SparklesIcon, DownloadIcon } from "./Icons";
 import { formatNaira } from "../lib/ticketService";
+import { downloadTicketSlip } from "../lib/ticketSlipGenerator";
 
 export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
   const [filter, setFilter] = useState("all");
@@ -175,9 +176,45 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--brand-gold)", fontSize: "12px", fontWeight: "700" }}>
-                    <QrCodeIcon size={22} />
-                    <span>View Pass ›</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <button
+                      type="button"
+                      title="Download Official Ticket Slip (PNG)"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadTicketSlip(t, 0, 1);
+                      }}
+                      style={{
+                        background: "rgba(212, 175, 55, 0.15)",
+                        border: "1px solid rgba(212, 175, 55, 0.4)",
+                        borderRadius: "6px",
+                        padding: "6px 12px",
+                        color: "#F5D061",
+                        fontSize: "11px",
+                        fontWeight: "800",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        cursor: "pointer",
+                        transition: "all 0.2s"
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = "#D4AF37";
+                        e.currentTarget.style.color = "#070709";
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = "rgba(212, 175, 55, 0.15)";
+                        e.currentTarget.style.color = "#F5D061";
+                      }}
+                    >
+                      <DownloadIcon size={13} />
+                      <span className="hidden sm:inline">Download Slip</span>
+                    </button>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--brand-gold)", fontSize: "12px", fontWeight: "700" }}>
+                      <QrCodeIcon size={20} />
+                      <span>View Pass ›</span>
+                    </div>
                   </div>
                 </div>
               );
