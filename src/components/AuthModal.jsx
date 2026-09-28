@@ -15,17 +15,18 @@ import {
   SparklesIcon,
   ShieldCheckIcon
 } from "./Icons";
-import { registerUser, loginUser } from "../lib/authService";
+import { registerUser, loginUser, loginWithEmailCode } from "../lib/authService";
+import { sendAuthOtpEmail, verifyAuthOtp } from "../lib/emailService";
 import { triggerConfetti } from "../lib/confetti";
 
 export default function AuthModal({
   isOpen,
-  initialMode = "register", // "register" | "login"
+  initialMode = "register", // "register" | "email_otp" | "login"
   promptReason = "", // e.g. "to complete your ticket purchase"
   onClose,
   onSuccess
 }) {
-  const [mode, setMode] = useState(initialMode); // "register" | "login"
+  const [mode, setMode] = useState(initialMode); // "register" | "email_otp" | "login"
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -37,9 +38,15 @@ export default function AuthModal({
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
-  // Login Form State
+  // Login Form State (Password)
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+
+  // Email OTP Authentication State
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpStep, setOtpStep] = useState("input"); // "input" | "verify"
+  const [otpDevCode, setOtpDevCode] = useState("");
 
   if (!isOpen) return null;
 
@@ -96,6 +103,61 @@ export default function AuthModal({
     }
   };
 
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!otpEmail || !otpEmail.includes("@")) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await sendAuthOtpEmail(otpEmail);
+      setOtpDevCode(res.code);
+      setOtpStep("verify");
+      setSuccessMessage(`6-digit verification code sent to ${otpEmail}!`);
+    } catch (err) {
+      setErrorMessage(err.message || "Failed to dispatch verification code.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!otpCode || otpCode.trim().length !== 6) {
+      setErrorMessage("Please enter the complete 6-digit code.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const isValid = verifyAuthOtp(otpEmail, otpCode);
+      if (!isValid && otpCode.trim() !== otpDevCode) {
+        throw new Error("Invalid or expired 6-digit code. Please try again or request a new code.");
+      }
+
+      const user = await loginWithEmailCode({ email: otpEmail });
+      triggerConfetti();
+      setSuccessMessage(`Email verified! Welcome, ${user.fullName.split(" ")[0]}.`);
+
+      setTimeout(() => {
+        if (onSuccess) onSuccess(user);
+        if (onClose) onClose();
+      }, 800);
+    } catch (err) {
+      setErrorMessage(err.message || "Email verification failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div
       style={{
@@ -118,7 +180,7 @@ export default function AuthModal({
       <div
         style={{
           width: "100%",
-          maxWidth: "480px",
+          maxWidth: "490px",
           background: "linear-gradient(180deg, #13131A 0%, #0B0B0F 100%)",
           border: "1px solid rgba(212, 175, 55, 0.35)",
           borderRadius: "20px",
@@ -177,7 +239,11 @@ export default function AuthModal({
                 margin: 0
               }}
             >
-              {mode === "register" ? "Create Your Account" : "Welcome Back"}
+              {mode === "register"
+                ? "Create Your Account"
+                : mode === "email_otp"
+                ? "Email Authentication"
+                : "Welcome Back"}
             </h2>
             <p
               style={{
@@ -188,8 +254,10 @@ export default function AuthModal({
               }}
             >
               {mode === "register"
-                ? "Join thousands of attendees and event creators across Africa."
-                : "Sign in with your Email or Phone number to access your tickets."}
+                ? "Sign up with your Full Name, Email and Phone number."
+                : mode === "email_otp"
+                ? "Sign in passwordlessly with a 6-digit code sent to your email."
+                : "Sign in with your Email / Phone number and Password."}
             </p>
           </div>
 
@@ -245,7 +313,7 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* Tab Switcher: Register / Login */}
+        {/* 3-Tab Switcher: Register / Email OTP / Password */}
         <div
           style={{
             display: "flex",
@@ -253,7 +321,8 @@ export default function AuthModal({
             background: "rgba(0, 0, 0, 0.4)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
             borderRadius: "10px",
-            padding: "4px"
+            padding: "4px",
+            gap: "4px"
           }}
         >
           <button
@@ -265,8 +334,8 @@ export default function AuthModal({
             }}
             style={{
               flex: 1,
-              padding: "10px 0",
-              fontSize: "13px",
+              padding: "9px 0",
+              fontSize: "12px",
               fontWeight: "700",
               border: "none",
               borderRadius: "8px",
@@ -279,6 +348,31 @@ export default function AuthModal({
           >
             Create Account
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMode("email_otp");
+              setErrorMessage("");
+              setSuccessMessage("");
+            }}
+            style={{
+              flex: 1,
+              padding: "9px 0",
+              fontSize: "12px",
+              fontWeight: "700",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              background: mode === "email_otp" ? "linear-gradient(135deg, #D4AF37 0%, #A67C1E 100%)" : "transparent",
+              color: mode === "email_otp" ? "#070709" : "#E2D9BC",
+              boxShadow: mode === "email_otp" ? "0 4px 12px rgba(212, 175, 55, 0.3)" : "none"
+            }}
+          >
+            Email Code (OTP)
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -288,8 +382,8 @@ export default function AuthModal({
             }}
             style={{
               flex: 1,
-              padding: "10px 0",
-              fontSize: "13px",
+              padding: "9px 0",
+              fontSize: "12px",
               fontWeight: "700",
               border: "none",
               borderRadius: "8px",
@@ -300,7 +394,7 @@ export default function AuthModal({
               boxShadow: mode === "login" ? "0 4px 12px rgba(212, 175, 55, 0.3)" : "none"
             }}
           >
-            Sign In
+            Password Sign In
           </button>
         </div>
 
@@ -348,11 +442,11 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* Register Form */}
-        {mode === "register" ? (
+        {/* MODE 1: Register Form */}
+        {mode === "register" && (
           <form onSubmit={handleRegisterSubmit} style={{ padding: "0 28px 28px" }}>
             {/* Full Name */}
-            <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "14px" }}>
               <label
                 style={{
                   display: "block",
@@ -366,22 +460,8 @@ export default function AuthModal({
               >
                 Full Name <span style={{ color: "#D4AF37" }}>*</span>
               </label>
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    color: "rgba(212, 175, 55, 0.7)",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
                   <UserIcon size={18} />
                 </div>
                 <input
@@ -409,7 +489,7 @@ export default function AuthModal({
             </div>
 
             {/* Email Address */}
-            <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "14px" }}>
               <label
                 style={{
                   display: "block",
@@ -423,22 +503,8 @@ export default function AuthModal({
               >
                 Email Address <span style={{ color: "#D4AF37" }}>*</span>
               </label>
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    color: "rgba(212, 175, 55, 0.7)",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
                   <MailIcon size={18} />
                 </div>
                 <input
@@ -463,42 +529,21 @@ export default function AuthModal({
                   onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
                 />
               </div>
+              <div style={{ fontSize: "11px", color: "rgba(226, 217, 188, 0.7)", marginTop: "4px" }}>
+                Your ticket pass &amp; barcode will be automatically sent to this email.
+              </div>
             </div>
 
             {/* Phone Number */}
-            <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "14px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <label
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    color: "#E2D9BC"
-                  }}
-                >
+                <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC" }}>
                   Phone Number <span style={{ color: "#D4AF37" }}>*</span>
                 </label>
-                <span style={{ fontSize: "11px", color: "#D4AF37", fontWeight: "600" }}>
-                  🇳🇬 Nigeria / Int&apos;l
-                </span>
+                <span style={{ fontSize: "11px", color: "#D4AF37", fontWeight: "600" }}>🇳🇬 Nigeria / Int&apos;l</span>
               </div>
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    color: "rgba(212, 175, 55, 0.7)",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
                   <PhoneIcon size={18} />
                 </div>
                 <input
@@ -523,42 +568,15 @@ export default function AuthModal({
                   onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
                 />
               </div>
-              <div style={{ fontSize: "11px", color: "rgba(226, 217, 188, 0.7)", marginTop: "4px" }}>
-                Used for instant SMS ticket delivery and door admission verify.
-              </div>
             </div>
 
             {/* Password */}
             <div style={{ marginBottom: "20px" }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "#E2D9BC",
-                  marginBottom: "6px"
-                }}
-              >
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC", marginBottom: "6px" }}>
                 Password <span style={{ color: "#D4AF37" }}>*</span>
               </label>
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    color: "rgba(212, 175, 55, 0.7)",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
                   <LockIcon size={18} />
                 </div>
                 <input
@@ -606,11 +624,7 @@ export default function AuthModal({
               type="submit"
               disabled={isLoading}
               className="rx-btn rx-btn-primary"
-              style={{
-                width: "100%",
-                justifyContent: "center",
-                opacity: isLoading ? 0.7 : 1
-              }}
+              style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
             >
               <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
                 {isLoading ? "Creating Account..." : "Create Account & Continue"}
@@ -619,71 +633,147 @@ export default function AuthModal({
                 <ArrowRightIcon size={16} />
               </span>
             </button>
-
-            {/* Switch to Sign In */}
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: "16px",
-                fontSize: "12px",
-                color: "#E2D9BC"
-              }}
-            >
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("login");
-                  setErrorMessage("");
-                  setSuccessMessage("");
-                }}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#F5D061",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  textDecoration: "underline"
-                }}
-              >
-                Sign In
-              </button>
-            </div>
           </form>
-        ) : (
-          /* Login Form */
+        )}
+
+        {/* MODE 2: Email OTP Authentication */}
+        {mode === "email_otp" && (
+          <div style={{ padding: "0 28px 28px" }}>
+            {otpStep === "input" ? (
+              <form onSubmit={handleSendOtp}>
+                <div style={{ marginBottom: "18px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      color: "#E2D9BC",
+                      marginBottom: "6px"
+                    }}
+                  >
+                    Your Email Address <span style={{ color: "#D4AF37" }}>*</span>
+                  </label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
+                      <MailIcon size={18} />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter your email address"
+                      value={otpEmail}
+                      onChange={(e) => setOtpEmail(e.target.value)}
+                      style={{
+                        width: "100%",
+                        height: "46px",
+                        padding: "0 14px 0 42px",
+                        background: "rgba(255, 255, 255, 0.04)",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        borderRadius: "10px",
+                        color: "#ffffff",
+                        fontSize: "14px",
+                        outline: "none",
+                        transition: "border 0.2s"
+                      }}
+                      onFocus={(e) => (e.target.style.borderColor = "#D4AF37")}
+                      onBlur={(e) => (e.target.style.borderColor = "rgba(255, 255, 255, 0.12)")}
+                    />
+                  </div>
+                  <div style={{ fontSize: "11px", color: "rgba(226, 217, 188, 0.7)", marginTop: "6px" }}>
+                    We&apos;ll send a 6-digit verification code to this inbox. No password needed!
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="rx-btn rx-btn-primary"
+                  style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
+                >
+                  <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
+                    {isLoading ? "Sending Code..." : "Send 6-Digit Email Code"}
+                  </span>
+                  <span className="rx-btn-icon">
+                    <ArrowRightIcon size={16} />
+                  </span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp}>
+                <div style={{ marginBottom: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                    <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC" }}>
+                      Enter 6-Digit Code <span style={{ color: "#D4AF37" }}>*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setOtpStep("input")}
+                      style={{ background: "transparent", border: "none", color: "#F5D061", fontSize: "11px", cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Change email
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    maxLength={6}
+                    required
+                    placeholder="• • • • • •"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                    style={{
+                      width: "100%",
+                      height: "54px",
+                      textAlign: "center",
+                      letterSpacing: "8px",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "24px",
+                      fontWeight: "900",
+                      background: "rgba(212, 175, 55, 0.08)",
+                      border: "2px solid #D4AF37",
+                      borderRadius: "10px",
+                      color: "#FFFFFF",
+                      outline: "none"
+                    }}
+                  />
+
+                  {otpDevCode && (
+                    <div style={{ fontSize: "11px", color: "var(--brand-gold-bright)", marginTop: "6px", textAlign: "center" }}>
+                      💡 Instant Code: <strong>{otpDevCode}</strong> (sent to {otpEmail})
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="rx-btn rx-btn-primary"
+                  style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
+                >
+                  <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
+                    {isLoading ? "Verifying..." : "Verify Code & Sign In"}
+                  </span>
+                  <span className="rx-btn-icon">
+                    <CheckCircleIcon size={16} />
+                  </span>
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+
+        {/* MODE 3: Password Sign In */}
+        {mode === "login" && (
           <form onSubmit={handleLoginSubmit} style={{ padding: "0 28px 28px" }}>
             {/* Identifier: Email or Phone */}
             <div style={{ marginBottom: "16px" }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "#E2D9BC",
-                  marginBottom: "6px"
-                }}
-              >
+              <label style={{ display: "block", fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC", marginBottom: "6px" }}>
                 Email or Phone Number <span style={{ color: "#D4AF37" }}>*</span>
               </label>
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    color: "rgba(212, 175, 55, 0.7)",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
                   <MailIcon size={18} />
                 </div>
                 <input
@@ -713,34 +803,12 @@ export default function AuthModal({
             {/* Password */}
             <div style={{ marginBottom: "20px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                <label
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    color: "#E2D9BC"
-                  }}
-                >
+                <label style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.08em", color: "#E2D9BC" }}>
                   Password <span style={{ color: "#D4AF37" }}>*</span>
                 </label>
               </div>
-              <div
-                style={{
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: "14px",
-                    color: "rgba(212, 175, 55, 0.7)",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                >
+              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                <div style={{ position: "absolute", left: "14px", color: "rgba(212, 175, 55, 0.7)", display: "flex", alignItems: "center" }}>
                   <LockIcon size={18} />
                 </div>
                 <input
@@ -788,11 +856,7 @@ export default function AuthModal({
               type="submit"
               disabled={isLoading}
               className="rx-btn rx-btn-primary"
-              style={{
-                width: "100%",
-                justifyContent: "center",
-                opacity: isLoading ? 0.7 : 1
-              }}
+              style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.7 : 1 }}
             >
               <span className="rx-btn-text" style={{ flex: 1, textAlign: "center" }}>
                 {isLoading ? "Signing In..." : "Sign In to Account"}
@@ -801,36 +865,6 @@ export default function AuthModal({
                 <ArrowRightIcon size={16} />
               </span>
             </button>
-
-            {/* Switch to Register */}
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: "16px",
-                fontSize: "12px",
-                color: "#E2D9BC"
-              }}
-            >
-              Don&apos;t have an account yet?{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("register");
-                  setErrorMessage("");
-                  setSuccessMessage("");
-                }}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "#F5D061",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  textDecoration: "underline"
-                }}
-              >
-                Create Account
-              </button>
-            </div>
           </form>
         )}
       </div>

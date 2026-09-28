@@ -5,6 +5,7 @@ import { CloseIcon, UserIcon, MailIcon, PhoneIcon, CreditCardIcon, ShieldCheckIc
 import { issueTickets, formatNaira } from "../lib/ticketService";
 import { payWithMonnify } from "../lib/monnifyService";
 import { triggerConfetti } from "../lib/confetti";
+import { sendTicketConfirmationEmail } from "../lib/emailService";
 
 export default function CheckoutModal({ bookingData, currentUser, onClose, onOrderComplete }) {
   const { event, tier, quantity, subtotal } = bookingData;
@@ -57,6 +58,13 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
       promoDiscount: appliedDiscount,
       gatewayResponse
     });
+
+    // Automatically send admission pass email with Barcode & Ticket ID
+    if (orderResult.tickets && orderResult.tickets.length > 0) {
+      orderResult.tickets.forEach(t => {
+        sendTicketConfirmationEmail(t).catch(e => console.warn("Email dispatch note:", e));
+      });
+    }
 
     setIsProcessing(false);
     triggerConfetti();

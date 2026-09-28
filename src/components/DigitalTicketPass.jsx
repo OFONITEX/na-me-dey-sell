@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QRCodeSVG } from "../lib/qrCodeGenerator";
 import { BarcodeSVG } from "../lib/barcodeGenerator";
 import { downloadTicketSlip } from "../lib/ticketSlipGenerator";
+import { sendTicketConfirmationEmail, buildTicketEmailHtml } from "../lib/emailService";
 import {
   CloseIcon,
   CopyIcon,
@@ -25,6 +26,9 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
   const [copied, setCopied] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccessToast, setDownloadSuccessToast] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSentToast, setEmailSentToast] = useState(false);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
 
   if (!tickets || tickets.length === 0) return null;
 
@@ -60,12 +64,24 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
     setIsDownloading(true);
     for (let i = 0; i < tickets.length; i++) {
       await downloadTicketSlip(tickets[i], i, tickets.length);
-      // Small delay between downloads so browser doesn't block concurrent downloads
       await new Promise(res => setTimeout(res, 400));
     }
     setIsDownloading(false);
     setDownloadSuccessToast(true);
     setTimeout(() => setDownloadSuccessToast(false), 3500);
+  };
+
+  const handleResendEmail = async () => {
+    setEmailSending(true);
+    try {
+      await sendTicketConfirmationEmail(ticket);
+      setEmailSentToast(true);
+      setTimeout(() => setEmailSentToast(false), 3500);
+    } catch (err) {
+      console.error("Resend email error:", err);
+    } finally {
+      setEmailSending(false);
+    }
   };
 
   const handleDownloadICS = () => {
@@ -157,12 +173,72 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
           <CloseIcon size={18} />
         </button>
 
-        {/* Download Success Toast Notification */}
-        {downloadSuccessToast && (
+        {/* Email Dispatched Banner with Resend & Preview Action */}
+        <div
+          style={{
+            margin: "12px 20px 0",
+            padding: "10px 14px",
+            background: "rgba(212, 175, 55, 0.08)",
+            border: "1px solid rgba(212, 175, 55, 0.3)",
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "8px"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", color: "#F5D061" }}>
+            <MailIcon size={16} style={{ color: "#D4AF37", flexShrink: 0 }} />
+            <span>
+              Ticket ID &amp; Barcode sent to <strong>{ticket.attendee?.email || "your email"}</strong>
+            </span>
+          </div>
+
+          <div style={{ display: "flex", gap: "6px" }}>
+            <button
+              type="button"
+              onClick={handleResendEmail}
+              disabled={emailSending}
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(212, 175, 55, 0.3)",
+                borderRadius: "4px",
+                padding: "4px 8px",
+                color: "#FFFFFF",
+                fontSize: "11px",
+                fontWeight: "700",
+                cursor: "pointer"
+              }}
+            >
+              {emailSending ? "Sending..." : "Resend"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowEmailPreview(true)}
+              style={{
+                background: "rgba(212, 175, 55, 0.2)",
+                border: "1px solid #D4AF37",
+                borderRadius: "4px",
+                padding: "4px 8px",
+                color: "#FFFFFF",
+                fontSize: "11px",
+                fontWeight: "700",
+                cursor: "pointer"
+              }}
+            >
+              Preview Email
+            </button>
+          </div>
+        </div>
+
+        {/* Toast Notifications */}
+        {emailSentToast && (
           <div
             style={{
-              margin: "12px 20px 0",
-              padding: "10px 14px",
+              margin: "8px 20px 0",
+              padding: "8px 12px",
               background: "rgba(16, 185, 129, 0.2)",
               border: "1px solid #10B981",
               borderRadius: "8px",
@@ -171,12 +247,32 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
               gap: "8px",
               color: "#6EE7B7",
               fontSize: "12px",
-              fontWeight: "700",
-              animation: "fadeIn 0.2s"
+              fontWeight: "700"
             }}
           >
-            <CheckIcon size={16} style={{ color: "#10B981" }} />
-            <span>Admission Slip downloaded successfully! Check your device downloads folder.</span>
+            <CheckIcon size={14} style={{ color: "#10B981" }} />
+            <span>Ticket confirmation email sent with Barcode and Ticket ID!</span>
+          </div>
+        )}
+
+        {downloadSuccessToast && (
+          <div
+            style={{
+              margin: "8px 20px 0",
+              padding: "8px 12px",
+              background: "rgba(16, 185, 129, 0.2)",
+              border: "1px solid #10B981",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              color: "#6EE7B7",
+              fontSize: "12px",
+              fontWeight: "700"
+            }}
+          >
+            <CheckIcon size={14} style={{ color: "#10B981" }} />
+            <span>Admission Slip downloaded successfully! Check your device downloads.</span>
           </div>
         )}
 
@@ -184,7 +280,7 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
         <div
           className="digital-pass-card"
           id="printable-ticket"
-          style={{ overflowY: "auto", maxHeight: "calc(88vh - 70px)", paddingBottom: "16px" }}
+          style={{ overflowY: "auto", maxHeight: "calc(82vh - 80px)", paddingBottom: "16px", marginTop: "10px" }}
         >
           {/* Top Banner section */}
           <div className="pass-header">
@@ -436,6 +532,79 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
           </div>
         </div>
       </div>
+
+      {/* Email Preview Modal */}
+      {showEmailPreview && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 10000,
+            background: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(10px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px"
+          }}
+          onClick={() => setShowEmailPreview(false)}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "650px",
+              maxHeight: "90vh",
+              background: "#070709",
+              border: "1px solid #D4AF37",
+              borderRadius: "16px",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 25px 50px rgba(0,0,0,0.9)"
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div
+              style={{
+                padding: "16px 20px",
+                background: "#0E0E14",
+                borderBottom: "1px solid rgba(212,175,55,0.3)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <h3 style={{ fontSize: "15px", fontWeight: "800", color: "#FFFFFF", margin: 0 }}>
+                  ✉️ Email Slip Preview ({ticket.attendee?.email})
+                </h3>
+                <span style={{ fontSize: "11px", color: "var(--brand-gold-bright)" }}>
+                  Subject: 🎫 Your Admission Pass: {ticket.eventTitle} (ID: {ticket.ticketId})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEmailPreview(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#E2D9BC",
+                  cursor: "pointer"
+                }}
+              >
+                <CloseIcon size={20} />
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+              <div
+                dangerouslySetInnerHTML={{ __html: buildTicketEmailHtml(ticket) }}
+                style={{ maxWidth: "100%" }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

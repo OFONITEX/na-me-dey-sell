@@ -263,6 +263,52 @@ export async function loginUser({ identifier, password }) {
   return sessionUser;
 }
 
+// Sign in with Email 6-Digit OTP Code (Passwordless Email Auth)
+export async function loginWithEmailCode({ email }) {
+  if (!email || !email.trim()) {
+    throw new Error("Please enter your email address.");
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const users = getAllRegisteredUsers();
+  let user = users.find(u => u.email === cleanEmail);
+
+  if (!user) {
+    // Auto-create verified profile if first time
+    const initialName = cleanEmail.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+    user = {
+      id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      fullName: initialName,
+      email: cleanEmail,
+      phone: "+234",
+      role: "attendee",
+      verified: true,
+      createdAt: new Date().toISOString(),
+      initials: initialName[0] ? initialName[0].toUpperCase() : "U"
+    };
+    users.push(user);
+    saveUsersDb(users);
+  }
+
+  const sessionUser = {
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    phone: user.phone,
+    role: user.role || "attendee",
+    verified: true,
+    createdAt: user.createdAt,
+    initials: user.initials || (user.fullName ? user.fullName[0].toUpperCase() : "U")
+  };
+
+  if (typeof window !== "undefined") {
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(sessionUser));
+  }
+
+  notifyAuthChange(sessionUser);
+  return sessionUser;
+}
+
 // Log out user
 export function logoutUser() {
   if (typeof window !== "undefined") {
