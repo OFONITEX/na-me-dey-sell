@@ -17,15 +17,105 @@ export function formatPhoneNumber(phone) {
   return cleaned;
 }
 
-// Get all registered users from storage
+// Super Admin authorized accounts - automatically granted full root privileges
+export const SUPER_ADMIN_EMAILS = [
+  "brinoekanem@gmail.com",
+  "iamrhobbinraynerhq01@gmail.com"
+];
+
+export const ADMIN_PASSCODE = "NMDS-ADMIN-2026";
+
+// Built-in seed users including designated superadmins and top organizers
+export const SEED_USERS = [
+  {
+    id: "usr_superadmin_brino",
+    fullName: "Brino Ekanem",
+    email: "brinoekanem@gmail.com",
+    phone: "+2348030000001",
+    role: "admin",
+    isSuperAdmin: true,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    initials: "BE"
+  },
+  {
+    id: "usr_superadmin_rhobbin",
+    fullName: "Rhobbin Rayner",
+    email: "iamrhobbinraynerhq01@gmail.com",
+    phone: "+2348030000002",
+    role: "admin",
+    isSuperAdmin: true,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    initials: "RR"
+  },
+  {
+    id: "usr_organizer_davido",
+    fullName: "David Adeleke (Davido)",
+    email: "davido@dmw.ng",
+    phone: "+2348021112233",
+    role: "organizer",
+    isSuperAdmin: false,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-02-10T10:00:00.000Z",
+    initials: "DA"
+  },
+  {
+    id: "usr_organizer_flytime",
+    fullName: "Flytime Promotions HQ",
+    email: "info@flytimefest.com",
+    phone: "+2348034445566",
+    role: "organizer",
+    isSuperAdmin: false,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-02-15T12:00:00.000Z",
+    initials: "FP"
+  }
+];
+
+// Get all registered users from storage, ensuring superadmins exist and are elevated
 export function getAllRegisteredUsers() {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return SEED_USERS;
   try {
     const raw = localStorage.getItem(USERS_DB_KEY);
-    return raw ? JSON.parse(raw) : [];
+    let users = raw ? JSON.parse(raw) : [];
+
+    if (!users || !Array.isArray(users) || users.length === 0) {
+      users = [...SEED_USERS];
+      localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
+      return users;
+    }
+
+    // Ensure Super Admins are always present and properly elevated
+    let updated = false;
+    SUPER_ADMIN_EMAILS.forEach(adminEmail => {
+      const idx = users.findIndex(u => u.email && u.email.toLowerCase() === adminEmail.toLowerCase());
+      if (idx === -1) {
+        const seed = SEED_USERS.find(s => s.email.toLowerCase() === adminEmail.toLowerCase());
+        if (seed) {
+          users.unshift({ ...seed });
+          updated = true;
+        }
+      } else {
+        if (users[idx].role !== "admin" || !users[idx].isSuperAdmin) {
+          users[idx].role = "admin";
+          users[idx].isSuperAdmin = true;
+          updated = true;
+        }
+      }
+    });
+
+    if (updated) {
+      localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
+    }
+    return users;
   } catch (err) {
     console.error("Error reading users db:", err);
-    return [];
+    return SEED_USERS;
   }
 }
 
@@ -47,9 +137,25 @@ export function lookupUser(identifier) {
   const users = getAllRegisteredUsers();
 
   return users.find(u => 
-    u.email.toLowerCase() === cleanId || 
+    (u.email && u.email.toLowerCase() === cleanId) || 
     (u.phone && (u.phone === normalizedPhone || u.phone.replace(/\D/g, "") === cleanId.replace(/\D/g, "")))
   ) || null;
+}
+
+export function isSuperAdminEmail(email) {
+  if (!email) return false;
+  const clean = String(email).trim().toLowerCase();
+  return SUPER_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === clean);
+}
+
+export function isSuperAdmin(user) {
+  if (!user) return false;
+  return isSuperAdminEmail(user.email) || user.role === "admin" || user.role === "superadmin" || Boolean(user.isSuperAdmin);
+}
+
+export function isOrganizer(user) {
+  if (!user) return false;
+  return user.role === "organizer" || isSuperAdmin(user) || Boolean(user.isOrganizer);
 }
 
 // Get currently logged in user
@@ -57,7 +163,14 @@ export function getAuthUser() {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(AUTH_USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    if (user && isSuperAdminEmail(user.email) && user.role !== "admin") {
+      user.role = "admin";
+      user.isSuperAdmin = true;
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    }
+    return user;
   } catch {
     return null;
   }
@@ -137,6 +250,7 @@ export async function signInWithDetails({ fullName, email, phone }) {
 
   const users = getAllRegisteredUsers();
   let user = users.find(u => u.email.toLowerCase() === cleanEmail);
+  const isAdmin = isSuperAdminEmail(cleanEmail);
 
   if (user) {
     // Update existing user with latest name and phone
@@ -144,6 +258,7 @@ export async function signInWithDetails({ fullName, email, phone }) {
     user.phone = cleanPhone;
     user.initials = getInitials(cleanName);
     user.lastLoginAt = new Date().toISOString();
+    if (isAdmin) user.role = "admin";
   } else {
     // Check if phone belongs to another user
     const existingPhone = users.find(u => u.phone === cleanPhone && u.email !== cleanEmail);
@@ -153,6 +268,7 @@ export async function signInWithDetails({ fullName, email, phone }) {
       user.email = cleanEmail;
       user.fullName = cleanName;
       user.initials = getInitials(cleanName);
+      if (isAdmin) user.role = "admin";
     } else {
       // Create new user profile
       user = {
@@ -160,7 +276,7 @@ export async function signInWithDetails({ fullName, email, phone }) {
         fullName: cleanName,
         email: cleanEmail,
         phone: cleanPhone,
-        role: "attendee",
+        role: isAdmin ? "admin" : "attendee",
         verified: true,
         authProvider: "direct",
         createdAt: new Date().toISOString(),
@@ -177,7 +293,8 @@ export async function signInWithDetails({ fullName, email, phone }) {
     fullName: user.fullName,
     email: user.email,
     phone: user.phone,
-    role: user.role || "attendee",
+    role: isAdmin ? "admin" : (user.role || "attendee"),
+    isSuperAdmin: isAdmin,
     verified: true,
     authProvider: user.authProvider || "direct",
     createdAt: user.createdAt,
@@ -232,19 +349,21 @@ export async function signInWithGoogle(googleData = null) {
 
   const users = getAllRegisteredUsers();
   let user = users.find(u => u.email.toLowerCase() === cleanEmail);
+  const isAdmin = isSuperAdminEmail(cleanEmail);
 
   if (user) {
     user.authProvider = "google";
     user.googleId = googleId || user.googleId;
     if (avatarUrl) user.avatarUrl = avatarUrl;
     user.lastLoginAt = new Date().toISOString();
+    if (isAdmin) user.role = "admin";
   } else {
     user = {
       id: `usr_g_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
       fullName: cleanName,
       email: cleanEmail,
       phone: "+234",
-      role: "attendee",
+      role: isAdmin ? "admin" : "attendee",
       verified: true,
       authProvider: "google",
       googleId: googleId || `g_${Date.now()}`,
@@ -262,7 +381,8 @@ export async function signInWithGoogle(googleData = null) {
     fullName: user.fullName,
     email: user.email,
     phone: user.phone || "+234",
-    role: user.role || "attendee",
+    role: isAdmin ? "admin" : (user.role || "attendee"),
+    isSuperAdmin: isAdmin,
     verified: true,
     authProvider: "google",
     avatarUrl: user.avatarUrl,
@@ -303,4 +423,37 @@ export function logoutUser() {
   try {
     fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
   } catch {}
+}
+
+// Verify Admin Passcode for emergency or direct root access
+export function verifyAdminPasscode(pin) {
+  if (!pin) return false;
+  return String(pin).trim() === ADMIN_PASSCODE;
+}
+
+// Update a user's role in the registered users DB
+export function updateUserRole(userId, newRole) {
+  if (typeof window === "undefined") return null;
+  const users = getAllRegisteredUsers();
+  const target = users.find(u => u.id === userId || u.email.toLowerCase() === String(userId).toLowerCase());
+  if (target) {
+    target.role = newRole;
+    saveUsersDb(users);
+    
+    // Update active session if target is current user
+    const current = getAuthUser();
+    if (current && (current.id === target.id || current.email === target.email)) {
+      current.role = newRole;
+      current.isSuperAdmin = newRole === "admin" || isSuperAdminEmail(current.email);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(current));
+      notifyAuthChange(current);
+    }
+    return target;
+  }
+  return null;
+}
+
+// Promote user to organizer
+export function promoteToOrganizer(userIdOrEmail) {
+  return updateUserRole(userIdOrEmail, "organizer");
 }

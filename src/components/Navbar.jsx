@@ -10,8 +10,10 @@ import {
   ShieldCheckIcon,
   LogOutIcon,
   PhoneIcon,
-  MailIcon
+  MailIcon,
+  CrownIcon
 } from "./Icons";
+import { isSuperAdmin } from "../lib/authService";
 
 export default function Navbar({
   user,
@@ -21,6 +23,8 @@ export default function Navbar({
   onOpenMyTickets,
   onOpenScanner,
   onOpenCreateEvent,
+  onOpenOrganizerDashboard,
+  onOpenAdminDashboard,
   searchQuery,
   onSearchChange,
   activeCategory,
@@ -28,6 +32,7 @@ export default function Navbar({
 }) {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userIsAdmin = isSuperAdmin(user);
 
   return (
     <header className="rx-nav-sticky">
@@ -86,12 +91,13 @@ export default function Navbar({
                   }}
                   onClick={() => {
                     setSolutionsOpen(false);
-                    onOpenCreateEvent();
+                    if (onOpenOrganizerDashboard) onOpenOrganizerDashboard();
+                    else onOpenCreateEvent();
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.15)"}
                   onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                 >
-                  For Organizers
+                  For Organizers (Dashboard)
                 </div>
                 <div
                   style={{
@@ -153,6 +159,29 @@ export default function Navbar({
 
         {/* Action Controls */}
         <div className="nav-actions" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {/* Super Admin Command Portal Button */}
+          {userIsAdmin && (
+            <button
+              className="nav-link-item"
+              onClick={onOpenAdminDashboard}
+              title="Super Admin Command Center"
+              style={{
+                border: "1px solid rgba(212, 175, 55, 0.7)",
+                borderRadius: "6px",
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(245, 208, 97, 0.1) 100%)",
+                color: "#F5D061",
+                fontWeight: "800",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                boxShadow: "0 0 15px rgba(212, 175, 55, 0.2)"
+              }}
+            >
+              <CrownIcon size={16} style={{ color: "#D4AF37" }} />
+              <span className="hidden sm:inline">Admin Portal</span>
+            </button>
+          )}
+
           {/* Gate Scanner */}
           <button
             className="nav-link-item"
@@ -269,7 +298,13 @@ export default function Navbar({
                       <span style={{ fontSize: "14px", fontWeight: "800", color: "#ffffff" }}>
                         {user.fullName}
                       </span>
-                      <ShieldCheckIcon size={14} style={{ color: "#10B981" }} />
+                      {userIsAdmin ? (
+                        <span style={{ fontSize: "9px", fontWeight: "900", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", color: "#070709", padding: "1px 5px", borderRadius: "4px", letterSpacing: "0.05em" }}>
+                          SUPERADMIN
+                        </span>
+                      ) : (
+                        <ShieldCheckIcon size={14} style={{ color: "#10B981" }} />
+                      )}
                     </div>
                     <div
                       style={{
@@ -301,6 +336,58 @@ export default function Navbar({
                   </div>
 
                   {/* Actions */}
+                  {userIsAdmin && (
+                    <div
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        if (onOpenAdminDashboard) onOpenAdminDashboard();
+                      }}
+                      style={{
+                        padding: "9px 12px",
+                        fontSize: "12px",
+                        fontWeight: "800",
+                        color: "#070709",
+                        background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "6px",
+                        boxShadow: "0 2px 8px rgba(212, 175, 55, 0.35)"
+                      }}
+                    >
+                      <CrownIcon size={14} style={{ color: "#070709" }} />
+                      <span>Super Admin Command</span>
+                    </div>
+                  )}
+
+                  <div
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      if (onOpenOrganizerDashboard) onOpenOrganizerDashboard();
+                    }}
+                    style={{
+                      padding: "9px 12px",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      color: "#F5D061",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      background: "rgba(212, 175, 55, 0.08)",
+                      marginBottom: "6px",
+                      transition: "background 0.2s"
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.2)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.08)"}
+                  >
+                    <TicketIcon size={14} style={{ color: "#D4AF37" }} />
+                    <span>Organizer Dashboard</span>
+                  </div>
+
                   <div
                     onClick={() => {
                       setUserDropdownOpen(false);

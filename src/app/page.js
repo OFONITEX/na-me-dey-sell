@@ -9,6 +9,8 @@ import DigitalTicketPass from "../components/DigitalTicketPass";
 import MyTicketsModal from "../components/MyTicketsModal";
 import OrganizerScannerModal from "../components/OrganizerScannerModal";
 import CreateEventModal from "../components/CreateEventModal";
+import OrganizerDashboard from "../components/OrganizerDashboard";
+import AdminDashboard from "../components/AdminDashboard";
 import AuthModal from "../components/AuthModal";
 import {
   SparklesIcon,
@@ -44,6 +46,8 @@ export default function Home() {
   const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const [isOrganizerDashboardOpen, setIsOrganizerDashboardOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
 
   // Load data and authenticate on mount
   useEffect(() => {
@@ -189,6 +193,10 @@ export default function Home() {
         onOpenCreateEvent={() =>
           requireAuth(() => setIsCreateEventOpen(true), "to create and publish an event")
         }
+        onOpenOrganizerDashboard={() =>
+          requireAuth(() => setIsOrganizerDashboardOpen(true), "to access your Organizer Studio & Dashboard")
+        }
+        onOpenAdminDashboard={() => setIsAdminDashboardOpen(true)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         activeCategory={activeCategory}
@@ -584,6 +592,35 @@ export default function Home() {
           currentUser={currentUser}
           onClose={() => setIsCreateEventOpen(false)}
           onEventCreated={handleEventCreated}
+        />
+      )}
+
+      {/* Organizer Dashboard & Event Studio */}
+      {isOrganizerDashboardOpen && (
+        <OrganizerDashboard
+          currentUser={currentUser}
+          events={events}
+          isOpen={isOrganizerDashboardOpen}
+          onClose={() => setIsOrganizerDashboardOpen(false)}
+          onOpenCreateEvent={() => {
+            setIsOrganizerDashboardOpen(false);
+            setIsCreateEventOpen(true);
+          }}
+          onOpenScanner={() => {
+            setIsOrganizerDashboardOpen(false);
+            setIsScannerOpen(true);
+          }}
+          onEventsRefresh={refreshData}
+        />
+      )}
+
+      {/* Super Admin Command Center & Moderation Hub */}
+      {isAdminDashboardOpen && (
+        <AdminDashboard
+          currentUser={currentUser}
+          isOpen={isAdminDashboardOpen}
+          onClose={() => setIsAdminDashboardOpen(false)}
+          onEventsRefresh={refreshData}
         />
       )}
 

@@ -3,7 +3,8 @@ import { INITIAL_EVENTS } from "../data/mockEvents";
 const STORAGE_KEYS = {
   EVENTS: "nmds_events_v2",
   TICKETS: "nmds_tickets_v2",
-  RSVP: "nmds_rsvp_v2"
+  RSVP: "nmds_rsvp_v2",
+  PAYMENTS: "nmds_payments_ledger_v2"
 };
 
 /**
@@ -64,6 +65,89 @@ export function saveNewEvent(eventData) {
     console.error("Failed to save new event:", err);
     return [];
   }
+}
+
+/**
+ * Update an existing event by ID (title, venue, tiers, flyer, etc.)
+ */
+export function updateEvent(eventId, updatedFields) {
+  if (typeof window === "undefined") return null;
+  try {
+    const events = getStoredEvents();
+    const index = events.findIndex(e => e.id === eventId);
+    if (index === -1) return null;
+
+    const existing = events[index];
+    const updated = {
+      ...existing,
+      ...updatedFields,
+      updatedAt: new Date().toISOString()
+    };
+
+    events[index] = updated;
+    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+
+    // Also update any future ticket references if event title changed
+    if (updatedFields.title && updatedFields.title !== existing.title) {
+      try {
+        const tickets = getStoredTickets();
+        const updatedTickets = tickets.map(t => 
+          t.eventId === eventId ? { ...t, eventTitle: updatedFields.title } : t
+        );
+        localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(updatedTickets));
+      } catch {}
+    }
+
+    return updated;
+  } catch (err) {
+    console.error("Failed to update event:", err);
+    return null;
+  }
+}
+
+/**
+ * Delete an event from the catalog
+ */
+export function deleteEvent(eventId) {
+  if (typeof window === "undefined") return false;
+  try {
+    const events = getStoredEvents();
+    const filtered = events.filter(e => e.id !== eventId);
+    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(filtered));
+    return true;
+  } catch (err) {
+    console.error("Failed to delete event:", err);
+    return false;
+  }
+}
+
+/**
+ * Toggle an event's featured badge status
+ */
+export function toggleEventFeatured(eventId) {
+  if (typeof window === "undefined") return null;
+  try {
+    const events = getStoredEvents();
+    const event = events.find(e => e.id === eventId);
+    if (!event) return null;
+    const isNowFeatured = !event.isFeatured;
+    event.isFeatured = isNowFeatured;
+    if (isNowFeatured && !event.badge) {
+      event.badge = "🔥 Featured by Admin";
+    }
+    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+    return event;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+/**
+ * Toggle event publication status: "live" | "paused" | "draft"
+ */
+export function toggleEventStatus(eventId, newStatus) {
+  return updateEvent(eventId, { status: newStatus });
 }
 
 export const INITIAL_TICKETS = [
@@ -163,6 +247,146 @@ export function saveTickets(newTicketsList) {
   }
 }
 
+export const INITIAL_PAYMENTS = [
+  {
+    orderId: "ORD-NG-849201",
+    transactionRef: "MNF_TX_849201_912",
+    paymentReference: "MNF_REV_2026_9401",
+    eventId: "evt_vibes_barn_afe_mbre",
+    eventTitle: "Vibes Barn: Afe Mbre Festival",
+    organizer: "Vibes Barn Global",
+    organizerEmail: "info@vibesbarn.com",
+    attendee: {
+      name: "Chukwudi Eze",
+      email: "chukwudi.eze@gmail.com",
+      phone: "+234 803 456 7890"
+    },
+    quantity: 1,
+    tierName: "VIP Lounge Pass",
+    grossAmount: 25000,
+    platformFee: 1250,
+    organizerPayout: 23750,
+    currency: "₦",
+    paymentMethod: "monnify",
+    paymentStatus: "PAID",
+    timestamp: "2026-09-20T18:30:00.000Z"
+  },
+  {
+    orderId: "ORD-NG-739104",
+    transactionRef: "MNF_TX_739104_310",
+    paymentReference: "MNF_REV_2026_7391",
+    eventId: "evt_lagos_tech_unwind",
+    eventTitle: "Lagos Tech & Founders Unwind 2026",
+    organizer: "Founders Circle Africa",
+    organizerEmail: "hello@founderscircle.ng",
+    attendee: {
+      name: "Amina Bello",
+      email: "amina.bello@techfoundry.africa",
+      phone: "+234 812 345 6789"
+    },
+    quantity: 1,
+    tierName: "Delegate Pass",
+    grossAmount: 15000,
+    platformFee: 750,
+    organizerPayout: 14250,
+    currency: "₦",
+    paymentMethod: "monnify",
+    paymentStatus: "PAID",
+    timestamp: "2026-09-22T11:15:00.000Z"
+  },
+  {
+    orderId: "ORD-NG-628491",
+    transactionRef: "MNF_TX_628491_582",
+    paymentReference: "MNF_REV_2026_6284",
+    eventId: "evt_vibes_barn_afe_mbre",
+    eventTitle: "Vibes Barn: Afe Mbre Festival",
+    organizer: "Vibes Barn Global",
+    organizerEmail: "info@vibesbarn.com",
+    attendee: {
+      name: "Tunde Bakare",
+      email: "tunde.bakare@lagosmail.com",
+      phone: "+234 802 334 5566"
+    },
+    quantity: 2,
+    tierName: "Regular Access",
+    grossAmount: 10000,
+    platformFee: 500,
+    organizerPayout: 9500,
+    currency: "₦",
+    paymentMethod: "monnify",
+    paymentStatus: "PAID",
+    timestamp: "2026-09-26T14:20:00.000Z"
+  },
+  {
+    orderId: "ORD-NG-519283",
+    transactionRef: "MNF_TX_519283_449",
+    paymentReference: "MNF_REV_2026_5192",
+    eventId: "evt_detty_december_beach",
+    eventTitle: "Detty December Landmark Beach Rave",
+    organizer: "Soundcity Pulse",
+    organizerEmail: "events@soundcitypulse.com",
+    attendee: {
+      name: "Kelechi Nwosu",
+      email: "kelechi.nwosu@gmail.com",
+      phone: "+234 805 112 3344"
+    },
+    quantity: 2,
+    tierName: "Early Bird General Pass",
+    grossAmount: 16000,
+    platformFee: 800,
+    organizerPayout: 15200,
+    currency: "₦",
+    paymentMethod: "monnify",
+    paymentStatus: "PAID",
+    timestamp: "2026-09-27T19:45:00.000Z"
+  }
+];
+
+export function getPaymentsLedger() {
+  if (typeof window === "undefined") return INITIAL_PAYMENTS;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PAYMENTS);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(INITIAL_PAYMENTS));
+      return INITIAL_PAYMENTS;
+    }
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error("Failed to load payments ledger:", err);
+    return INITIAL_PAYMENTS;
+  }
+}
+
+export function recordPayment(paymentData) {
+  if (typeof window === "undefined") return paymentData;
+  try {
+    const ledger = getPaymentsLedger();
+    const updated = [paymentData, ...ledger];
+    localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(updated));
+    return updated;
+  } catch (err) {
+    console.error("Failed to record payment:", err);
+    return [];
+  }
+}
+
+export function getEventsByOrganizer(organizerIdOrEmail) {
+  if (!organizerIdOrEmail) return [];
+  const events = getStoredEvents();
+  const cleanId = String(organizerIdOrEmail).trim().toLowerCase();
+  return events.filter(e => 
+    (e.organizerId && String(e.organizerId).toLowerCase() === cleanId) ||
+    (e.organizerEmail && String(e.organizerEmail).toLowerCase() === cleanId) ||
+    (e.organizer && String(e.organizer).toLowerCase() === cleanId)
+  );
+}
+
+export function getAttendeesByEvent(eventId) {
+  const tickets = getStoredTickets();
+  if (!eventId) return tickets;
+  return tickets.filter(t => t.eventId === eventId);
+}
+
 /**
  * Issues new tickets upon successful checkout
  */
@@ -219,12 +443,41 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
 
   saveTickets(createdTickets);
 
+  const totalPaid = Math.max(0, (tier.price * quantity) - promoDiscount);
+  const platformFee = Math.round(totalPaid * 0.05); // 5% platform commission
+  const organizerPayout = totalPaid - platformFee;
+
+  // Record transaction in Payments Ledger
+  recordPayment({
+    orderId,
+    transactionRef: transactionReference || `TRX-${Date.now()}`,
+    paymentReference: paymentReference || `MNF-REF-${orderId}`,
+    eventId: event.id,
+    eventTitle: event.title,
+    organizer: event.organizer || "Event Organizer",
+    organizerId: event.organizerId || event.organizerEmail || "org_default",
+    attendee: {
+      name: attendee.name,
+      email: attendee.email,
+      phone: attendee.phone
+    },
+    quantity,
+    tierName: tier.name,
+    grossAmount: totalPaid,
+    platformFee,
+    organizerPayout,
+    currency: tier.currency || event.currency || "₦",
+    paymentMethod: paymentMethod || "monnify",
+    paymentStatus: paymentStatus || "PAID",
+    timestamp: new Date().toISOString()
+  });
+
   return {
     orderId,
     tickets: createdTickets,
     paymentReference,
     transactionReference,
-    totalPaid: (tier.price * quantity) - promoDiscount
+    totalPaid
   };
 }
 

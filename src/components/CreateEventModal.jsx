@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon, CheckCircleIcon, ShieldCheckIcon } from "./Icons";
 import { saveNewEvent } from "../lib/ticketService";
+import { promoteToOrganizer } from "../lib/authService";
 import CitySearchSelector from "./CitySearchSelector";
 import DatePickerCalendar from "./DatePickerCalendar";
 import VenueLocationSearch from "./VenueLocationSearch";
@@ -327,7 +328,12 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated 
       venue: formData.venue,
       city: formData.city,
       address: formData.address,
-      organizer: formData.organizer || "Event Organizer",
+      organizer: formData.organizer || currentUser?.fullName || "Event Organizer",
+      organizerId: currentUser?.id || currentUser?.email || `org_${Date.now()}`,
+      organizerEmail: currentUser?.email || "",
+      organizerPhone: currentUser?.phone || "",
+      status: "live",
+      isFeatured: false,
       badge: "✨ Newly Published",
       liveSoldText: "Just Launched",
       xpReward: 60,
@@ -339,10 +345,14 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated 
       galleryImages: allFlyers,
       bannerPattern: `linear-gradient(135deg, ${formData.accentColor} 0%, #070709 100%)`,
       description: formData.description,
-      tiers: eventTiers
+      tiers: eventTiers,
+      createdAt: new Date().toISOString()
     };
 
     saveNewEvent(newEvent);
+    if (currentUser?.email) {
+      promoteToOrganizer(currentUser.email);
+    }
     try {
       localStorage.removeItem(DRAFT_STORAGE_KEY);
     } catch (_) {}
