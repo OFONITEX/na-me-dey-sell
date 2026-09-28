@@ -10,7 +10,7 @@ import { SUPPORTED_CURRENCIES } from "../data/currencies";
 
 const DRAFT_STORAGE_KEY = "nmds_event_draft_v1";
 
-export default function CreateEventModal({ onClose, onEventCreated }) {
+export default function CreateEventModal({ currentUser, onClose, onEventCreated }) {
   const [selectedCurrency, setSelectedCurrency] = useState(SUPPORTED_CURRENCIES[0]); // NGN default
   const [showProModal, setShowProModal] = useState(false);
   const [draftSavedToast, setDraftSavedToast] = useState(false);
@@ -27,7 +27,7 @@ export default function CreateEventModal({ onClose, onEventCreated }) {
     venue: "Camp Gee Arena & Events",
     city: "Uyo, Akwa Ibom, Nigeria",
     address: "Ring Road 3, Uyo",
-    organizer: "Naija Live Entertainment",
+    organizer: currentUser?.fullName || "Naija Live Entertainment",
     description: "An electrifying live concert and cultural gathering with top afrobeat stars, gourmet food stalls, and unforgettable music vibes.\n\n📅 EVENT SCHEDULE:\n- 07:00 PM: Red Carpet & VIP Cocktail Arrival\n- 08:30 PM: Opening Acts & Cultural Showcase\n- 10:00 PM: Headline Superstar Live Performance\n- 12:30 AM: Afterparty & Resident DJ Jam\n\n👔 DRESS CODE:\nDress to impress. Smart casual & traditional chic are warmly welcomed.\n\n🔒 SECURITY & ADMISSION:\nStrict digital QR verification at all gates. Licensed security & paramedical marshals on site.",
     accentColor: "#522672"
   });

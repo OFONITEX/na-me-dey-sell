@@ -9,6 +9,7 @@ import DigitalTicketPass from "../components/DigitalTicketPass";
 import MyTicketsModal from "../components/MyTicketsModal";
 import OrganizerScannerModal from "../components/OrganizerScannerModal";
 import CreateEventModal from "../components/CreateEventModal";
+import AuthModal from "../components/AuthModal";
 import {
   SparklesIcon,
   TicketIcon,
@@ -17,11 +18,11 @@ import {
   ArrowRightIcon,
   MapPinIcon,
   SearchIcon,
-  FlameIcon,
-  CalendarIcon
+  FlameIcon
 } from "../components/Icons";
 import { getStoredEvents, getStoredTickets, INITIAL_TICKETS } from "../lib/ticketService";
 import { INITIAL_EVENTS } from "../data/mockEvents";
+import { getAuthUser, logoutUser, subscribeAuth } from "../lib/authService";
 
 export default function Home() {
   const [events, setEvents] = useState(INITIAL_EVENTS);
@@ -29,6 +30,13 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedCity, setSelectedCity] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // User Authentication State
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState("register"); // "register" | "login"
+  const [authPromptReason, setAuthPromptReason] = useState("");
+  const [pendingAction, setPendingAction] = useState(null);
 
   // Modal States
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -38,15 +46,49 @@ export default function Home() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
-  // Load data on mount
+  // Load data and authenticate on mount
   useEffect(() => {
     setEvents(getStoredEvents());
     setTickets(getStoredTickets());
+    setCurrentUser(getAuthUser());
+
+    const unsubscribe = subscribeAuth((user) => {
+      setCurrentUser(user);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const refreshData = () => {
     setEvents(getStoredEvents());
     setTickets(getStoredTickets());
+  };
+
+  // Auth requirement gate helper
+  const requireAuth = (actionCallback, reason = "", preferredMode = "register") => {
+    const user = getAuthUser();
+    if (user) {
+      actionCallback(user);
+    } else {
+      setPendingAction(() => actionCallback);
+      setAuthPromptReason(reason);
+      setAuthModalMode(preferredMode);
+      setIsAuthModalOpen(true);
+    }
+  };
+
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    if (pendingAction) {
+      const action = pendingAction;
+      setPendingAction(null);
+      action(user);
+    }
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
   };
 
   const categories = [
@@ -108,9 +150,16 @@ export default function Home() {
 
   const trendingEvents = events.slice(0, 4);
 
+  // Require account registration/login before proceeding to checkout
   const handleStartBooking = (bookingPayload) => {
-    setSelectedEvent(null);
-    setCheckoutData(bookingPayload);
+    requireAuth(
+      (authedUser) => {
+        setSelectedEvent(null);
+        setCheckoutData({ ...bookingPayload, user: authedUser });
+      },
+      "to purchase tickets and receive your verified pass",
+      "register"
+    );
   };
 
   const handleOrderComplete = ({ orderId, tickets: newTickets }) => {
@@ -127,10 +176,23 @@ export default function Home() {
     <div className="min-h-screen bg-[#070709]" style={{ backgroundColor: "#070709" }}>
       {/* Sticky Navigation */}
       <Navbar
+        user={currentUser}
+        onOpenAuth={(mode, reason) => {
+          setAuthModalMode(mode || "register");
+          setAuthPromptReason(reason || "");
+          setIsAuthModalOpen(true);
+        }}
+        onLogout={handleLogout}
         ticketsCount={tickets.length}
-        onOpenMyTickets={() => setIsMyTicketsOpen(true)}
-        onOpenScanner={() => setIsScannerOpen(true)}
-        onOpenCreateEvent={() => setIsCreateEventOpen(true)}
+        onOpenMyTickets={() =>
+          requireAuth(() => setIsMyTicketsOpen(true), "to access your pass wallet", "login")
+        }
+        onOpenScanner={() =>
+          requireAuth(() => setIsScannerOpen(true), "to access the Gate Staff Scanner", "login")
+        }
+        onOpenCreateEvent={() =>
+          requireAuth(() => setIsCreateEventOpen(true), "to create and publish an event", "register")
+        }
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         activeCategory={activeCategory}
@@ -159,7 +221,9 @@ export default function Home() {
         <div className="rx-hero-actions">
           <button
             className="rx-btn rx-btn-primary"
-            onClick={() => setIsCreateEventOpen(true)}
+            onClick={() =>
+              requireAuth(() => setIsCreateEventOpen(true), "to create and publish an event", "register")
+            }
           >
             <span className="rx-btn-text">Create an Event</span>
             <span className="rx-btn-icon">
@@ -245,7 +309,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trending Events Spotlight Slider (Rigitix signature layout) */}
+      {/* Trending Events Spotlight Slider */}
       <section id="trending" className="rx-trending-section">
         <div className="rx-section-header-wrap">
           <div>
@@ -327,7 +391,7 @@ export default function Home() {
         )}
       </section>
 
-      {/* Why Choose Nà Mè Dèy Sell (Rigitix 4-Pillar Features) */}
+      {/* Why Choose Nà Mè Dèy Sell */}
       <section id="features" className="rx-features-section">
         <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto" }}>
           <div className="rx-section-badge" style={{ justifyContent: "center" }}>
@@ -405,7 +469,16 @@ export default function Home() {
             <div>
               <h4 className="rx-footer-heading">Solutions</h4>
               <ul className="rx-footer-links">
-                <li><span className="rx-footer-link" onClick={() => setIsCreateEventOpen(true)}>For Organizers</span></li>
+                <li>
+                  <span
+                    className="rx-footer-link"
+                    onClick={() =>
+                      requireAuth(() => setIsCreateEventOpen(true), "to create and manage your event", "register")
+                    }
+                  >
+                    For Organizers
+                  </span>
+                </li>
                 <li><span className="rx-footer-link">For Promoters &amp; Affiliates</span></li>
                 <li><span className="rx-footer-link">For Food &amp; Merch Vendors</span></li>
                 <li><span className="rx-footer-link">NMDS XP Rewards</span></li>
@@ -416,8 +489,26 @@ export default function Home() {
             <div>
               <h4 className="rx-footer-heading">Experience</h4>
               <ul className="rx-footer-links">
-                <li><span className="rx-footer-link" onClick={() => setIsMyTicketsOpen(true)}>My Pass Wallet</span></li>
-                <li><span className="rx-footer-link" onClick={() => setIsScannerOpen(true)}>Gate Staff Scanner</span></li>
+                <li>
+                  <span
+                    className="rx-footer-link"
+                    onClick={() =>
+                      requireAuth(() => setIsMyTicketsOpen(true), "to access your pass wallet", "login")
+                    }
+                  >
+                    My Pass Wallet
+                  </span>
+                </li>
+                <li>
+                  <span
+                    className="rx-footer-link"
+                    onClick={() =>
+                      requireAuth(() => setIsScannerOpen(true), "to access the Gate Staff Scanner", "login")
+                    }
+                  >
+                    Gate Staff Scanner
+                  </span>
+                </li>
                 <li><a href="#trending" className="rx-footer-link">Trending Events</a></li>
                 <li><a href="#features" className="rx-footer-link">Safety &amp; Anti-Fraud</a></li>
               </ul>
@@ -460,6 +551,7 @@ export default function Home() {
       {checkoutData && (
         <CheckoutModal
           bookingData={checkoutData}
+          currentUser={currentUser}
           onClose={() => setCheckoutData(null)}
           onOrderComplete={handleOrderComplete}
         />
@@ -493,10 +585,23 @@ export default function Home() {
 
       {isCreateEventOpen && (
         <CreateEventModal
+          currentUser={currentUser}
           onClose={() => setIsCreateEventOpen(false)}
           onEventCreated={handleEventCreated}
         />
       )}
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialMode={authModalMode}
+        promptReason={authPromptReason}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setPendingAction(null);
+        }}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 }

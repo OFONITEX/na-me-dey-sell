@@ -6,13 +6,13 @@ import { issueTickets, formatNaira } from "../lib/ticketService";
 import { payWithMonnify } from "../lib/monnifyService";
 import { triggerConfetti } from "../lib/confetti";
 
-export default function CheckoutModal({ bookingData, onClose, onOrderComplete }) {
+export default function CheckoutModal({ bookingData, currentUser, onClose, onOrderComplete }) {
   const { event, tier, quantity, subtotal } = bookingData;
 
   const [attendee, setAttendee] = useState({
-    name: "Emeka Okafor",
-    email: "emeka.okafor@example.com",
-    phone: "08023456789",
+    name: currentUser?.fullName || "",
+    email: currentUser?.email || "",
+    phone: currentUser?.phone || "",
     notes: ""
   });
 
@@ -261,8 +261,16 @@ export default function CheckoutModal({ bookingData, onClose, onOrderComplete })
 
           {/* Attendee Details */}
           <div>
-            <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>
-              Attendee Information
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+              <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                Attendee Information
+              </div>
+              {currentUser && (
+                <div style={{ display: "flex", alignItems: "center", gap: "5px", fontSize: "11px", color: "#10b981", fontWeight: "700" }}>
+                  <ShieldCheckIcon size={14} />
+                  <span>Verified Account Pre-filled</span>
+                </div>
+              )}
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
