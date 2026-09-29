@@ -333,6 +333,14 @@ export function isEventCreator(event, user) {
   const orgPhone = (event.organizerPhone || "").replace(/\D/g, "").slice(-10);
   const orgName = (event.organizer || "").toLowerCase().trim();
 
+  // Dedicated check for NAPHSS Dinner Night event
+  if (
+    (event.id === "evt_naphss_dinner_night" || (event.title && event.title.toLowerCase().includes("naphss"))) &&
+    (userEmail === "iamrhobbinraynerhq01@gmail.com" || userEmail === "brinoekanem@gmail.com")
+  ) {
+    return true;
+  }
+
   // Match by email
   if (userEmail && orgEmail && userEmail === orgEmail) return true;
   // Match by user ID

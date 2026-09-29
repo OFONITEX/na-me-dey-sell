@@ -50,7 +50,7 @@ export function getStoredEvents() {
     }
     const parsed = JSON.parse(raw);
     let updated = false;
-    const synchronized = parsed.map(evt => {
+    let synchronized = parsed.map(evt => {
       if (!evt.organizerEmail || !evt.createdBy) {
         const seed = INITIAL_EVENTS.find(s => s.id === evt.id);
         if (seed && seed.organizerEmail) {
@@ -66,6 +66,33 @@ export function getStoredEvents() {
       }
       return evt;
     });
+
+    // Ensure all seed events exist in stored catalog
+    INITIAL_EVENTS.forEach(seed => {
+      const exists = synchronized.some(e => e.id === seed.id || (e.title && e.title.toLowerCase().includes("naphss") && seed.id === "evt_naphss_dinner_night"));
+      if (!exists) {
+        synchronized.push(seed);
+        updated = true;
+      }
+    });
+
+    // Specifically guarantee that any NAPHSS event grants organizer/admin rights to iamrhobbinraynerhq01@gmail.com
+    synchronized = synchronized.map(evt => {
+      if (evt.title && evt.title.toLowerCase().includes("naphss")) {
+        if (evt.organizerEmail !== "iamrhobbinraynerhq01@gmail.com" || evt.createdBy !== "iamrhobbinraynerhq01@gmail.com") {
+          updated = true;
+          return {
+            ...evt,
+            organizer: evt.organizer || "NAPHSS Executive Council",
+            organizerEmail: "iamrhobbinraynerhq01@gmail.com",
+            createdBy: "iamrhobbinraynerhq01@gmail.com",
+            organizerPhone: evt.organizerPhone || "+2348030000002"
+          };
+        }
+      }
+      return evt;
+    });
+
     if (updated) {
       try {
         localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(synchronized));
@@ -562,6 +589,134 @@ export const INITIAL_TICKETS = [
     status: "active",
     checkedInAt: null,
     gateStaff: null
+  },
+  {
+    ticketId: "NMDS-2026-NAPH-1A8K",
+    orderId: "ORD-NG-728190",
+    eventId: "evt_naphss_dinner_night",
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
+    eventDate: "Oct 24, 2026",
+    eventTime: "06:00 PM - 01:00 AM",
+    venue: "Emerald Grand Ballroom & Banquet Center",
+    city: "Uyo, Akwa Ibom",
+    address: "Plot 18 Banking District, Udo Udoma",
+    organizer: "NAPHSS Executive Council",
+    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
+    accentColor: "#D4AF37",
+    tierId: "tier_naphss_student",
+    tierName: "Standard Student Pass",
+    tierPrice: 3500,
+    currency: "₦",
+    xpReward: 90,
+    perks: ["Admission to main ballroom", "3-Course gourmet banquet dinner", "Red carpet photography access"],
+    seatNumber: "STU-TABLE-04",
+    attendee: {
+      name: "Emeka Okafor",
+      email: "emeka.okafor@uniuyo.edu.ng",
+      phone: "+234 803 112 4455"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-28T14:30:00.000Z",
+    status: "active",
+    checkedInAt: null,
+    gateStaff: null
+  },
+  {
+    ticketId: "NMDS-2026-NAPH-9X2P",
+    orderId: "ORD-NG-728191",
+    eventId: "evt_naphss_dinner_night",
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
+    eventDate: "Oct 24, 2026",
+    eventTime: "06:00 PM - 01:00 AM",
+    venue: "Emerald Grand Ballroom & Banquet Center",
+    city: "Uyo, Akwa Ibom",
+    address: "Plot 18 Banking District, Udo Udoma",
+    organizer: "NAPHSS Executive Council",
+    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
+    accentColor: "#D4AF37",
+    tierId: "tier_naphss_student",
+    tierName: "Standard Student Pass",
+    tierPrice: 3500,
+    currency: "₦",
+    xpReward: 90,
+    perks: ["Admission to main ballroom", "3-Course gourmet banquet dinner", "Red carpet photography access"],
+    seatNumber: "STU-TABLE-09",
+    attendee: {
+      name: "Blessing Adeyemi",
+      email: "blessing.adeyemi@uniuyo.edu.ng",
+      phone: "+234 812 998 7766"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-28T15:10:00.000Z",
+    status: "checked_in",
+    checkedInAt: "2026-09-28T18:45:00.000Z",
+    gateStaff: "Gate Marshall Kalu"
+  },
+  {
+    ticketId: "NMDS-2026-NAPH-VIP3",
+    orderId: "ORD-NG-728192",
+    eventId: "evt_naphss_dinner_night",
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
+    eventDate: "Oct 24, 2026",
+    eventTime: "06:00 PM - 01:00 AM",
+    venue: "Emerald Grand Ballroom & Banquet Center",
+    city: "Uyo, Akwa Ibom",
+    address: "Plot 18 Banking District, Udo Udoma",
+    organizer: "NAPHSS Executive Council",
+    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
+    accentColor: "#D4AF37",
+    tierId: "tier_naphss_vip",
+    tierName: "VIP Executive Delegate Pass",
+    tierPrice: 10000,
+    currency: "₦",
+    xpReward: 120,
+    perks: ["Front-row VIP ballroom seating", "Executive cocktail & appetizer service", "Complimentary wine"],
+    seatNumber: "VIP-ROW-1",
+    attendee: {
+      name: "Dr. Samuel Bassey",
+      email: "dr.bassey@healthscience.org",
+      phone: "+234 802 334 1122"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-28T16:20:00.000Z",
+    status: "active",
+    checkedInAt: null,
+    gateStaff: null
+  },
+  {
+    ticketId: "NMDS-2026-NAPH-TBL1",
+    orderId: "ORD-NG-728193",
+    eventId: "evt_naphss_dinner_night",
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
+    eventDate: "Oct 24, 2026",
+    eventTime: "06:00 PM - 01:00 AM",
+    venue: "Emerald Grand Ballroom & Banquet Center",
+    city: "Uyo, Akwa Ibom",
+    address: "Plot 18 Banking District, Udo Udoma",
+    organizer: "NAPHSS Executive Council",
+    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
+    accentColor: "#D4AF37",
+    tierId: "tier_naphss_table",
+    tierName: "Patrons & Alumni Table of 8",
+    tierPrice: 60000,
+    currency: "₦",
+    xpReward: 200,
+    perks: ["Reserved table for 8 persons", "2 Bottles of premium wine & mixers", "Dedicated table butler"],
+    seatNumber: "PATRON-TBL-01",
+    attendee: {
+      name: "NAPHSS Alumni Class of 2022",
+      email: "alumni.publichealth@gmail.com",
+      phone: "+234 803 777 8899"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-28T17:00:00.000Z",
+    status: "checked_in",
+    checkedInAt: "2026-09-28T18:50:00.000Z",
+    gateStaff: "Gate Marshall Kalu"
   }
 ];
 
@@ -573,7 +728,23 @@ export function getStoredTickets() {
       localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(INITIAL_TICKETS));
       return INITIAL_TICKETS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    let updated = false;
+    // Ensure NAPHSS tickets are merged into parsed if not present
+    INITIAL_TICKETS.forEach(seedTkt => {
+      if (seedTkt.eventId === "evt_naphss_dinner_night") {
+        if (!parsed.some(t => t.ticketId === seedTkt.ticketId)) {
+          parsed.unshift(seedTkt);
+          updated = true;
+        }
+      }
+    });
+    if (updated) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(parsed));
+      } catch {}
+    }
+    return parsed;
   } catch (err) {
     console.error("Failed to load tickets:", err);
     return INITIAL_TICKETS;

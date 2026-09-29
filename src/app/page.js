@@ -12,6 +12,7 @@ import CreateEventModal from "../components/CreateEventModal";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import AdminDashboard from "../components/AdminDashboard";
 import EditEventModal from "../components/EditEventModal";
+import EventAdminModal from "../components/EventAdminModal";
 import AuthModal from "../components/AuthModal";
 import {
   SparklesIcon,
@@ -26,7 +27,7 @@ import {
 } from "../components/Icons";
 import { getStoredEvents, getStoredTickets, INITIAL_TICKETS } from "../lib/ticketService";
 import { INITIAL_EVENTS } from "../data/mockEvents";
-import { getAuthUser, logoutUser, subscribeAuth, isSuperAdmin } from "../lib/authService";
+import { getAuthUser, logoutUser, subscribeAuth, isSuperAdmin, canEditEvent } from "../lib/authService";
 
 export default function Home() {
   const [events, setEvents] = useState(INITIAL_EVENTS);
@@ -43,6 +44,7 @@ export default function Home() {
 
   // Modal States
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [adminEvent, setAdminEvent] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
   const [checkoutData, setCheckoutData] = useState(null);
   const [activePassTickets, setActivePassTickets] = useState(null);
@@ -54,9 +56,11 @@ export default function Home() {
 
   // Load data and authenticate on mount
   useEffect(() => {
-    setEvents(getStoredEvents());
+    const loadedEvents = getStoredEvents();
+    setEvents(loadedEvents);
     setTickets(getStoredTickets());
-    setCurrentUser(getAuthUser());
+    const authUser = getAuthUser();
+    setCurrentUser(authUser);
 
     const unsubscribe = subscribeAuth((user) => {
       setCurrentUser(user);
@@ -68,6 +72,27 @@ export default function Home() {
     };
 
     window.addEventListener("nmds_events_change", handleEventsChange);
+
+    // Support direct public ticket link query parameter (?event=id)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlEventId = params.get("event");
+      const urlMode = params.get("mode");
+      if (urlEventId) {
+        const found = loadedEvents.find(
+          e => String(e.id || "").toLowerCase() === String(urlEventId).toLowerCase()
+        );
+        if (found) {
+          if (urlMode === "attendee") {
+            setSelectedEvent(found);
+          } else if (canEditEvent(found, authUser)) {
+            setAdminEvent(found);
+          } else {
+            setSelectedEvent(found);
+          }
+        }
+      }
+    } catch {}
 
     return () => {
       unsubscribe();
@@ -164,6 +189,32 @@ export default function Home() {
   });
 
   const trendingEvents = events.slice(0, 4);
+
+  // Handle event selection:
+  // - If user has organizer/admin rights to this event, display the Event Admin Dashboard directly!
+  //   (Tickets sold, revenue, gate check-in status, attendee roster, and "Generate Ticket Link" button)
+  // - If user is a visitor/attendee, display the public ticket booking detail modal.
+  // - Supports explicit forceMode: "attendee" (for preview) or "admin" (for switching back)
+  const handleSelectEvent = (event, forceMode = null) => {
+    if (!event) return;
+    if (forceMode === "attendee") {
+      setAdminEvent(null);
+      setSelectedEvent(event);
+      return;
+    }
+    if (forceMode === "admin") {
+      setSelectedEvent(null);
+      setAdminEvent(event);
+      return;
+    }
+    if (canEditEvent(event, currentUser)) {
+      setSelectedEvent(null);
+      setAdminEvent(event);
+    } else {
+      setAdminEvent(null);
+      setSelectedEvent(event);
+    }
+  };
 
   // Require account registration/login before proceeding to checkout
   const handleStartBooking = (bookingPayload) => {
@@ -420,7 +471,7 @@ export default function Home() {
               key={evt.id}
               event={evt}
               currentUser={currentUser}
-              onSelect={setSelectedEvent}
+              onSelect={handleSelectEvent}
               onEditEvent={setEditingEvent}
             />
           ))}
@@ -469,7 +520,7 @@ export default function Home() {
                 key={evt.id}
                 event={evt}
                 currentUser={currentUser}
-                onSelect={setSelectedEvent}
+                onSelect={handleSelectEvent}
                 onEditEvent={setEditingEvent}
               />
             ))}
@@ -633,6 +684,33 @@ export default function Home() {
           onClose={() => setSelectedEvent(null)}
           onProceedToCheckout={handleStartBooking}
           onEditEvent={setEditingEvent}
+          onSwitchToAdmin={(evt) => handleSelectEvent(evt, "admin")}
+        />
+      )}
+
+      {/* Dedicated Event Admin Dashboard for Organizers & Admins */}
+      {adminEvent && (
+        <EventAdminModal
+          event={adminEvent}
+          isOpen={Boolean(adminEvent)}
+          currentUser={currentUser}
+          onClose={() => setAdminEvent(null)}
+          onOpenEdit={(evt) => {
+            setEditingEvent(evt);
+          }}
+          onPreviewAttendee={(evt) => {
+            handleSelectEvent(evt, "attendee");
+          }}
+          onOpenScanner={() => {
+            setIsScannerOpen(true);
+          }}
+          onEventUpdated={(updated) => {
+            refreshData();
+            setAdminEvent(updated);
+            if (selectedEvent && String(selectedEvent.id) === String(updated.id)) {
+              setSelectedEvent(updated);
+            }
+          }}
         />
       )}
 
@@ -645,6 +723,9 @@ export default function Home() {
           onEventUpdated={(updated) => {
             setEditingEvent(null);
             refreshData();
+            if (adminEvent && String(adminEvent.id) === String(updated.id)) {
+              setAdminEvent(updated);
+            }
             if (selectedEvent && String(selectedEvent.id) === String(updated.id)) {
               setSelectedEvent(updated);
             }
@@ -711,6 +792,10 @@ export default function Home() {
             setIsScannerOpen(true);
           }}
           onEventsRefresh={refreshData}
+          onOpenEventAdmin={(evt) => {
+            setIsOrganizerDashboardOpen(false);
+            setAdminEvent(evt);
+          }}
         />
       )}
 

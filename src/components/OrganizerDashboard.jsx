@@ -38,7 +38,8 @@ export default function OrganizerDashboard({
   onClose,
   onOpenCreateEvent,
   onOpenScanner,
-  onEventsRefresh
+  onEventsRefresh,
+  onOpenEventAdmin
 }) {
   if (!isOpen) return null;
 
@@ -525,6 +526,35 @@ export default function OrganizerDashboard({
 
                         {/* Organizer Action Buttons */}
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "160px" }}>
+                          {/* EVENT ADMIN HUB (SINGLE EVENT DASHBOARD) */}
+                          {onOpenEventAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onClose();
+                                onOpenEventAdmin(evt);
+                              }}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "6px",
+                                padding: "8px 14px",
+                                background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                                border: "none",
+                                borderRadius: "8px",
+                                color: "#070709",
+                                fontSize: "12px",
+                                fontWeight: "900",
+                                cursor: "pointer",
+                                boxShadow: "0 2px 8px rgba(212, 175, 55, 0.35)"
+                              }}
+                              title="Open single-event admin studio: tickets sold, link generator, gate check-in & roster"
+                            >
+                              <span>👑 Event Admin Hub</span>
+                            </button>
+                          )}
+
                           {/* EDIT EVENT BUTTON */}
                           <button
                             type="button"

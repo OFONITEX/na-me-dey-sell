@@ -10,7 +10,8 @@ export default function EventDetailModal({
   currentUser,
   onClose,
   onProceedToCheckout,
-  onEditEvent
+  onEditEvent,
+  onSwitchToAdmin
 }) {
   const safeTiers = event?.tiers?.length ? event.tiers : [{ id: "tier_default", name: "General Admission", price: 0, currency: "₦", capacity: 100, soldCount: 0, description: "Standard entry", perks: ["General access"] }];
   const [selectedTierId, setSelectedTierId] = useState(safeTiers[0]?.id || "");
@@ -128,29 +129,57 @@ export default function EventDetailModal({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                if (onEditEvent) onEditEvent(event);
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "6px 14px",
-                background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
-                border: "none",
-                borderRadius: "6px",
-                color: "#070709",
-                fontSize: "12px",
-                fontWeight: "900",
-                cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(212, 175, 55, 0.35)"
-              }}
-            >
-              <span>✏️ Edit Event &amp; Tiers</span>
-            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              {onSwitchToAdmin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onSwitchToAdmin(event);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 14px",
+                    background: "rgba(212, 175, 55, 0.15)",
+                    border: "1px solid rgba(212, 175, 55, 0.6)",
+                    borderRadius: "6px",
+                    color: "#F5D061",
+                    fontSize: "12px",
+                    fontWeight: "800",
+                    cursor: "pointer"
+                  }}
+                  title="Open the Event Admin Dashboard to view live tickets sold, revenue, roster, and generate links"
+                >
+                  <span>📊 Event Admin Dashboard</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onEditEvent) onEditEvent(event);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 14px",
+                  background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                  border: "none",
+                  borderRadius: "6px",
+                  color: "#070709",
+                  fontSize: "12px",
+                  fontWeight: "900",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(212, 175, 55, 0.35)"
+                }}
+              >
+                <span>✏️ Edit Event &amp; Tiers</span>
+              </button>
+            </div>
           </div>
         )}
 

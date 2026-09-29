@@ -41,35 +41,63 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent })
         </div>
 
         {/* Organizer Edit Shortcut Chip */}
-        {userCanEdit && onEditEvent && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEditEvent(event);
-            }}
+        {userCanEdit && (
+          <div
             style={{
               position: "absolute",
               top: "12px",
               right: "12px",
               zIndex: 10,
-              background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
-              color: "#070709",
-              border: "none",
-              borderRadius: "20px",
-              padding: "4px 10px",
-              fontSize: "11px",
-              fontWeight: "900",
-              cursor: "pointer",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.6), 0 0 10px rgba(212,175,55,0.4)",
               display: "flex",
               alignItems: "center",
-              gap: "4px"
+              gap: "6px"
             }}
-            title="Edit your created event"
           >
-            <span>✏️ Edit</span>
-          </button>
+            <div
+              style={{
+                background: "rgba(10, 10, 14, 0.88)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(212, 175, 55, 0.6)",
+                color: "#F5D061",
+                borderRadius: "20px",
+                padding: "3px 8px",
+                fontSize: "10px",
+                fontWeight: "900",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.6)"
+              }}
+            >
+              <span>👑 Your Event</span>
+            </div>
+            {onEditEvent && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditEvent(event);
+                }}
+                style={{
+                  background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                  color: "#070709",
+                  border: "none",
+                  borderRadius: "20px",
+                  padding: "4px 10px",
+                  fontSize: "11px",
+                  fontWeight: "900",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.6), 0 0 10px rgba(212,175,55,0.4)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px"
+                }}
+                title="Edit your created event"
+              >
+                <span>✏️ Edit</span>
+              </button>
+            )}
+          </div>
         )}
 
         {/* Category Badge */}
@@ -144,32 +172,43 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent })
             <span className="rx-price-amount">{formatNaira(lowestPrice, event.currency || event.tiers?.[0]?.currency || "₦")}</span>
           </div>
 
-          {userCanEdit && onEditEvent ? (
+          {userCanEdit ? (
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEditEvent(event);
-                }}
+              {onEditEvent && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditEvent(event);
+                  }}
+                  style={{
+                    background: "rgba(212, 175, 55, 0.15)",
+                    border: "1px solid rgba(212, 175, 55, 0.5)",
+                    color: "#F5D061",
+                    borderRadius: "6px",
+                    padding: "6px 10px",
+                    fontSize: "11px",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px"
+                  }}
+                  title="Edit event details & ticket tiers"
+                >
+                  <span>✏️ Edit</span>
+                </button>
+              )}
+              <div
+                className="rx-btn rx-btn-primary rx-btn-sm"
                 style={{
-                  background: "rgba(212, 175, 55, 0.15)",
-                  border: "1px solid rgba(212, 175, 55, 0.5)",
-                  color: "#F5D061",
-                  borderRadius: "6px",
-                  padding: "6px 10px",
-                  fontSize: "11px",
-                  fontWeight: "800",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px"
+                  background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                  color: "#070709",
+                  fontWeight: "900"
                 }}
+                title="Open Event Admin Studio"
               >
-                <span>✏️ Edit</span>
-              </button>
-              <div className="rx-btn rx-btn-primary rx-btn-sm">
-                <span className="rx-btn-text">View</span>
+                <span className="rx-btn-text">👑 Admin Hub</span>
                 <span className="rx-btn-icon">
                   <ArrowRightIcon size={14} />
                 </span>
