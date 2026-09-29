@@ -37,6 +37,21 @@ export function formatNaira(amount, currency = "₦") {
   return formatPrice(amount, currency);
 }
 
+export const LEGACY_REMOVED_EVENT_IDS = new Set([
+  "evt_flytime_fest_burna",
+  "evt_lagos_tech_unwind",
+  "evt_eko_supper_club_experience",
+  "evt_comedy_royalty_night",
+  "evt_detty_december_beach_rave",
+  "evt_detty_december_beach",
+  "evt_corporate_leadership_awards",
+  "evt_royal_wedding_experience",
+  "evt_timeless_stadium_lagos",
+  "evt_afrobeat_rave_abuja",
+  "evt_palmwine_food_culture",
+  "evt_campus_comedy_blast"
+]);
+
 /**
  * Loads events from localStorage or seeds with default events
  */
@@ -51,7 +66,17 @@ export function getStoredEvents() {
     }
     const parsed = JSON.parse(raw);
     let updated = false;
-    let synchronized = parsed.map(evt => {
+
+    // Remove legacy mock events, preserving Vibes Barn and any newly created events
+    const filtered = parsed.filter(evt => {
+      if (LEGACY_REMOVED_EVENT_IDS.has(evt.id)) {
+        updated = true;
+        return false;
+      }
+      return true;
+    });
+
+    let synchronized = filtered.map(evt => {
       // Sync missing organizer fields from seed data
       if (!evt.organizerEmail || !evt.createdBy) {
         const seed = INITIAL_EVENTS.find(s => s.id === evt.id);
@@ -66,12 +91,18 @@ export function getStoredEvents() {
           };
         }
       }
-      // Backfill createdAt from seed data if missing
+      // Backfill createdAt from seed data or fallback if missing
       if (!evt.createdAt) {
         const seed = INITIAL_EVENTS.find(s => s.id === evt.id);
         if (seed && seed.createdAt) {
           updated = true;
           return { ...evt, createdAt: seed.createdAt };
+        } else if (evt.id === "evt_naphss_dinner_night") {
+          updated = true;
+          return { ...evt, createdAt: "2026-09-28T18:00:00.000Z" };
+        } else {
+          updated = true;
+          return { ...evt, createdAt: evt.updatedAt || new Date().toISOString() };
         }
       }
       return evt;
@@ -84,25 +115,6 @@ export function getStoredEvents() {
         synchronized.push(seed);
         updated = true;
       }
-    });
-
-    // Guarantee that any NAPHSS event grants organizer/admin rights to the correct emails
-    synchronized = synchronized.map(evt => {
-      if (evt.id === "evt_naphss_dinner_night" || (evt.title && evt.title.toLowerCase().includes("naphss"))) {
-        if (evt.organizerEmail !== "iamrhobbinraynerhq01@gmail.com" || evt.createdBy !== "iamrhobbinraynerhq01@gmail.com" || !evt.isFeatured) {
-          updated = true;
-          return {
-            ...evt,
-            organizer: evt.organizer || "NAPHSS Executive Council",
-            organizerEmail: "iamrhobbinraynerhq01@gmail.com",
-            createdBy: "iamrhobbinraynerhq01@gmail.com",
-            organizerPhone: evt.organizerPhone || "+2348030000002",
-            badge: evt.badge || "👑 Featured • NAPHSS Gala Night",
-            isFeatured: true
-          };
-        }
-      }
-      return evt;
     });
 
     // Sort all events by createdAt descending (newest first)
@@ -143,34 +155,10 @@ export const INITIAL_ACTIVITIES = [
     actorEmail: "chukwudi.eze@gmail.com",
     role: "attendee",
     eventTitle: "Vibes Barn: Afe Mbre Festival",
+    eventId: "evt_vibes_barn_afe_mbre",
     orderId: "ORD-NG-849201",
     amount: 25000,
     timestamp: "2026-09-27T20:15:00.000Z"
-  },
-  {
-    id: "act_init_2",
-    type: "checkin",
-    category: "Gate Check-In",
-    title: "Gate Admission Verified",
-    description: "Amina Bello checked in at Landmark Event Centre for Lagos Tech Unwind",
-    actor: "Gate Marshall Segun",
-    actorEmail: "gate1@landmark.ng",
-    role: "staff",
-    eventTitle: "Lagos Tech & Founders Unwind 2026",
-    ticketId: "NMDS-2026-4R8E-W19P",
-    timestamp: "2026-09-25T08:15:22.000Z"
-  },
-  {
-    id: "act_init_3",
-    type: "event",
-    category: "Event Publishing",
-    title: "New Event Published Live",
-    description: "Flytime Promotions published 'Flytime Fest 2026' with 3 ticket tiers",
-    actor: "Flytime Promotions HQ",
-    actorEmail: "info@flytimefest.com",
-    role: "organizer",
-    eventTitle: "Flytime Fest: Rhythm & Soul",
-    timestamp: "2026-09-22T14:30:00.000Z"
   },
   {
     id: "act_init_4",
@@ -204,36 +192,10 @@ export const INITIAL_ACTIVITIES = [
     actorEmail: "tunde.bakare@lagosmail.com",
     role: "attendee",
     eventTitle: "Vibes Barn: Afe Mbre Festival",
+    eventId: "evt_vibes_barn_afe_mbre",
     orderId: "ORD-NG-628491",
     amount: 10000,
     timestamp: "2026-09-26T14:20:00.000Z"
-  },
-  {
-    id: "act_init_7",
-    type: "event",
-    category: "Event Moderation",
-    title: "Event Details Updated",
-    description: "David Adeleke updated venue and tier capacity for 'Timeless Lagos Stadium Concert'",
-    actor: "David Adeleke (Davido)",
-    actorEmail: "davido@dmw.ng",
-    role: "organizer",
-    eventTitle: "Timeless Lagos Stadium Concert",
-    eventId: "evt_timeless_stadium_lagos",
-    timestamp: "2026-09-25T17:10:00.000Z"
-  },
-  {
-    id: "act_init_8",
-    type: "payment",
-    category: "Payment",
-    title: "Early Bird Ticket Purchase",
-    description: "Kelechi Nwosu paid ₦16,000 for 2x Early Bird Passes",
-    actor: "Kelechi Nwosu",
-    actorEmail: "kelechi.nwosu@gmail.com",
-    role: "attendee",
-    eventTitle: "Detty December Landmark Beach Rave",
-    orderId: "ORD-NG-519283",
-    amount: 16000,
-    timestamp: "2026-09-27T19:45:00.000Z"
   },
   {
     id: "act_init_9",
@@ -245,6 +207,7 @@ export const INITIAL_ACTIVITIES = [
     role: "staff",
     ticketId: "NMDS-2026-9X7M-K42B",
     eventTitle: "Vibes Barn: Afe Mbre Festival",
+    eventId: "evt_vibes_barn_afe_mbre",
     timestamp: "2026-09-27T20:45:10.000Z"
   }
 ];
@@ -257,7 +220,19 @@ export function getActivityFeed() {
       localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(INITIAL_ACTIVITIES));
       return INITIAL_ACTIVITIES;
     }
-    return JSON.parse(raw);
+    let parsed = JSON.parse(raw);
+    let updated = false;
+    const beforeCount = parsed.length;
+    parsed = parsed.filter(act => !LEGACY_REMOVED_EVENT_IDS.has(act.eventId));
+    if (parsed.length !== beforeCount) {
+      updated = true;
+    }
+    if (updated) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(parsed));
+      } catch {}
+    }
+    return parsed;
   } catch {
     return INITIAL_ACTIVITIES;
   }
@@ -488,40 +463,6 @@ export const INITIAL_TICKETS = [
     gateStaff: "Gate Marshall Kalu"
   },
   {
-    ticketId: "NMDS-2026-4R8E-W19P",
-    orderId: "ORD-NG-739104",
-    eventId: "evt_lagos_tech_unwind",
-    eventTitle: "Lagos Tech & Founders Unwind 2026",
-    eventSubtitle: "West Africa's largest gathering of tech founders, venture capitalists, designers, and AI creators.",
-    eventDate: "Oct 18, 2026",
-    eventTime: "10:00 AM - 07:00 PM",
-    venue: "Landmark Event Centre",
-    city: "Victoria Island, Lagos",
-    address: "Water Corporation Drive, Oniru",
-    organizer: "Founders Circle Africa",
-    organizerEmail: "hello@founderscircle.ng",
-    accentColor: "#D4AF37",
-    bannerPattern: "linear-gradient(135deg, #070709 0%, #1a160d 50%, #D4AF37 100%)",
-    tierId: "tier_builder",
-    tierName: "Delegate Pass",
-    tierPrice: 15000,
-    currency: "₦",
-    xpReward: 100,
-    perks: ["All stage panels & keynotes", "Access to 50+ startup demo booths", "Official goodie bag & digital pass"],
-    seatNumber: "MAIN-HALL-E12",
-    attendee: {
-      name: "Amina Bello",
-      email: "amina.bello@techfoundry.africa",
-      phone: "+234 812 345 6789",
-      notes: "Startup Pitch Finalist"
-    },
-    paymentMethod: "card",
-    purchaseDate: "2026-09-22T11:15:00.000Z",
-    status: "checked_in",
-    checkedInAt: "2026-09-25T08:15:22.000Z",
-    gateStaff: "Gate Marshall Segun"
-  },
-  {
     ticketId: "NMDS-2026-3X8K-Q72L",
     orderId: "ORD-NG-628491",
     eventId: "evt_vibes_barn_afe_mbre",
@@ -552,198 +493,6 @@ export const INITIAL_TICKETS = [
     status: "active",
     checkedInAt: null,
     gateStaff: null
-  },
-  {
-    ticketId: "NMDS-2026-7H2V-M91P",
-    orderId: "ORD-NG-519283",
-    eventId: "evt_detty_december_beach",
-    eventTitle: "Detty December Landmark Beach Rave",
-    eventSubtitle: "End of year afrobeat fiesta on the beachfront with top guest artists and sunrise DJ sets.",
-    eventDate: "Dec 20, 2026",
-    eventTime: "06:00 PM - 05:00 AM",
-    venue: "Landmark Beach",
-    city: "Victoria Island, Lagos",
-    address: "Water Corporation Road, Oniru",
-    organizer: "Soundcity Pulse",
-    organizerEmail: "events@soundcitypulse.com",
-    accentColor: "#F59E0B",
-    tierId: "tier_eb",
-    tierName: "Early Bird General Pass",
-    tierPrice: 8000,
-    currency: "₦",
-    xpReward: 40,
-    perks: ["Beach access pass", "1 Free drink ticket"],
-    seatNumber: "BEACH-GA-044",
-    attendee: {
-      name: "Kelechi Nwosu",
-      email: "kelechi.nwosu@gmail.com",
-      phone: "+234 805 112 3344"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-27T19:45:00.000Z",
-    status: "active",
-    checkedInAt: null,
-    gateStaff: null
-  },
-  {
-    ticketId: "NMDS-2026-6Y9T-B38V",
-    orderId: "ORD-NG-408192",
-    eventId: "evt_timeless_stadium_lagos",
-    eventTitle: "Timeless Lagos Stadium Concert",
-    eventSubtitle: "Davido live in concert with an unmissable orchestra and guest superstars.",
-    eventDate: "Dec 28, 2026",
-    eventTime: "07:00 PM - 02:00 AM",
-    venue: "Teslim Balogun Stadium",
-    city: "Surulere, Lagos",
-    address: "Alhaji Masha Road",
-    organizer: "David Adeleke (Davido)",
-    organizerEmail: "davido@dmw.ng",
-    accentColor: "#D4AF37",
-    tierId: "tier_gold_circle",
-    tierName: "Gold Circle Stage Pass",
-    tierPrice: 35000,
-    currency: "₦",
-    xpReward: 150,
-    perks: ["Front of stage pit access", "Collector laminate", "Dedicated VIP bar"],
-    seatNumber: "STAGE-PIT-019",
-    attendee: {
-      name: "Amina Bello",
-      email: "amina.bello@techfoundry.africa",
-      phone: "+234 812 345 6789"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-24T12:00:00.000Z",
-    status: "active",
-    checkedInAt: null,
-    gateStaff: null
-  },
-  {
-    ticketId: "NMDS-2026-NAPH-1A8K",
-    orderId: "ORD-NG-728190",
-    eventId: "evt_naphss_dinner_night",
-    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
-    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
-    eventDate: "Oct 24, 2026",
-    eventTime: "06:00 PM - 01:00 AM",
-    venue: "Emerald Grand Ballroom & Banquet Center",
-    city: "Uyo, Akwa Ibom",
-    address: "Plot 18 Banking District, Udo Udoma",
-    organizer: "NAPHSS Executive Council",
-    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
-    accentColor: "#D4AF37",
-    tierId: "tier_naphss_student",
-    tierName: "Standard Student Pass",
-    tierPrice: 3500,
-    currency: "₦",
-    xpReward: 90,
-    perks: ["Admission to main ballroom", "3-Course gourmet banquet dinner", "Red carpet photography access"],
-    seatNumber: "STU-TABLE-04",
-    attendee: {
-      name: "Emeka Okafor",
-      email: "emeka.okafor@uniuyo.edu.ng",
-      phone: "+234 803 112 4455"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-28T14:30:00.000Z",
-    status: "active",
-    checkedInAt: null,
-    gateStaff: null
-  },
-  {
-    ticketId: "NMDS-2026-NAPH-9X2P",
-    orderId: "ORD-NG-728191",
-    eventId: "evt_naphss_dinner_night",
-    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
-    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
-    eventDate: "Oct 24, 2026",
-    eventTime: "06:00 PM - 01:00 AM",
-    venue: "Emerald Grand Ballroom & Banquet Center",
-    city: "Uyo, Akwa Ibom",
-    address: "Plot 18 Banking District, Udo Udoma",
-    organizer: "NAPHSS Executive Council",
-    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
-    accentColor: "#D4AF37",
-    tierId: "tier_naphss_student",
-    tierName: "Standard Student Pass",
-    tierPrice: 3500,
-    currency: "₦",
-    xpReward: 90,
-    perks: ["Admission to main ballroom", "3-Course gourmet banquet dinner", "Red carpet photography access"],
-    seatNumber: "STU-TABLE-09",
-    attendee: {
-      name: "Blessing Adeyemi",
-      email: "blessing.adeyemi@uniuyo.edu.ng",
-      phone: "+234 812 998 7766"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-28T15:10:00.000Z",
-    status: "checked_in",
-    checkedInAt: "2026-09-28T18:45:00.000Z",
-    gateStaff: "Gate Marshall Kalu"
-  },
-  {
-    ticketId: "NMDS-2026-NAPH-VIP3",
-    orderId: "ORD-NG-728192",
-    eventId: "evt_naphss_dinner_night",
-    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
-    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
-    eventDate: "Oct 24, 2026",
-    eventTime: "06:00 PM - 01:00 AM",
-    venue: "Emerald Grand Ballroom & Banquet Center",
-    city: "Uyo, Akwa Ibom",
-    address: "Plot 18 Banking District, Udo Udoma",
-    organizer: "NAPHSS Executive Council",
-    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
-    accentColor: "#D4AF37",
-    tierId: "tier_naphss_vip",
-    tierName: "VIP Executive Delegate Pass",
-    tierPrice: 10000,
-    currency: "₦",
-    xpReward: 120,
-    perks: ["Front-row VIP ballroom seating", "Executive cocktail & appetizer service", "Complimentary wine"],
-    seatNumber: "VIP-ROW-1",
-    attendee: {
-      name: "Dr. Samuel Bassey",
-      email: "dr.bassey@healthscience.org",
-      phone: "+234 802 334 1122"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-28T16:20:00.000Z",
-    status: "active",
-    checkedInAt: null,
-    gateStaff: null
-  },
-  {
-    ticketId: "NMDS-2026-NAPH-TBL1",
-    orderId: "ORD-NG-728193",
-    eventId: "evt_naphss_dinner_night",
-    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
-    eventSubtitle: "The official grand banquet, academic excellence awards, and cultural dinner gala.",
-    eventDate: "Oct 24, 2026",
-    eventTime: "06:00 PM - 01:00 AM",
-    venue: "Emerald Grand Ballroom & Banquet Center",
-    city: "Uyo, Akwa Ibom",
-    address: "Plot 18 Banking District, Udo Udoma",
-    organizer: "NAPHSS Executive Council",
-    organizerEmail: "iamrhobbinraynerhq01@gmail.com",
-    accentColor: "#D4AF37",
-    tierId: "tier_naphss_table",
-    tierName: "Patrons & Alumni Table of 8",
-    tierPrice: 60000,
-    currency: "₦",
-    xpReward: 200,
-    perks: ["Reserved table for 8 persons", "2 Bottles of premium wine & mixers", "Dedicated table butler"],
-    seatNumber: "PATRON-TBL-01",
-    attendee: {
-      name: "NAPHSS Alumni Class of 2022",
-      email: "alumni.publichealth@gmail.com",
-      phone: "+234 803 777 8899"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-28T17:00:00.000Z",
-    status: "checked_in",
-    checkedInAt: "2026-09-28T18:50:00.000Z",
-    gateStaff: "Gate Marshall Kalu"
   }
 ];
 
@@ -755,15 +504,21 @@ export function getStoredTickets() {
       localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(INITIAL_TICKETS));
       return INITIAL_TICKETS;
     }
-    const parsed = JSON.parse(raw);
+    let parsed = JSON.parse(raw);
     let updated = false;
-    // Ensure NAPHSS tickets are merged into parsed if not present
+
+    // Purge tickets belonging to removed legacy mock events
+    const beforeCount = parsed.length;
+    parsed = parsed.filter(t => !LEGACY_REMOVED_EVENT_IDS.has(t.eventId));
+    if (parsed.length !== beforeCount) {
+      updated = true;
+    }
+
+    // Ensure seed tickets exist
     INITIAL_TICKETS.forEach(seedTkt => {
-      if (seedTkt.eventId === "evt_naphss_dinner_night") {
-        if (!parsed.some(t => t.ticketId === seedTkt.ticketId)) {
-          parsed.unshift(seedTkt);
-          updated = true;
-        }
+      if (!parsed.some(t => t.ticketId === seedTkt.ticketId)) {
+        parsed.push(seedTkt);
+        updated = true;
       }
     });
     if (updated) {
@@ -816,29 +571,6 @@ export const INITIAL_PAYMENTS = [
     timestamp: "2026-09-20T18:30:00.000Z"
   },
   {
-    orderId: "ORD-NG-739104",
-    transactionRef: "MNF_TX_739104_310",
-    paymentReference: "MNF_REV_2026_7391",
-    eventId: "evt_lagos_tech_unwind",
-    eventTitle: "Lagos Tech & Founders Unwind 2026",
-    organizer: "Founders Circle Africa",
-    organizerEmail: "hello@founderscircle.ng",
-    attendee: {
-      name: "Amina Bello",
-      email: "amina.bello@techfoundry.africa",
-      phone: "+234 812 345 6789"
-    },
-    quantity: 1,
-    tierName: "Delegate Pass",
-    grossAmount: 15000,
-    platformFee: 750,
-    organizerPayout: 14250,
-    currency: "₦",
-    paymentMethod: "monnify",
-    paymentStatus: "PAID",
-    timestamp: "2026-09-22T11:15:00.000Z"
-  },
-  {
     orderId: "ORD-NG-628491",
     transactionRef: "MNF_TX_628491_582",
     paymentReference: "MNF_REV_2026_6284",
@@ -860,52 +592,6 @@ export const INITIAL_PAYMENTS = [
     paymentMethod: "monnify",
     paymentStatus: "PAID",
     timestamp: "2026-09-26T14:20:00.000Z"
-  },
-  {
-    orderId: "ORD-NG-519283",
-    transactionRef: "MNF_TX_519283_449",
-    paymentReference: "MNF_REV_2026_5192",
-    eventId: "evt_detty_december_beach",
-    eventTitle: "Detty December Landmark Beach Rave",
-    organizer: "Soundcity Pulse",
-    organizerEmail: "events@soundcitypulse.com",
-    attendee: {
-      name: "Kelechi Nwosu",
-      email: "kelechi.nwosu@gmail.com",
-      phone: "+234 805 112 3344"
-    },
-    quantity: 2,
-    tierName: "Early Bird General Pass",
-    grossAmount: 16000,
-    platformFee: 800,
-    organizerPayout: 15200,
-    currency: "₦",
-    paymentMethod: "monnify",
-    paymentStatus: "PAID",
-    timestamp: "2026-09-27T19:45:00.000Z"
-  },
-  {
-    orderId: "ORD-NG-408192",
-    transactionRef: "MNF_TX_408192_811",
-    paymentReference: "MNF_REV_2026_4081",
-    eventId: "evt_timeless_stadium_lagos",
-    eventTitle: "Timeless Lagos Stadium Concert",
-    organizer: "David Adeleke (Davido)",
-    organizerEmail: "davido@dmw.ng",
-    attendee: {
-      name: "Amina Bello",
-      email: "amina.bello@techfoundry.africa",
-      phone: "+234 812 345 6789"
-    },
-    quantity: 1,
-    tierName: "Gold Circle Stage Pass",
-    grossAmount: 35000,
-    platformFee: 1750,
-    organizerPayout: 33250,
-    currency: "₦",
-    paymentMethod: "monnify",
-    paymentStatus: "PAID",
-    timestamp: "2026-09-24T12:00:00.000Z"
   }
 ];
 
@@ -917,7 +603,19 @@ export function getPaymentsLedger() {
       localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(INITIAL_PAYMENTS));
       return INITIAL_PAYMENTS;
     }
-    return JSON.parse(raw);
+    let parsed = JSON.parse(raw);
+    let updated = false;
+    const beforeCount = parsed.length;
+    parsed = parsed.filter(p => !LEGACY_REMOVED_EVENT_IDS.has(p.eventId));
+    if (parsed.length !== beforeCount) {
+      updated = true;
+    }
+    if (updated) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(parsed));
+      } catch {}
+    }
+    return parsed;
   } catch (err) {
     console.error("Failed to load payments ledger:", err);
     return INITIAL_PAYMENTS;
