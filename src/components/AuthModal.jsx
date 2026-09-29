@@ -11,7 +11,8 @@ import {
   AlertTriangleIcon,
   SparklesIcon,
   ShieldCheckIcon,
-  GoogleIcon
+  GoogleIcon,
+  CrownIcon
 } from "./Icons";
 import { signInWithDetails, signInWithGoogle, lookupUser } from "../lib/authService";
 import { triggerConfetti } from "../lib/confetti";

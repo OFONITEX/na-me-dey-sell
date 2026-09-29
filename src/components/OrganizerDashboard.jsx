@@ -18,9 +18,17 @@ import {
   CreditCardIcon,
   UserIcon,
   PhoneIcon,
-  MailIcon
+  MailIcon,
+  ActivityIcon
 } from "./Icons";
-import { formatNaira, getStoredTickets, deleteEvent } from "../lib/ticketService";
+import {
+  formatNaira,
+  getStoredTickets,
+  deleteEvent,
+  saveNewEvent,
+  getOrganizerEventAnalytics
+} from "../lib/ticketService";
+import { isSuperAdmin } from "../lib/authService";
 import EditEventModal from "./EditEventModal";
 
 export default function OrganizerDashboard({
@@ -34,11 +42,16 @@ export default function OrganizerDashboard({
 }) {
   if (!isOpen) return null;
 
-  const [activeTab, setActiveTab] = useState("events"); // "events" | "attendees" | "payouts"
+  const [activeTab, setActiveTab] = useState("events"); // "events" | "analytics" | "attendees" | "payouts"
   const [editingEvent, setEditingEvent] = useState(null);
   const [searchAttendeeQuery, setSearchAttendeeQuery] = useState("");
   const [selectedEventFilter, setSelectedEventFilter] = useState("all");
+  const [analyticsEventFilter, setAnalyticsEventFilter] = useState("all");
   const [toastMessage, setToastMessage] = useState("");
+  const [adminViewAll, setAdminViewAll] = useState(false);
+
+  // Check if current user is Super Admin
+  const userIsSuperAdmin = isSuperAdmin(currentUser);
 
   // Payout bank state
   const [bankDetails, setBankDetails] = useState(() => {
@@ -51,38 +64,41 @@ export default function OrganizerDashboard({
     }
   });
 
-  // Filter events belonging to this organizer
+  // Filter events belonging to this organizer account
   const myEvents = useMemo(() => {
     if (!currentUser) return [];
     const userEmail = (currentUser.email || "").toLowerCase().trim();
-    const userName = (currentUser.fullName || "").toLowerCase().trim();
     const userId = (currentUser.id || "").toLowerCase().trim();
+    const userPhone = (currentUser.phone || "").replace(/\D/g, "");
 
     return events.filter(e => {
-      const orgEmail = (e.organizerEmail || "").toLowerCase().trim();
+      const orgEmail = (e.organizerEmail || e.createdBy || "").toLowerCase().trim();
       const orgId = (e.organizerId || "").toLowerCase().trim();
-      const orgName = (e.organizer || "").toLowerCase().trim();
+      const orgPhone = (e.organizerPhone || "").replace(/\D/g, "");
 
-      // If user created this event, matches email, ID, or name
-      const isOwner = (userEmail && orgEmail === userEmail) ||
-        (userId && orgId === userId) ||
-        (userName && orgName.includes(userName)) ||
-        (e.id && e.id.startsWith("evt_user_"));
+      // Match strictly by owner email, user ID, createdBy, or phone
+      const matchesEmail = Boolean(userEmail && orgEmail && (orgEmail === userEmail));
+      const matchesId = Boolean(userId && orgId && (orgId === userId));
+      const matchesPhone = Boolean(userPhone && orgPhone && (orgPhone === userPhone));
 
-      // Also if user is super admin or in demo mode with no events, show first 2 events so they can test immediately
-      return isOwner;
+      return matchesEmail || matchesId || matchesPhone;
     });
   }, [events, currentUser]);
 
-  // If user has no self-created events yet, show top sample events as editable demo events
-  const displayEvents = myEvents.length > 0 ? myEvents : events.slice(0, 2);
+  // Display events based on admin toggle or user's own events
+  const displayEvents = (userIsSuperAdmin && adminViewAll) ? events : myEvents;
 
-  // All tickets belonging to organizer's events
+  // All tickets belonging to displayed events
   const allTickets = useMemo(() => {
     const rawTickets = getStoredTickets();
     const myEventIds = new Set(displayEvents.map(e => e.id));
     return rawTickets.filter(t => myEventIds.has(t.eventId));
   }, [displayEvents]);
+
+  // Analytics data generated for organizer
+  const analyticsData = useMemo(() => {
+    return getOrganizerEventAnalytics(currentUser?.email || currentUser?.id, analyticsEventFilter, displayEvents);
+  }, [currentUser, analyticsEventFilter, displayEvents, allTickets]);
 
   // Filtered attendees list
   const filteredAttendees = useMemo(() => {
@@ -162,11 +178,12 @@ export default function OrganizerDashboard({
 
   return (
     <div
+      className="dashboard-modal-overlay"
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 9990,
-        backgroundColor: "rgba(5, 5, 8, 0.92)",
+        backgroundColor: "rgba(5, 5, 8, 0.94)",
         backdropFilter: "blur(14px)",
         WebkitBackdropFilter: "blur(14px)",
         display: "flex",
@@ -180,16 +197,17 @@ export default function OrganizerDashboard({
       }}
     >
       <div
+        className="dashboard-modal-container"
         style={{
           width: "100%",
-          maxWidth: "1080px",
-          height: "90vh",
+          maxWidth: "1140px",
+          height: "92vh",
           display: "flex",
           flexDirection: "column",
           background: "linear-gradient(180deg, #13131A 0%, #08080C 100%)",
-          border: "1px solid rgba(212, 175, 55, 0.4)",
+          border: "1px solid rgba(212, 175, 55, 0.45)",
           borderRadius: "20px",
-          boxShadow: "0 25px 60px -10px rgba(0, 0, 0, 0.95), 0 0 50px rgba(212, 175, 55, 0.2)",
+          boxShadow: "0 25px 65px -10px rgba(0, 0, 0, 0.95), 0 0 55px rgba(212, 175, 55, 0.2)",
           overflow: "hidden"
         }}
         onClick={e => e.stopPropagation()}
@@ -200,12 +218,14 @@ export default function OrganizerDashboard({
         {/* Dashboard Top Header */}
         <div
           style={{
-            padding: "20px 28px",
+            padding: "18px 28px",
             borderBottom: "1px solid rgba(212, 175, 55, 0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "rgba(0, 0, 0, 0.3)"
+            background: "rgba(0, 0, 0, 0.35)",
+            flexWrap: "wrap",
+            gap: "12px"
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -240,7 +260,7 @@ export default function OrganizerDashboard({
                     borderRadius: "20px"
                   }}
                 >
-                  Verified Organizer Hub
+                  Organizer Studio
                 </span>
                 <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>
                   {currentUser?.email}
@@ -272,7 +292,7 @@ export default function OrganizerDashboard({
               }}
             >
               <PlusIcon size={16} />
-              <span>Create New Event</span>
+              <span>Publish New Event</span>
             </button>
 
             <button
@@ -308,7 +328,7 @@ export default function OrganizerDashboard({
           }}
         >
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "12px", padding: "12px 16px" }}>
-            <div style={{ fontSize: "11px", fontWeight: "700", color: "#948B75", textTransform: "uppercase" }}>Total Events</div>
+            <div style={{ fontSize: "11px", fontWeight: "700", color: "#948B75", textTransform: "uppercase" }}>My Live Events</div>
             <div style={{ fontSize: "24px", fontWeight: "900", color: "#ffffff", marginTop: "4px" }}>{displayEvents.length}</div>
           </div>
 
@@ -335,11 +355,13 @@ export default function OrganizerDashboard({
             gap: "8px",
             padding: "12px 28px",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
-            background: "rgba(10,10,15,0.5)"
+            background: "rgba(10,10,15,0.5)",
+            overflowX: "auto"
           }}
         >
           {[
             { id: "events", label: `My Events (${displayEvents.length})` },
+            { id: "analytics", label: "📊 Event Analytics" },
             { id: "attendees", label: `Attendee Roster (${allTickets.length})` },
             { id: "payouts", label: "Payout & Settlements" }
           ].map(tab => (
@@ -356,6 +378,7 @@ export default function OrganizerDashboard({
                 border: activeTab === tab.id ? "none" : "1px solid rgba(255,255,255,0.1)",
                 borderRadius: "8px",
                 cursor: "pointer",
+                whiteSpace: "nowrap",
                 transition: "all 0.2s"
               }}
             >
@@ -377,29 +400,60 @@ export default function OrganizerDashboard({
           {/* TAB 1: MY EVENTS */}
           {activeTab === "events" && (
             <div>
+              {/* Super Admin View All Toggle */}
+              {userIsSuperAdmin && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(212, 175, 55, 0.08)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "10px", padding: "10px 16px", marginBottom: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "#F5D061", fontWeight: "700" }}>👑 Super Admin View:</span>
+                    <span style={{ fontSize: "12px", color: "#948B75" }}>
+                      {adminViewAll ? `Showing all ${events.length} platform events` : `Showing your created events (${myEvents.length})`}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAdminViewAll(!adminViewAll)}
+                    style={{
+                      padding: "5px 12px",
+                      background: adminViewAll ? "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)" : "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(212, 175, 55, 0.4)",
+                      borderRadius: "6px",
+                      color: adminViewAll ? "#070709" : "#E2D9BC",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      cursor: "pointer"
+                    }}
+                  >
+                    {adminViewAll ? "Switch to My Created Events Only" : `View All Platform Events (${events.length})`}
+                  </button>
+                </div>
+              )}
+
               {displayEvents.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "60px 20px" }}>
                   <TicketIcon size={48} style={{ color: "#D4AF37", opacity: 0.5, marginBottom: "16px" }} />
                   <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#ffffff", margin: 0 }}>No Events Created Yet</h3>
-                  <p style={{ fontSize: "13px", color: "#948B75", maxWidth: "420px", margin: "8px auto 20px" }}>
-                    You have not published any events under this account. Create your first live concert, festival, or meetup now!
+                  <p style={{ fontSize: "13px", color: "#948B75", maxWidth: "440px", margin: "8px auto 20px" }}>
+                    You have not published any events under this account ({currentUser?.email}). Publish your live concert, festival, wedding, or business event to start selling tickets and monitoring analytics.
                   </p>
-                  <button
-                    type="button"
-                    onClick={onOpenCreateEvent}
-                    style={{
-                      padding: "10px 24px",
-                      background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
-                      border: "none",
-                      borderRadius: "8px",
-                      color: "#070709",
-                      fontWeight: "800",
-                      fontSize: "13px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    Publish First Event
-                  </button>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={onOpenCreateEvent}
+                      style={{
+                        padding: "10px 24px",
+                        background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                        border: "none",
+                        borderRadius: "8px",
+                        color: "#070709",
+                        fontWeight: "800",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 14px rgba(212, 175, 55, 0.35)"
+                      }}
+                    >
+                      + Create and Publish Event
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -475,7 +529,7 @@ export default function OrganizerDashboard({
                           {/* Progress Bar for Ticket Sales */}
                           <div style={{ marginTop: "10px", maxWidth: "340px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
-                              <span style={{ color: "#E2D9BC", fontWeight: "700" }}>{soldCount} tickets sold</span>
+                              <span style={{ color: "#E2D9BC", fontWeight: "700" }}>{soldCount} / {totalCap} tickets sold</span>
                               <span style={{ color: "#F5D061" }}>{formatNaira(evtRev)} gross</span>
                             </div>
                             <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.1)", borderRadius: "3px", overflow: "hidden" }}>
@@ -566,7 +620,243 @@ export default function OrganizerDashboard({
             </div>
           )}
 
-          {/* TAB 2: ATTENDEE & SALES ROSTER */}
+          {/* TAB 2: ORGANIZED EVENT ANALYTICS */}
+          {activeTab === "analytics" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              {/* Analytics Header & Event Filter Selector */}
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(212, 175, 55, 0.25)",
+                  borderRadius: "14px",
+                  padding: "16px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "12px"
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <ActivityIcon size={18} style={{ color: "#D4AF37" }} />
+                    <h2 style={{ fontSize: "16px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
+                      Event Analytics &amp; Performance Tables
+                    </h2>
+                  </div>
+                  <p style={{ fontSize: "12px", color: "#948B75", margin: "4px 0 0" }}>
+                    Live conversion rates, ticket tier revenue, and gate admission velocity for your events.
+                  </p>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "12px", color: "#E2D9BC", fontWeight: "600" }}>Scope Event:</span>
+                  <select
+                    value={analyticsEventFilter}
+                    onChange={e => setAnalyticsEventFilter(e.target.value)}
+                    style={{
+                      height: "38px",
+                      padding: "0 12px",
+                      background: "#13131A",
+                      border: "1px solid rgba(212, 175, 55, 0.35)",
+                      borderRadius: "8px",
+                      color: "#F5D061",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      outline: "none"
+                    }}
+                  >
+                    <option value="all">📊 All My Events Aggregated</option>
+                    {displayEvents.map(e => (
+                      <option key={e.id} value={e.id}>{e.title}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Organized Table 1: Event Performance & Quick Edit Actions */}
+              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "14px", padding: "18px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+                  <h3 style={{ fontSize: "15px", fontWeight: "800", color: "#ffffff", margin: 0 }}>
+                    Event Sales, Payouts &amp; Conversion Table
+                  </h3>
+                  <span style={{ fontSize: "11px", color: "#D4AF37", fontWeight: "700" }}>
+                    {analyticsData.eventSummaries.length} event(s) monitored
+                  </span>
+                </div>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "12px" }}>
+                    <thead>
+                      <tr style={{ background: "rgba(0,0,0,0.5)", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", color: "#D4AF37", fontSize: "11px", fontWeight: "800", textTransform: "uppercase" }}>
+                        <th style={{ padding: "12px 14px" }}>Event Title</th>
+                        <th style={{ padding: "12px 14px" }}>Schedule &amp; Venue</th>
+                        <th style={{ padding: "12px 14px" }}>Sold / Capacity</th>
+                        <th style={{ padding: "12px 14px" }}>Gross Sales (₦)</th>
+                        <th style={{ padding: "12px 14px" }}>Net Payout (95%)</th>
+                        <th style={{ padding: "12px 14px" }}>Gate Check-In %</th>
+                        <th style={{ padding: "12px 14px" }}>Status</th>
+                        <th style={{ padding: "12px 14px" }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData.eventSummaries.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} style={{ padding: "24px", textAlign: "center", color: "#948B75" }}>
+                            No events found for this account. Create an event to begin tracking analytics.
+                          </td>
+                        </tr>
+                      ) : (
+                        analyticsData.eventSummaries.map(evt => {
+                          const origEvt = displayEvents.find(e => e.id === evt.id) || evt;
+                          return (
+                            <tr key={evt.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                              <td style={{ padding: "12px 14px" }}>
+                                <div style={{ fontWeight: "700", color: "#ffffff" }}>{evt.title}</div>
+                                <div style={{ fontSize: "10px", color: "#D4AF37" }}>{evt.category}</div>
+                              </td>
+
+                              <td style={{ padding: "12px 14px" }}>
+                                <div style={{ color: "#E2D9BC" }}>{evt.date}</div>
+                                <div style={{ fontSize: "11px", color: "#948B75" }}>{evt.venue}, {evt.city}</div>
+                              </td>
+
+                              <td style={{ padding: "12px 14px" }}>
+                                <div style={{ fontWeight: "700", color: "#ffffff" }}>{evt.ticketsSold} / {evt.capacity}</div>
+                                <div style={{ width: "100px", height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px", marginTop: "4px", overflow: "hidden" }}>
+                                  <div style={{ width: `${evt.capacity > 0 ? Math.min(100, Math.round((evt.ticketsSold / evt.capacity) * 100)) : 0}%`, height: "100%", background: "#10B981" }} />
+                                </div>
+                              </td>
+
+                              <td style={{ padding: "12px 14px", fontWeight: "800", color: "#10B981" }}>
+                                {formatNaira(evt.grossRevenue)}
+                              </td>
+
+                              <td style={{ padding: "12px 14px", fontWeight: "700", color: "#60A5FA" }}>
+                                {formatNaira(evt.netPayout)}
+                              </td>
+
+                              <td style={{ padding: "12px 14px" }}>
+                                <div style={{ fontWeight: "700", color: "#ffffff" }}>{evt.checkInRate}%</div>
+                                <div style={{ fontSize: "10px", color: "#948B75" }}>{evt.checkedIn}/{evt.ticketsSold} admitted</div>
+                              </td>
+
+                              <td style={{ padding: "12px 14px" }}>
+                                <span style={{ padding: "2px 8px", borderRadius: "8px", fontSize: "10px", fontWeight: "800", background: evt.status === "paused" ? "rgba(239, 68, 68, 0.15)" : "rgba(16, 185, 129, 0.15)", color: evt.status === "paused" ? "#EF4444" : "#10B981" }}>
+                                  {evt.status === "paused" ? "PAUSED" : "LIVE"}
+                                </span>
+                              </td>
+
+                              <td style={{ padding: "12px 14px" }}>
+                                <div style={{ display: "flex", gap: "6px" }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingEvent(origEvt)}
+                                    style={{
+                                      padding: "5px 10px",
+                                      background: "rgba(212, 175, 55, 0.15)",
+                                      border: "1px solid rgba(212, 175, 55, 0.35)",
+                                      borderRadius: "6px",
+                                      color: "#F5D061",
+                                      fontSize: "11px",
+                                      fontWeight: "700",
+                                      cursor: "pointer",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "4px"
+                                    }}
+                                  >
+                                    <EditIcon size={12} />
+                                    <span>Edit</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedEventFilter(evt.id);
+                                      setActiveTab("attendees");
+                                    }}
+                                    style={{
+                                      padding: "5px 10px",
+                                      background: "rgba(255, 255, 255, 0.06)",
+                                      border: "1px solid rgba(255, 255, 255, 0.15)",
+                                      borderRadius: "6px",
+                                      color: "#E2D9BC",
+                                      fontSize: "11px",
+                                      fontWeight: "600",
+                                      cursor: "pointer"
+                                    }}
+                                  >
+                                    Guest List
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Organized Table 2: Ticket Tiers Breakdown Table */}
+              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "14px", padding: "18px" }}>
+                <h3 style={{ fontSize: "15px", fontWeight: "800", color: "#ffffff", margin: "0 0 14px" }}>
+                  Ticket Tier Sales Breakdown Table
+                </h3>
+
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "12px" }}>
+                    <thead>
+                      <tr style={{ background: "rgba(0,0,0,0.5)", borderBottom: "1px solid rgba(212, 175, 55, 0.2)", color: "#D4AF37", fontSize: "11px", fontWeight: "800", textTransform: "uppercase" }}>
+                        <th style={{ padding: "10px 14px" }}>Event</th>
+                        <th style={{ padding: "10px 14px" }}>Tier Pass Name</th>
+                        <th style={{ padding: "10px 14px" }}>Price (₦)</th>
+                        <th style={{ padding: "10px 14px" }}>Sold / Capacity</th>
+                        <th style={{ padding: "10px 14px" }}>Tier Revenue (₦)</th>
+                        <th style={{ padding: "10px 14px" }}>Remaining Seats</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData.tierSummaries.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} style={{ padding: "20px", textAlign: "center", color: "#948B75" }}>
+                            No tier data available.
+                          </td>
+                        </tr>
+                      ) : (
+                        analyticsData.tierSummaries.map((tier, idx) => (
+                          <tr key={idx} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "10px 14px", color: "#ffffff", fontWeight: "700" }}>
+                              {tier.eventTitle}
+                            </td>
+                            <td style={{ padding: "10px 14px", color: "#F5D061", fontWeight: "700" }}>
+                              {tier.name}
+                            </td>
+                            <td style={{ padding: "10px 14px", color: "#10B981", fontWeight: "700" }}>
+                              {formatNaira(tier.price)}
+                            </td>
+                            <td style={{ padding: "10px 14px", color: "#E2D9BC" }}>
+                              {tier.sold} / {tier.capacity}
+                            </td>
+                            <td style={{ padding: "10px 14px", color: "#10B981", fontWeight: "800" }}>
+                              {formatNaira(tier.gross)}
+                            </td>
+                            <td style={{ padding: "10px 14px", color: tier.remaining < 20 ? "#EF4444" : "#E2D9BC" }}>
+                              {tier.remaining} tickets left
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: ATTENDEE & SALES ROSTER */}
           {activeTab === "attendees" && (
             <div>
               {/* Filter and Search Bar */}
@@ -681,13 +971,12 @@ export default function OrganizerDashboard({
                             <div style={{ color: "#ffffff", fontWeight: "600", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {t.eventTitle}
                             </div>
+                            <div style={{ fontSize: "11px", color: "#948B75" }}>{t.city}</div>
                           </td>
 
                           <td style={{ padding: "12px 16px" }}>
-                            <span style={{ background: "rgba(212, 175, 55, 0.15)", color: "#F5D061", padding: "2px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "700" }}>
-                              {t.tierName}
-                            </span>
-                            <div style={{ fontSize: "10px", color: "#948B75", marginTop: "2px" }}>{t.seatNumber}</div>
+                            <div style={{ color: "#F5D061", fontWeight: "600" }}>{t.tierName}</div>
+                            <div style={{ fontSize: "11px", color: "#948B75" }}>Seat: {t.seatNumber}</div>
                           </td>
 
                           <td style={{ padding: "12px 16px", color: "#10B981", fontWeight: "700" }}>
@@ -695,21 +984,15 @@ export default function OrganizerDashboard({
                           </td>
 
                           <td style={{ padding: "12px 16px" }}>
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                padding: "2px 8px",
-                                borderRadius: "10px",
-                                fontSize: "11px",
-                                fontWeight: "700",
-                                background: t.status === "checked_in" ? "rgba(16, 185, 129, 0.15)" : "rgba(59, 130, 246, 0.15)",
-                                color: t.status === "checked_in" ? "#10B981" : "#60A5FA"
-                              }}
-                            >
-                              {t.status === "checked_in" ? "✓ Checked In" : "Active Pass"}
-                            </span>
+                            {t.status === "checked_in" ? (
+                              <span style={{ padding: "2px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: "800", background: "rgba(16, 185, 129, 0.15)", color: "#10B981" }}>
+                                Checked In
+                              </span>
+                            ) : (
+                              <span style={{ padding: "2px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: "800", background: "rgba(245, 158, 11, 0.15)", color: "#F59E0B" }}>
+                                Active Pass
+                              </span>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -720,96 +1003,54 @@ export default function OrganizerDashboard({
             </div>
           )}
 
-          {/* TAB 3: PAYOUT & SETTLEMENTS */}
+          {/* TAB 4: PAYOUT & SETTLEMENTS */}
           {activeTab === "payouts" && (
-            <div style={{ maxWidth: "680px" }}>
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "14px", padding: "20px", marginBottom: "20px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#ffffff", margin: "0 0 12px" }}>
-                  Financial Settlement Breakdown
+            <div style={{ maxWidth: "700px" }}>
+              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "14px", padding: "24px", marginBottom: "20px" }}>
+                <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#ffffff", margin: "0 0 16px" }}>
+                  Automated Settlement Bank Account
                 </h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-                  <div style={{ background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "8px" }}>
-                    <div style={{ fontSize: "11px", color: "#948B75" }}>Gross Ticket Sales</div>
-                    <div style={{ fontSize: "18px", fontWeight: "800", color: "#ffffff", marginTop: "4px" }}>{formatNaira(totalRevenue)}</div>
-                  </div>
-
-                  <div style={{ background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "8px" }}>
-                    <div style={{ fontSize: "11px", color: "#948B75" }}>Platform Fee (5%)</div>
-                    <div style={{ fontSize: "18px", fontWeight: "800", color: "#EF4444", marginTop: "4px" }}>- {formatNaira(Math.round(totalRevenue * 0.05))}</div>
-                  </div>
-
-                  <div style={{ background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "8px" }}>
-                    <div style={{ fontSize: "11px", color: "#D4AF37" }}>Net Payout Balance (95%)</div>
-                    <div style={{ fontSize: "18px", fontWeight: "800", color: "#10B981", marginTop: "4px" }}>{formatNaira(Math.round(totalRevenue * 0.95))}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bank Account Details Form */}
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "14px", padding: "20px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#ffffff", margin: "0 0 4px" }}>
-                  Bank Settlement Details (Monnify Direct Payout)
-                </h3>
-                <p style={{ fontSize: "12px", color: "#948B75", margin: "0 0 16px" }}>
-                  Ticket earnings will be deposited into this verified Nigerian bank account.
-                </p>
 
                 <form onSubmit={handleSaveBank} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#D4AF37", marginBottom: "4px" }}>
-                      BANK NAME
-                    </label>
+                    <label style={{ display: "block", fontSize: "12px", color: "#948B75", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>Bank Name</label>
                     <input
                       type="text"
                       required
                       value={bankDetails.bankName}
                       onChange={e => setBankDetails({ ...bankDetails, bankName: e.target.value })}
-                      style={{ width: "100%", height: "40px", padding: "0 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", color: "#ffffff", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", height: "42px", padding: "0 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "8px", color: "#ffffff", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#D4AF37", marginBottom: "4px" }}>
-                      ACCOUNT NUMBER
-                    </label>
+                    <label style={{ display: "block", fontSize: "12px", color: "#948B75", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>NUBAN Account Number (10 Digits)</label>
                     <input
                       type="text"
                       required
+                      maxLength={10}
                       value={bankDetails.accountNumber}
                       onChange={e => setBankDetails({ ...bankDetails, accountNumber: e.target.value })}
-                      style={{ width: "100%", height: "40px", padding: "0 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", color: "#ffffff", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", height: "42px", padding: "0 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "8px", color: "#ffffff", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: "700", color: "#D4AF37", marginBottom: "4px" }}>
-                      ACCOUNT NAME
-                    </label>
+                    <label style={{ display: "block", fontSize: "12px", color: "#948B75", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>Account Beneficiary Name</label>
                     <input
                       type="text"
                       required
                       value={bankDetails.accountName}
                       onChange={e => setBankDetails({ ...bankDetails, accountName: e.target.value })}
-                      style={{ width: "100%", height: "40px", padding: "0 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", color: "#ffffff", outline: "none", boxSizing: "border-box" }}
+                      style={{ width: "100%", height: "42px", padding: "0 12px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "8px", color: "#ffffff", fontSize: "13px", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
 
                   <button
                     type="submit"
-                    style={{
-                      padding: "10px 20px",
-                      background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
-                      border: "none",
-                      borderRadius: "8px",
-                      color: "#070709",
-                      fontWeight: "800",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      alignSelf: "flex-start",
-                      marginTop: "6px"
-                    }}
+                    style={{ marginTop: "8px", height: "42px", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", border: "none", borderRadius: "8px", color: "#070709", fontSize: "13px", fontWeight: "800", cursor: "pointer" }}
                   >
-                    Save Settlement Account
+                    Save Settlement Details
                   </button>
                 </form>
               </div>
@@ -818,7 +1059,7 @@ export default function OrganizerDashboard({
         </div>
       </div>
 
-      {/* Edit Event Modal Integration */}
+      {/* Edit Event Modal */}
       {editingEvent && (
         <EditEventModal
           event={editingEvent}

@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
   EVENTS: "nmds_events_v2",
   TICKETS: "nmds_tickets_v2",
   RSVP: "nmds_rsvp_v2",
-  PAYMENTS: "nmds_payments_ledger_v2"
+  PAYMENTS: "nmds_payments_ledger_v2",
+  ACTIVITIES: "nmds_activity_feed_v2"
 };
 
 /**
@@ -47,10 +48,182 @@ export function getStoredEvents() {
       localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(INITIAL_EVENTS));
       return INITIAL_EVENTS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    let updated = false;
+    const synchronized = parsed.map(evt => {
+      if (!evt.organizerEmail || !evt.createdBy) {
+        const seed = INITIAL_EVENTS.find(s => s.id === evt.id);
+        if (seed && seed.organizerEmail) {
+          updated = true;
+          return {
+            ...evt,
+            organizer: seed.organizer,
+            organizerEmail: seed.organizerEmail,
+            createdBy: seed.createdBy || seed.organizerEmail,
+            organizerPhone: seed.organizerPhone || evt.organizerPhone || ""
+          };
+        }
+      }
+      return evt;
+    });
+    if (updated) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(synchronized));
+      } catch {}
+    }
+    return synchronized;
   } catch (err) {
     console.error("Failed to load events:", err);
     return INITIAL_EVENTS;
+  }
+}
+
+export const INITIAL_ACTIVITIES = [
+  {
+    id: "act_init_1",
+    type: "payment",
+    category: "Payment",
+    title: "Ticket Purchase Completed",
+    description: "Chukwudi Eze paid ₦25,000 for VIP Lounge Pass at Vibes Barn Festival",
+    actor: "Chukwudi Eze",
+    actorEmail: "chukwudi.eze@gmail.com",
+    role: "attendee",
+    eventTitle: "Vibes Barn: Afe Mbre Festival",
+    orderId: "ORD-NG-849201",
+    amount: 25000,
+    timestamp: "2026-09-27T20:15:00.000Z"
+  },
+  {
+    id: "act_init_2",
+    type: "checkin",
+    category: "Gate Check-In",
+    title: "Gate Admission Verified",
+    description: "Amina Bello checked in at Landmark Event Centre for Lagos Tech Unwind",
+    actor: "Gate Marshall Segun",
+    actorEmail: "gate1@landmark.ng",
+    role: "staff",
+    eventTitle: "Lagos Tech & Founders Unwind 2026",
+    ticketId: "NMDS-2026-4R8E-W19P",
+    timestamp: "2026-09-25T08:15:22.000Z"
+  },
+  {
+    id: "act_init_3",
+    type: "event",
+    category: "Event Publishing",
+    title: "New Event Published Live",
+    description: "Flytime Promotions published 'Flytime Fest 2026' with 3 ticket tiers",
+    actor: "Flytime Promotions HQ",
+    actorEmail: "info@flytimefest.com",
+    role: "organizer",
+    eventTitle: "Flytime Fest: Rhythm & Soul",
+    timestamp: "2026-09-22T14:30:00.000Z"
+  },
+  {
+    id: "act_init_4",
+    type: "auth",
+    category: "Super Admin",
+    title: "Super Admin Root Initialized",
+    description: "Brino Ekanem authenticated with Super Admin root permissions",
+    actor: "Brino Ekanem",
+    actorEmail: "brinoekanem@gmail.com",
+    role: "admin",
+    timestamp: "2026-09-20T10:00:00.000Z"
+  },
+  {
+    id: "act_init_5",
+    type: "auth",
+    category: "Super Admin",
+    title: "Super Admin Console Session",
+    description: "Rhobbin Rayner reviewed global payments and accounts ledger",
+    actor: "Rhobbin Rayner",
+    actorEmail: "iamrhobbinraynerhq01@gmail.com",
+    role: "admin",
+    timestamp: "2026-09-26T16:45:00.000Z"
+  },
+  {
+    id: "act_init_6",
+    type: "payment",
+    category: "Payment",
+    title: "Monnify Card Payment Cleared",
+    description: "Tunde Bakare paid ₦10,000 for 2x Regular Access passes",
+    actor: "Tunde Bakare",
+    actorEmail: "tunde.bakare@lagosmail.com",
+    role: "attendee",
+    eventTitle: "Vibes Barn: Afe Mbre Festival",
+    orderId: "ORD-NG-628491",
+    amount: 10000,
+    timestamp: "2026-09-26T14:20:00.000Z"
+  },
+  {
+    id: "act_init_7",
+    type: "event",
+    category: "Event Moderation",
+    title: "Event Details Updated",
+    description: "David Adeleke updated venue and tier capacity for 'Timeless Lagos Stadium Concert'",
+    actor: "David Adeleke (Davido)",
+    actorEmail: "davido@dmw.ng",
+    role: "organizer",
+    eventTitle: "Timeless Lagos Stadium Concert",
+    eventId: "evt_timeless_stadium_lagos",
+    timestamp: "2026-09-25T17:10:00.000Z"
+  },
+  {
+    id: "act_init_8",
+    type: "payment",
+    category: "Payment",
+    title: "Early Bird Ticket Purchase",
+    description: "Kelechi Nwosu paid ₦16,000 for 2x Early Bird Passes",
+    actor: "Kelechi Nwosu",
+    actorEmail: "kelechi.nwosu@gmail.com",
+    role: "attendee",
+    eventTitle: "Detty December Landmark Beach Rave",
+    orderId: "ORD-NG-519283",
+    amount: 16000,
+    timestamp: "2026-09-27T19:45:00.000Z"
+  },
+  {
+    id: "act_init_9",
+    type: "checkin",
+    category: "Gate Check-In",
+    title: "Gate Check-In Admitted",
+    description: "Chukwudi Eze scanned in at VIP Entrance with ticket pass NMDS-2026-9X7M-K42B",
+    actor: "Gate Marshall Kalu",
+    role: "staff",
+    ticketId: "NMDS-2026-9X7M-K42B",
+    eventTitle: "Vibes Barn: Afe Mbre Festival",
+    timestamp: "2026-09-27T20:45:10.000Z"
+  }
+];
+
+export function getActivityFeed() {
+  if (typeof window === "undefined") return INITIAL_ACTIVITIES;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(INITIAL_ACTIVITIES));
+      return INITIAL_ACTIVITIES;
+    }
+    return JSON.parse(raw);
+  } catch {
+    return INITIAL_ACTIVITIES;
+  }
+}
+
+export function recordActivity(activityData) {
+  if (typeof window === "undefined") return activityData;
+  try {
+    const feed = getActivityFeed();
+    const newActivity = {
+      id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      timestamp: new Date().toISOString(),
+      ...activityData
+    };
+    const updated = [newActivity, ...feed].slice(0, 150);
+    localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(updated));
+    return newActivity;
+  } catch (err) {
+    console.error("Failed to record activity:", err);
+    return activityData;
   }
 }
 
@@ -60,6 +233,19 @@ export function saveNewEvent(eventData) {
     const events = getStoredEvents();
     const newEvents = [eventData, ...events];
     localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(newEvents));
+
+    recordActivity({
+      type: "event",
+      category: "Event Publishing",
+      title: "New Event Published Live",
+      description: `${eventData.organizer || "Organizer"} published "${eventData.title}" (${(eventData.tiers || []).length} tiers, ${eventData.city})`,
+      actor: eventData.organizer || "Event Organizer",
+      actorEmail: eventData.organizerEmail || "",
+      role: "organizer",
+      eventTitle: eventData.title,
+      eventId: eventData.id
+    });
+
     return newEvents;
   } catch (err) {
     console.error("Failed to save new event:", err);
@@ -98,6 +284,18 @@ export function updateEvent(eventId, updatedFields) {
       } catch {}
     }
 
+    recordActivity({
+      type: "event",
+      category: "Event Moderation",
+      title: "Event Details Updated",
+      description: `Event "${updated.title}" was edited and saved`,
+      actor: updated.organizer || "Organizer",
+      actorEmail: updated.organizerEmail || "",
+      role: "organizer",
+      eventTitle: updated.title,
+      eventId: updated.id
+    });
+
     return updated;
   } catch (err) {
     console.error("Failed to update event:", err);
@@ -112,8 +310,24 @@ export function deleteEvent(eventId) {
   if (typeof window === "undefined") return false;
   try {
     const events = getStoredEvents();
+    const target = events.find(e => e.id === eventId);
     const filtered = events.filter(e => e.id !== eventId);
     localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(filtered));
+
+    if (target) {
+      recordActivity({
+        type: "event",
+        category: "Event Moderation",
+        title: "Event Removed",
+        description: `Event "${target.title}" was removed from the catalog`,
+        actor: target.organizer || "Organizer / Admin",
+        actorEmail: target.organizerEmail || "",
+        role: "admin",
+        eventTitle: target.title,
+        eventId: target.id
+      });
+    }
+
     return true;
   } catch (err) {
     console.error("Failed to delete event:", err);
@@ -163,6 +377,7 @@ export const INITIAL_TICKETS = [
     city: "Uyo, Akwa Ibom",
     address: "Udo Udoma Banking District",
     organizer: "Vibes Barn Global",
+    organizerEmail: "info@vibesbarn.com",
     accentColor: "#522672",
     bannerPattern: "linear-gradient(135deg, #2D1B4E 0%, #522672 50%, #ff8a65 100%)",
     tierId: "tier_vip",
@@ -180,9 +395,9 @@ export const INITIAL_TICKETS = [
     },
     paymentMethod: "paystack",
     purchaseDate: "2026-09-20T18:30:00.000Z",
-    status: "active",
-    checkedInAt: null,
-    gateStaff: null
+    status: "checked_in",
+    checkedInAt: "2026-09-27T20:45:10.000Z",
+    gateStaff: "Gate Marshall Kalu"
   },
   {
     ticketId: "NMDS-2026-4R8E-W19P",
@@ -196,6 +411,7 @@ export const INITIAL_TICKETS = [
     city: "Victoria Island, Lagos",
     address: "Water Corporation Drive, Oniru",
     organizer: "Founders Circle Africa",
+    organizerEmail: "hello@founderscircle.ng",
     accentColor: "#D4AF37",
     bannerPattern: "linear-gradient(135deg, #070709 0%, #1a160d 50%, #D4AF37 100%)",
     tierId: "tier_builder",
@@ -216,6 +432,102 @@ export const INITIAL_TICKETS = [
     status: "checked_in",
     checkedInAt: "2026-09-25T08:15:22.000Z",
     gateStaff: "Gate Marshall Segun"
+  },
+  {
+    ticketId: "NMDS-2026-3X8K-Q72L",
+    orderId: "ORD-NG-628491",
+    eventId: "evt_vibes_barn_afe_mbre",
+    eventTitle: "Vibes Barn: Afe Mbre Festival",
+    eventSubtitle: "The ultimate cultural groove, live music, beachside culinary feast, and Afro-fusion experience.",
+    eventDate: "Sep 27, 2026",
+    eventTime: "08:00 PM - 04:00 AM",
+    venue: "Ibom Tropicana Entertainment Center",
+    city: "Uyo, Akwa Ibom",
+    address: "Udo Udoma Banking District",
+    organizer: "Vibes Barn Global",
+    organizerEmail: "info@vibesbarn.com",
+    accentColor: "#522672",
+    tierId: "tier_reg",
+    tierName: "Regular Access",
+    tierPrice: 5000,
+    currency: "₦",
+    xpReward: 25,
+    perks: ["General entry", "Festival wristband"],
+    seatNumber: "REG-GA-102",
+    attendee: {
+      name: "Tunde Bakare",
+      email: "tunde.bakare@lagosmail.com",
+      phone: "+234 802 334 5566"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-26T14:20:00.000Z",
+    status: "active",
+    checkedInAt: null,
+    gateStaff: null
+  },
+  {
+    ticketId: "NMDS-2026-7H2V-M91P",
+    orderId: "ORD-NG-519283",
+    eventId: "evt_detty_december_beach",
+    eventTitle: "Detty December Landmark Beach Rave",
+    eventSubtitle: "End of year afrobeat fiesta on the beachfront with top guest artists and sunrise DJ sets.",
+    eventDate: "Dec 20, 2026",
+    eventTime: "06:00 PM - 05:00 AM",
+    venue: "Landmark Beach",
+    city: "Victoria Island, Lagos",
+    address: "Water Corporation Road, Oniru",
+    organizer: "Soundcity Pulse",
+    organizerEmail: "events@soundcitypulse.com",
+    accentColor: "#F59E0B",
+    tierId: "tier_eb",
+    tierName: "Early Bird General Pass",
+    tierPrice: 8000,
+    currency: "₦",
+    xpReward: 40,
+    perks: ["Beach access pass", "1 Free drink ticket"],
+    seatNumber: "BEACH-GA-044",
+    attendee: {
+      name: "Kelechi Nwosu",
+      email: "kelechi.nwosu@gmail.com",
+      phone: "+234 805 112 3344"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-27T19:45:00.000Z",
+    status: "active",
+    checkedInAt: null,
+    gateStaff: null
+  },
+  {
+    ticketId: "NMDS-2026-6Y9T-B38V",
+    orderId: "ORD-NG-408192",
+    eventId: "evt_timeless_stadium_lagos",
+    eventTitle: "Timeless Lagos Stadium Concert",
+    eventSubtitle: "Davido live in concert with an unmissable orchestra and guest superstars.",
+    eventDate: "Dec 28, 2026",
+    eventTime: "07:00 PM - 02:00 AM",
+    venue: "Teslim Balogun Stadium",
+    city: "Surulere, Lagos",
+    address: "Alhaji Masha Road",
+    organizer: "David Adeleke (Davido)",
+    organizerEmail: "davido@dmw.ng",
+    accentColor: "#D4AF37",
+    tierId: "tier_gold_circle",
+    tierName: "Gold Circle Stage Pass",
+    tierPrice: 35000,
+    currency: "₦",
+    xpReward: 150,
+    perks: ["Front of stage pit access", "Collector laminate", "Dedicated VIP bar"],
+    seatNumber: "STAGE-PIT-019",
+    attendee: {
+      name: "Amina Bello",
+      email: "amina.bello@techfoundry.africa",
+      phone: "+234 812 345 6789"
+    },
+    paymentMethod: "monnify",
+    purchaseDate: "2026-09-24T12:00:00.000Z",
+    status: "active",
+    checkedInAt: null,
+    gateStaff: null
   }
 ];
 
@@ -339,6 +651,29 @@ export const INITIAL_PAYMENTS = [
     paymentMethod: "monnify",
     paymentStatus: "PAID",
     timestamp: "2026-09-27T19:45:00.000Z"
+  },
+  {
+    orderId: "ORD-NG-408192",
+    transactionRef: "MNF_TX_408192_811",
+    paymentReference: "MNF_REV_2026_4081",
+    eventId: "evt_timeless_stadium_lagos",
+    eventTitle: "Timeless Lagos Stadium Concert",
+    organizer: "David Adeleke (Davido)",
+    organizerEmail: "davido@dmw.ng",
+    attendee: {
+      name: "Amina Bello",
+      email: "amina.bello@techfoundry.africa",
+      phone: "+234 812 345 6789"
+    },
+    quantity: 1,
+    tierName: "Gold Circle Stage Pass",
+    grossAmount: 35000,
+    platformFee: 1750,
+    organizerPayout: 33250,
+    currency: "₦",
+    paymentMethod: "monnify",
+    paymentStatus: "PAID",
+    timestamp: "2026-09-24T12:00:00.000Z"
   }
 ];
 
@@ -472,6 +807,21 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
     timestamp: new Date().toISOString()
   });
 
+  // Record platform activity
+  recordActivity({
+    type: "payment",
+    category: "Ticket Order",
+    title: "New Tickets Purchased",
+    description: `${attendee.name} paid ${tier.currency || "₦"}${totalPaid.toLocaleString()} for ${quantity}x ${tier.name} (${event.title})`,
+    actor: attendee.name,
+    actorEmail: attendee.email,
+    role: "attendee",
+    eventTitle: event.title,
+    orderId,
+    amount: totalPaid,
+    ticketCount: quantity
+  });
+
   return {
     orderId,
     tickets: createdTickets,
@@ -484,7 +834,7 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
 /**
  * Validates a ticket ID for Gate Staff Scanner
  */
-export function validateTicket(ticketId) {
+export function validateTicket(ticketId, staffName = "Gate Marshall #1") {
   const cleanId = (ticketId || "").trim().toUpperCase();
   const tickets = getStoredTickets();
   const found = tickets.find(
@@ -510,13 +860,14 @@ export function validateTicket(ticketId) {
   }
 
   // Mark ticket as checked in
+  const checkInTime = new Date().toISOString();
   const updatedTickets = tickets.map(t => {
     if (t.ticketId === found.ticketId) {
       return {
         ...t,
         status: "checked_in",
-        checkedInAt: new Date().toISOString(),
-        gateStaff: "Gate Marshall #1"
+        checkedInAt: checkInTime,
+        gateStaff: staffName
       };
     }
     return t;
@@ -530,6 +881,18 @@ export function validateTicket(ticketId) {
     }
   }
 
+  recordActivity({
+    type: "checkin",
+    category: "Gate Check-In",
+    title: "Attendee Admitted",
+    description: `${found.attendee?.name || "Attendee"} admitted at gate for "${found.eventTitle}" (${found.tierName})`,
+    actor: staffName,
+    role: "staff",
+    ticketId: found.ticketId,
+    eventTitle: found.eventTitle,
+    orderId: found.orderId
+  });
+
   return {
     success: true,
     status: "valid",
@@ -537,13 +900,14 @@ export function validateTicket(ticketId) {
     ticket: {
       ...found,
       status: "checked_in",
-      checkedInAt: new Date().toISOString()
+      checkedInAt: checkInTime,
+      gateStaff: staffName
     }
   };
 }
 
 export function verifyTicketCheckIn(ticketId, staffName = "Gate Marshall") {
-  const result = validateTicket(ticketId);
+  const result = validateTicket(ticketId, staffName);
   if (result.success) {
     return {
       status: "SUCCESS",
@@ -564,4 +928,258 @@ export function verifyTicketCheckIn(ticketId, staffName = "Gate Marshall") {
     };
   }
 }
+
+/**
+ * Toggle or force ticket check-in status (Admin/Staff override)
+ */
+export function toggleTicketStatus(ticketId, forcedStatus = null, staff = "Super Admin") {
+  if (typeof window === "undefined") return null;
+  try {
+    const tickets = getStoredTickets();
+    const index = tickets.findIndex(t => t.ticketId.toUpperCase() === (ticketId || "").toUpperCase());
+    if (index === -1) return null;
+
+    const current = tickets[index];
+    const newStatus = forcedStatus || (current.status === "checked_in" ? "active" : "checked_in");
+    const updated = {
+      ...current,
+      status: newStatus,
+      checkedInAt: newStatus === "checked_in" ? new Date().toISOString() : null,
+      gateStaff: newStatus === "checked_in" ? staff : null
+    };
+
+    tickets[index] = updated;
+    localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(tickets));
+
+    recordActivity({
+      type: "checkin",
+      category: "Ticketing Admin",
+      title: newStatus === "checked_in" ? "Ticket Checked In (Admin Override)" : "Ticket Check-in Reset to Active",
+      description: `Ticket ${current.ticketId} (${current.attendee?.name}, ${current.eventTitle}) status set to ${newStatus}`,
+      actor: staff,
+      role: "admin",
+      ticketId: current.ticketId,
+      eventTitle: current.eventTitle
+    });
+
+    return updated;
+  } catch (err) {
+    console.error("Failed to toggle ticket status:", err);
+    return null;
+  }
+}
+
+/**
+ * Super Admin Helper: Scopes all portal entities (activities, payments, tickets, events)
+ * to a single registered user account, OR returns all if "all" / null.
+ */
+export function getAccountPortalData(accountEmailOrId) {
+  const allActivities = getActivityFeed();
+  const allPayments = getPaymentsLedger();
+  const allTickets = getStoredTickets();
+  const allEvents = getStoredEvents();
+
+  if (!accountEmailOrId || accountEmailOrId === "all") {
+    return {
+      isGlobal: true,
+      email: "all",
+      activities: allActivities,
+      payments: allPayments,
+      tickets: allTickets,
+      events: allEvents,
+      metrics: {
+        totalPaid: allPayments.reduce((s, p) => s + (Number(p.grossAmount) || 0), 0),
+        totalEarned: allPayments.reduce((s, p) => s + (Number(p.organizerPayout) || 0), 0),
+        platformRevenue: allPayments.reduce((s, p) => s + (Number(p.platformFee) || 0), 0),
+        totalTicketsIssued: allTickets.length,
+        eventsCount: allEvents.length
+      }
+    };
+  }
+
+  const clean = String(accountEmailOrId).toLowerCase().trim();
+
+  // Events owned or created by this account
+  const accountEvents = allEvents.filter(e =>
+    (e.organizerEmail && e.organizerEmail.toLowerCase() === clean) ||
+    (e.createdBy && e.createdBy.toLowerCase() === clean) ||
+    (e.organizerId && String(e.organizerId).toLowerCase() === clean)
+  );
+  const accountEventIds = new Set(accountEvents.map(e => e.id));
+
+  // Payments where account was payer OR organizer
+  const accountPayments = allPayments.filter(p =>
+    (p.attendee?.email && p.attendee.email.toLowerCase() === clean) ||
+    (p.organizerEmail && p.organizerEmail.toLowerCase() === clean) ||
+    (p.organizerId && String(p.organizerId).toLowerCase() === clean) ||
+    (p.eventId && accountEventIds.has(p.eventId))
+  );
+
+  // Tickets where account is attendee OR tickets sold for account's events
+  const accountTickets = allTickets.filter(t =>
+    (t.attendee?.email && t.attendee.email.toLowerCase() === clean) ||
+    accountEventIds.has(t.eventId)
+  );
+
+  // Activities performed by, targeted to, or pertaining to this account
+  const accountActivities = allActivities.filter(a =>
+    (a.actorEmail && a.actorEmail.toLowerCase() === clean) ||
+    (a.targetEmail && a.targetEmail.toLowerCase() === clean) ||
+    (a.eventId && accountEventIds.has(a.eventId)) ||
+    (a.orderId && accountPayments.some(p => p.orderId === a.orderId)) ||
+    (a.ticketId && accountTickets.some(t => t.ticketId === a.ticketId))
+  );
+
+  const totalPaid = accountPayments
+    .filter(p => p.attendee?.email && p.attendee.email.toLowerCase() === clean)
+    .reduce((s, p) => s + (Number(p.grossAmount) || 0), 0);
+
+  const totalEarned = accountPayments
+    .filter(p => (p.organizerEmail && p.organizerEmail.toLowerCase() === clean) || accountEventIds.has(p.eventId))
+    .reduce((s, p) => s + (Number(p.organizerPayout) || 0), 0);
+
+  const totalTicketsBought = accountTickets.filter(t => t.attendee?.email && t.attendee.email.toLowerCase() === clean).length;
+  const totalTicketsSold = accountTickets.filter(t => accountEventIds.has(t.eventId)).length;
+
+  return {
+    isGlobal: false,
+    email: clean,
+    events: accountEvents,
+    payments: accountPayments,
+    tickets: accountTickets,
+    activities: accountActivities,
+    metrics: {
+      totalPaid,
+      totalEarned,
+      totalTicketsBought,
+      totalTicketsSold,
+      eventsCount: accountEvents.length
+    }
+  };
+}
+
+/**
+ * Organizer Analytics Helper: Generates organized structured analytics for event creators
+ */
+export function getOrganizerEventAnalytics(organizerEmailOrId, specificEventId = "all", customEvents = null) {
+  const allEvents = Array.isArray(customEvents) ? customEvents : getStoredEvents();
+  const allTickets = getStoredTickets();
+  const allPayments = getPaymentsLedger();
+
+  const cleanEmail = organizerEmailOrId ? String(organizerEmailOrId).toLowerCase().trim() : "";
+
+  // Filter events strictly belonging to organizer
+  const organizerEvents = Array.isArray(customEvents)
+    ? customEvents
+    : allEvents.filter(e => {
+        if (!cleanEmail) return false;
+        return (e.organizerEmail && e.organizerEmail.toLowerCase() === cleanEmail) ||
+          (e.createdBy && e.createdBy.toLowerCase() === cleanEmail) ||
+          (e.organizerId && String(e.organizerId).toLowerCase() === cleanEmail);
+      });
+
+  const selectedEvents = specificEventId && specificEventId !== "all"
+    ? organizerEvents.filter(e => e.id === specificEventId)
+    : organizerEvents;
+
+  // If this organizer has zero events, return strictly zero metrics
+  if (!selectedEvents || selectedEvents.length === 0) {
+    return {
+      grossSales: 0,
+      platformFee: 0,
+      netPayout: 0,
+      ticketsSold: 0,
+      checkedInCount: 0,
+      totalCapacity: 0,
+      checkInRate: 0,
+      capacitySoldRate: 0,
+      eventSummaries: [],
+      tierSummaries: [],
+      recentCheckIns: []
+    };
+  }
+
+  const targetEventIds = new Set(selectedEvents.map(e => e.id));
+
+  // Tickets for these events
+  const relevantTickets = allTickets.filter(t => targetEventIds.has(t.eventId));
+  // Payments for these events
+  const relevantPayments = allPayments.filter(p => targetEventIds.has(p.eventId));
+
+  const grossSales = relevantPayments.reduce((sum, p) => sum + (Number(p.grossAmount) || 0), 0);
+  const platformFee = Math.round(grossSales * 0.05);
+  const netPayout = grossSales - platformFee;
+  const ticketsSold = relevantTickets.length;
+  const checkedInCount = relevantTickets.filter(t => t.status === "checked_in").length;
+  const totalCapacity = selectedEvents.reduce((sum, e) => {
+    return sum + (e.tiers || []).reduce((tsum, tier) => tsum + (Number(tier.capacity) || 100), 0);
+  }, 0);
+
+  const checkInRate = ticketsSold > 0 ? Math.round((checkedInCount / ticketsSold) * 100) : 0;
+  const capacitySoldRate = totalCapacity > 0 ? Math.min(100, Math.round((ticketsSold / totalCapacity) * 100)) : 0;
+
+  // Event summaries table rows
+  const eventSummaries = selectedEvents.map(e => {
+    const eTickets = relevantTickets.filter(t => t.eventId === e.id);
+    const ePayments = relevantPayments.filter(p => p.eventId === e.id);
+    const eGross = ePayments.reduce((sum, p) => sum + (Number(p.grossAmount) || 0), 0);
+    const eNet = Math.round(eGross * 0.95);
+    const eSold = eTickets.length;
+    const eCap = (e.tiers || []).reduce((tsum, tier) => tsum + (Number(tier.capacity) || 100), 0);
+    const eCheckedIn = eTickets.filter(t => t.status === "checked_in").length;
+    const eCheckInRate = eSold > 0 ? Math.round((eCheckedIn / eSold) * 100) : 0;
+
+    return {
+      id: e.id,
+      title: e.title,
+      category: e.category,
+      date: e.date,
+      venue: e.venue,
+      city: e.city,
+      status: e.status || "live",
+      grossRevenue: eGross,
+      netPayout: eNet,
+      ticketsSold: eSold,
+      capacity: eCap,
+      checkedIn: eCheckedIn,
+      checkInRate: eCheckInRate,
+      tiers: e.tiers || []
+    };
+  });
+
+  // Tier summaries table rows
+  const tierSummaries = [];
+  selectedEvents.forEach(e => {
+    (e.tiers || []).forEach(tier => {
+      const soldForTier = relevantTickets.filter(t => t.eventId === e.id && (t.tierId === tier.id || t.tierName === tier.name)).length;
+      const tierGross = soldForTier * (Number(tier.price) || 0);
+      tierSummaries.push({
+        eventId: e.id,
+        eventTitle: e.title,
+        tierId: tier.id,
+        name: tier.name,
+        price: tier.price,
+        capacity: tier.capacity || 100,
+        sold: soldForTier,
+        gross: tierGross,
+        remaining: Math.max(0, (tier.capacity || 100) - soldForTier)
+      });
+    });
+  });
+
+  return {
+    grossSales,
+    platformFee,
+    netPayout,
+    ticketsSold,
+    checkedInCount,
+    totalCapacity,
+    checkInRate,
+    capacitySoldRate,
+    eventSummaries,
+    tierSummaries,
+    recentCheckIns: relevantTickets.filter(t => t.status === "checked_in").slice(0, 10)
+  };
+}
+
 

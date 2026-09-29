@@ -332,6 +332,7 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated 
       organizerId: currentUser?.id || currentUser?.email || `org_${Date.now()}`,
       organizerEmail: currentUser?.email || "",
       organizerPhone: currentUser?.phone || "",
+      createdBy: currentUser?.email || currentUser?.id || "",
       status: "live",
       isFeatured: false,
       badge: "✨ Newly Published",

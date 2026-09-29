@@ -18,10 +18,57 @@ export function formatPhoneNumber(phone) {
 }
 
 // Super Admin authorized accounts - automatically granted full root privileges
-export const SUPER_ADMIN_EMAILS = [
+export const DEFAULT_SUPER_ADMIN_EMAILS = [
   "brinoekanem@gmail.com",
   "iamrhobbinraynerhq01@gmail.com"
 ];
+
+const SUPER_ADMINS_STORAGE_KEY = "nmds_super_admin_emails_v2";
+
+export function getSuperAdminEmails() {
+  if (typeof window === "undefined") return [...DEFAULT_SUPER_ADMIN_EMAILS];
+  try {
+    const raw = localStorage.getItem(SUPER_ADMINS_STORAGE_KEY);
+    const custom = raw ? JSON.parse(raw) : [];
+    const combined = [
+      ...DEFAULT_SUPER_ADMIN_EMAILS.map(e => e.toLowerCase().trim()),
+      ...(Array.isArray(custom) ? custom.map(e => String(e).toLowerCase().trim()) : [])
+    ];
+    return [...new Set(combined)];
+  } catch {
+    return [...DEFAULT_SUPER_ADMIN_EMAILS];
+  }
+}
+
+export function addSuperAdminEmail(email) {
+  if (!email || !email.includes("@")) return false;
+  const clean = email.toLowerCase().trim();
+  const current = getSuperAdminEmails();
+  if (!current.includes(clean)) {
+    const updated = [...current, clean];
+    try {
+      localStorage.setItem(SUPER_ADMINS_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  }
+  promoteToSuperAdmin(clean);
+  return true;
+}
+
+export function removeSuperAdminEmail(email) {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  // Don't remove core default superadmins
+  if (DEFAULT_SUPER_ADMIN_EMAILS.map(e => e.toLowerCase()).includes(clean)) {
+    return false;
+  }
+  const current = getSuperAdminEmails().filter(e => e !== clean);
+  try {
+    localStorage.setItem(SUPER_ADMINS_STORAGE_KEY, JSON.stringify(current));
+  } catch {}
+  return true;
+}
+
+export const SUPER_ADMIN_EMAILS = DEFAULT_SUPER_ADMIN_EMAILS;
 
 export const ADMIN_PASSCODE = "NMDS-ADMIN-2026";
 
@@ -74,6 +121,54 @@ export const SEED_USERS = [
     authProvider: "direct",
     createdAt: "2026-02-15T12:00:00.000Z",
     initials: "FP"
+  },
+  {
+    id: "usr_attendee_chukwudi",
+    fullName: "Chukwudi Eze",
+    email: "chukwudi.eze@gmail.com",
+    phone: "+2348034567890",
+    role: "attendee",
+    isSuperAdmin: false,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-03-01T10:00:00.000Z",
+    initials: "CE"
+  },
+  {
+    id: "usr_attendee_amina",
+    fullName: "Amina Bello",
+    email: "amina.bello@techfoundry.africa",
+    phone: "+2348123456789",
+    role: "attendee",
+    isSuperAdmin: false,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-03-05T12:00:00.000Z",
+    initials: "AB"
+  },
+  {
+    id: "usr_attendee_tunde",
+    fullName: "Tunde Bakare",
+    email: "tunde.bakare@lagosmail.com",
+    phone: "+2348023345566",
+    role: "attendee",
+    isSuperAdmin: false,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-03-10T14:00:00.000Z",
+    initials: "TB"
+  },
+  {
+    id: "usr_attendee_kelechi",
+    fullName: "Kelechi Nwosu",
+    email: "kelechi.nwosu@gmail.com",
+    phone: "+2348051123344",
+    role: "attendee",
+    isSuperAdmin: false,
+    verified: true,
+    authProvider: "direct",
+    createdAt: "2026-03-12T09:00:00.000Z",
+    initials: "KN"
   }
 ];
 
@@ -92,12 +187,29 @@ export function getAllRegisteredUsers() {
 
     // Ensure Super Admins are always present and properly elevated
     let updated = false;
-    SUPER_ADMIN_EMAILS.forEach(adminEmail => {
+    getSuperAdminEmails().forEach(adminEmail => {
       const idx = users.findIndex(u => u.email && u.email.toLowerCase() === adminEmail.toLowerCase());
       if (idx === -1) {
         const seed = SEED_USERS.find(s => s.email.toLowerCase() === adminEmail.toLowerCase());
         if (seed) {
           users.unshift({ ...seed });
+          updated = true;
+        } else {
+          // Create user entry for dynamic superadmin
+          const namePart = adminEmail.split("@")[0].replace(/[._-]/g, " ");
+          const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+          users.unshift({
+            id: `usr_superadmin_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+            fullName: formattedName,
+            email: adminEmail,
+            phone: "+2348000000000",
+            role: "admin",
+            isSuperAdmin: true,
+            verified: true,
+            authProvider: "direct",
+            createdAt: new Date().toISOString(),
+            initials: formattedName.slice(0, 2).toUpperCase()
+          });
           updated = true;
         }
       } else {
@@ -145,7 +257,7 @@ export function lookupUser(identifier) {
 export function isSuperAdminEmail(email) {
   if (!email) return false;
   const clean = String(email).trim().toLowerCase();
-  return SUPER_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === clean);
+  return getSuperAdminEmails().some(adminEmail => adminEmail.toLowerCase() === clean);
 }
 
 export function isSuperAdmin(user) {
@@ -258,7 +370,10 @@ export async function signInWithDetails({ fullName, email, phone }) {
     user.phone = cleanPhone;
     user.initials = getInitials(cleanName);
     user.lastLoginAt = new Date().toISOString();
-    if (isAdmin) user.role = "admin";
+    if (isAdmin) {
+      user.role = "admin";
+      user.isSuperAdmin = true;
+    }
   } else {
     // Check if phone belongs to another user
     const existingPhone = users.find(u => u.phone === cleanPhone && u.email !== cleanEmail);
@@ -268,7 +383,10 @@ export async function signInWithDetails({ fullName, email, phone }) {
       user.email = cleanEmail;
       user.fullName = cleanName;
       user.initials = getInitials(cleanName);
-      if (isAdmin) user.role = "admin";
+      if (isAdmin) {
+        user.role = "admin";
+        user.isSuperAdmin = true;
+      }
     } else {
       // Create new user profile
       user = {
@@ -277,6 +395,7 @@ export async function signInWithDetails({ fullName, email, phone }) {
         email: cleanEmail,
         phone: cleanPhone,
         role: isAdmin ? "admin" : "attendee",
+        isSuperAdmin: Boolean(isAdmin),
         verified: true,
         authProvider: "direct",
         createdAt: new Date().toISOString(),
@@ -356,7 +475,10 @@ export async function signInWithGoogle(googleData = null) {
     user.googleId = googleId || user.googleId;
     if (avatarUrl) user.avatarUrl = avatarUrl;
     user.lastLoginAt = new Date().toISOString();
-    if (isAdmin) user.role = "admin";
+    if (isAdmin) {
+      user.role = "admin";
+      user.isSuperAdmin = true;
+    }
   } else {
     user = {
       id: `usr_g_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -364,6 +486,7 @@ export async function signInWithGoogle(googleData = null) {
       email: cleanEmail,
       phone: "+234",
       role: isAdmin ? "admin" : "attendee",
+      isSuperAdmin: Boolean(isAdmin),
       verified: true,
       authProvider: "google",
       googleId: googleId || `g_${Date.now()}`,
@@ -457,3 +580,57 @@ export function updateUserRole(userId, newRole) {
 export function promoteToOrganizer(userIdOrEmail) {
   return updateUserRole(userIdOrEmail, "organizer");
 }
+
+// Promote user to super admin
+export function promoteToSuperAdmin(userIdOrEmail) {
+  if (typeof window === "undefined") return null;
+  const users = getAllRegisteredUsers();
+  const target = users.find(u => u.id === userIdOrEmail || (u.email && u.email.toLowerCase() === String(userIdOrEmail).toLowerCase()));
+  if (target) {
+    target.role = "admin";
+    target.isSuperAdmin = true;
+    saveUsersDb(users);
+    
+    // Update active session if target is current user
+    const current = getAuthUser();
+    if (current && (current.id === target.id || current.email === target.email)) {
+      current.role = "admin";
+      current.isSuperAdmin = true;
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(current));
+      notifyAuthChange(current);
+    }
+    return target;
+  }
+  return null;
+}
+
+// Instant switch active session to any registered account (Super Admin tool or quick test)
+export function quickSwitchAccount(email) {
+  if (typeof window === "undefined" || !email) return null;
+  const clean = email.toLowerCase().trim();
+  const users = getAllRegisteredUsers();
+  let target = users.find(u => u.email && u.email.toLowerCase() === clean);
+  const isAdmin = isSuperAdminEmail(clean);
+
+  if (!target) {
+    const seed = SEED_USERS.find(s => s.email.toLowerCase() === clean);
+    if (seed) {
+      target = { ...seed };
+      users.unshift(target);
+      saveUsersDb(users);
+    }
+  }
+
+  if (target) {
+    if (isAdmin) {
+      target.role = "admin";
+      target.isSuperAdmin = true;
+    }
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(target));
+    notifyAuthChange(target);
+    return target;
+  }
+  return null;
+}
+
+

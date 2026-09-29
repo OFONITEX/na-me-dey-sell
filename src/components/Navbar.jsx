@@ -11,7 +11,9 @@ import {
   LogOutIcon,
   PhoneIcon,
   MailIcon,
-  CrownIcon
+  CrownIcon,
+  MenuIcon,
+  CloseIcon
 } from "./Icons";
 import { isSuperAdmin } from "../lib/authService";
 
@@ -32,6 +34,7 @@ export default function Navbar({
 }) {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const userIsAdmin = isSuperAdmin(user);
 
   return (
@@ -148,6 +151,38 @@ export default function Navbar({
                   <span>NMDS XP Rewards</span>
                   <span style={{ fontSize: "9px", background: "#D4AF37", color: "#070709", padding: "2px 5px", borderRadius: "3px", fontWeight: "900" }}>HOT</span>
                 </div>
+
+                {userIsAdmin && (
+                  <>
+                    <div style={{ height: "1px", background: "rgba(212, 175, 55, 0.2)", margin: "4px 0" }} />
+                    <div
+                      style={{
+                        padding: "10px 14px",
+                        fontSize: "12px",
+                        fontWeight: "800",
+                        color: "#F5D061",
+                        background: "rgba(212, 175, 55, 0.1)",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between"
+                      }}
+                      onClick={() => {
+                        setSolutionsOpen(false);
+                        if (onOpenAdminDashboard) onOpenAdminDashboard();
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.25)"}
+                      onMouseLeave={e => e.currentTarget.style.background = "rgba(212, 175, 55, 0.1)"}
+                    >
+                      <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <CrownIcon size={14} style={{ color: "#D4AF37" }} />
+                        <span>Super Admin Portal</span>
+                      </span>
+                      <span style={{ fontSize: "9px", background: "#D4AF37", color: "#070709", padding: "2px 5px", borderRadius: "3px", fontWeight: "900" }}>ROOT</span>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -158,39 +193,51 @@ export default function Navbar({
         </nav>
 
         {/* Action Controls */}
-        <div className="nav-actions" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {/* Super Admin Command Portal Button */}
+        <div className="nav-actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Super Admin Command Portal Button (Tablet & Desktop) */}
           {userIsAdmin && (
             <button
-              className="nav-link-item"
+              className="nav-link-item hidden md:flex"
               onClick={onOpenAdminDashboard}
-              title="Super Admin Command Center"
+              title="Super Admin Portal — View All Accounts, Payments & Activities"
               style={{
-                border: "1px solid rgba(212, 175, 55, 0.7)",
-                borderRadius: "6px",
-                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(245, 208, 97, 0.1) 100%)",
+                border: "1px solid #D4AF37",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(245, 208, 97, 0.15) 100%)",
                 color: "#F5D061",
-                fontWeight: "800",
-                display: "flex",
+                fontWeight: "900",
                 alignItems: "center",
-                gap: "6px",
-                boxShadow: "0 0 15px rgba(212, 175, 55, 0.2)"
+                gap: "7px",
+                padding: "6px 12px",
+                boxShadow: "0 0 18px rgba(212, 175, 55, 0.35)",
+                cursor: "pointer"
               }}
             >
-              <CrownIcon size={16} style={{ color: "#D4AF37" }} />
-              <span className="hidden sm:inline">Admin Portal</span>
+              <CrownIcon size={16} style={{ color: "#F5D061" }} />
+              <span className="hidden lg:inline">👑 Super Admin Portal</span>
+              <span className="lg:hidden">👑 Admin</span>
+              <span style={{
+                fontSize: "10px",
+                background: "#D4AF37",
+                color: "#070709",
+                padding: "2px 6px",
+                borderRadius: "4px",
+                fontWeight: "900"
+              }}>
+                ⚡ ALL
+              </span>
             </button>
           )}
 
-          {/* Gate Scanner */}
+          {/* Gate Scanner (Desktop only) */}
           <button
-            className="nav-link-item"
+            className="nav-link-item hidden lg:flex"
             onClick={onOpenScanner}
             title="Gate Staff Ticket Validator"
             style={{ border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "6px" }}
           >
             <QrCodeIcon size={16} />
-            <span className="hidden sm:inline">Gate Scanner</span>
+            <span>Gate Scanner</span>
           </button>
 
           {/* My Tickets Pass Wallet */}
@@ -198,9 +245,10 @@ export default function Navbar({
             className="btn-ticket-wallet"
             onClick={onOpenMyTickets}
             title="View your booked passes"
+            style={{ padding: "7px 12px" }}
           >
             <TicketIcon size={16} />
-            <span>My Passes</span>
+            <span className="hidden sm:inline">My Passes</span>
             {ticketsCount > 0 && <span className="badge-ticket-counter">{ticketsCount}</span>}
           </button>
 
@@ -537,9 +585,9 @@ export default function Navbar({
             </div>
           )}
 
-          {/* Rigitix Signature Split Button: Create Event */}
+          {/* Rigitix Signature Split Button: Create Event (Desktop/Tablet) */}
           <button
-            className="rx-btn rx-btn-primary"
+            className="rx-btn rx-btn-primary hidden md:inline-flex"
             onClick={onOpenCreateEvent}
             title="Sell tickets on Nà Mè Dèy Sell"
           >
@@ -548,8 +596,247 @@ export default function Navbar({
               <PlusIcon size={16} />
             </span>
           </button>
+
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            type="button"
+            className="flex md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+            style={{
+              background: mobileMenuOpen ? "rgba(212, 175, 55, 0.25)" : "rgba(212, 175, 55, 0.12)",
+              border: "1px solid rgba(212, 175, 55, 0.4)",
+              borderRadius: "8px",
+              color: "#F5D061",
+              width: "36px",
+              height: "36px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              flexShrink: 0
+            }}
+          >
+            {mobileMenuOpen ? <CloseIcon size={18} /> : <MenuIcon size={18} />}
+          </button>
         </div>
       </div>
+
+      {/* MOBILE DRAWER MENU */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-nav-drawer md:hidden"
+          style={{
+            position: "fixed",
+            top: "58px",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(7, 7, 9, 0.98)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderTop: "1px solid rgba(212, 175, 55, 0.25)",
+            padding: "16px 16px 40px",
+            overflowY: "auto",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
+            animation: "fadeIn 0.2s ease-out"
+          }}
+        >
+          {/* Super Admin Quick Access Card */}
+          {userIsAdmin && (
+            <div
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenAdminDashboard();
+              }}
+              style={{
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(245, 208, 97, 0.1) 100%)",
+                border: "1px solid #D4AF37",
+                borderRadius: "12px",
+                padding: "14px 16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                cursor: "pointer",
+                boxShadow: "0 0 20px rgba(212, 175, 55, 0.25)"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <CrownIcon size={22} style={{ color: "#F5D061" }} />
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "900", color: "#ffffff" }}>
+                    👑 Super Admin Portal
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#F5D061" }}>
+                    View all activities, payments &amp; accounts
+                  </div>
+                </div>
+              </div>
+              <span style={{ fontSize: "10px", background: "#D4AF37", color: "#070709", padding: "4px 8px", borderRadius: "4px", fontWeight: "900" }}>
+                OPEN
+              </span>
+            </div>
+          )}
+
+          {/* User profile or Auth buttons */}
+          {user ? (
+            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "12px", padding: "14px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "#D4AF37", color: "#070709", fontWeight: "900", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}>
+                  {user.initials || user.fullName?.[0]?.toUpperCase() || "U"}
+                </div>
+                <div>
+                  <div style={{ fontSize: "14px", fontWeight: "800", color: "#ffffff" }}>{user.fullName}</div>
+                  <div style={{ fontSize: "11px", color: "#E2D9BC" }}>{user.email}</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenOrganizerDashboard();
+                  }}
+                  style={{ flex: 1, padding: "8px", background: "rgba(212, 175, 55, 0.15)", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "8px", color: "#F5D061", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
+                >
+                  Organizer Studio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onLogout();
+                  }}
+                  style={{ padding: "8px 12px", background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "8px", color: "#F87171", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth("to sign in to your account");
+                }}
+                style={{ flex: 1, padding: "12px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "10px", color: "#ffffff", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth("to create your account");
+                }}
+                style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", border: "none", borderRadius: "10px", color: "#070709", fontSize: "13px", fontWeight: "800", cursor: "pointer" }}
+              >
+                Create Account
+              </button>
+            </div>
+          )}
+
+          {/* Primary Action: Create Event */}
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onOpenCreateEvent();
+            }}
+            className="rx-btn rx-btn-primary"
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            <span className="rx-btn-text" style={{ flex: 1, textAlign: "center", padding: "12px" }}>+ Create an Event</span>
+            <span className="rx-btn-icon"><PlusIcon size={16} /></span>
+          </button>
+
+          {/* Secondary Actions */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenMyTickets();
+              }}
+              style={{ padding: "12px", background: "rgba(212, 175, 55, 0.08)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "10px", color: "#ffffff", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer" }}
+            >
+              <TicketIcon size={16} style={{ color: "#D4AF37" }} />
+              <span>My Passes ({ticketsCount})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenScanner();
+              }}
+              style={{ padding: "12px", background: "rgba(212, 175, 55, 0.08)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "10px", color: "#ffffff", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer" }}
+            >
+              <QrCodeIcon size={16} style={{ color: "#D4AF37" }} />
+              <span>Gate Scanner</span>
+            </button>
+          </div>
+
+          {/* Navigation Links */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "14px" }}>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#948B75", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+              Quick Navigation
+            </div>
+            <a
+              href="#trending"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ padding: "10px 12px", color: "#E2D9BC", textDecoration: "none", fontSize: "14px", fontWeight: "600", borderRadius: "8px", background: "rgba(255,255,255,0.02)" }}
+            >
+              🔥 Trending Events
+            </a>
+            <a
+              href="#events-section"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ padding: "10px 12px", color: "#E2D9BC", textDecoration: "none", fontSize: "14px", fontWeight: "600", borderRadius: "8px", background: "rgba(255,255,255,0.02)" }}
+            >
+              🎟️ Explore All Tickets
+            </a>
+            <a
+              href="#features"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ padding: "10px 12px", color: "#E2D9BC", textDecoration: "none", fontSize: "14px", fontWeight: "600", borderRadius: "8px", background: "rgba(255,255,255,0.02)" }}
+            >
+              🛡️ Why Nà Mè Dèy Sell
+            </a>
+          </div>
+
+          {/* Solutions List */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "14px" }}>
+            <div style={{ fontSize: "11px", fontWeight: "800", color: "#948B75", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>
+              Solutions &amp; Ecosystem
+            </div>
+            <div
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenOrganizerDashboard();
+              }}
+              style={{ padding: "8px 12px", color: "#F5D061", fontSize: "13px", fontWeight: "700", cursor: "pointer" }}
+            >
+              • For Organizers (Dashboard &amp; Studio)
+            </div>
+            <div style={{ padding: "8px 12px", color: "rgba(255,255,255,0.7)", fontSize: "13px" }}>
+              • For Promoters &amp; Affiliates
+            </div>
+            <div style={{ padding: "8px 12px", color: "rgba(255,255,255,0.7)", fontSize: "13px" }}>
+              • For Food &amp; Merch Vendors
+            </div>
+            <div style={{ padding: "8px 12px", color: "#D4AF37", fontSize: "13px", fontWeight: "700" }}>
+              • NMDS XP Rewards &amp; Badges
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

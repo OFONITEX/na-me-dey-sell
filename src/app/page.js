@@ -20,11 +20,12 @@ import {
   ArrowRightIcon,
   MapPinIcon,
   SearchIcon,
-  FlameIcon
+  FlameIcon,
+  CrownIcon
 } from "../components/Icons";
 import { getStoredEvents, getStoredTickets, INITIAL_TICKETS } from "../lib/ticketService";
 import { INITIAL_EVENTS } from "../data/mockEvents";
-import { getAuthUser, logoutUser, subscribeAuth } from "../lib/authService";
+import { getAuthUser, logoutUser, subscribeAuth, isSuperAdmin } from "../lib/authService";
 
 export default function Home() {
   const [events, setEvents] = useState(INITIAL_EVENTS);
@@ -175,6 +176,67 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#070709]" style={{ backgroundColor: "#070709" }}>
+      {/* Super Admin Top Notification Ribbon */}
+      {isSuperAdmin(currentUser) && (
+        <div
+          className="rx-superadmin-ribbon"
+          style={{
+            background: "linear-gradient(90deg, #181303 0%, #291D04 50%, #181303 100%)",
+            borderBottom: "1px solid rgba(212, 175, 55, 0.4)",
+            position: "sticky",
+            top: 0,
+            zIndex: 1001,
+            boxShadow: "0 4px 15px rgba(0,0,0,0.6)"
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <span
+              style={{
+                background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                color: "#070709",
+                padding: "2px 8px",
+                borderRadius: "4px",
+                fontWeight: "900",
+                fontSize: "10px",
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap"
+              }}
+            >
+              👑 SUPER ADMIN
+            </span>
+            <span style={{ fontSize: "12px", color: "#F5D061", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "260px" }}>
+              {currentUser?.email}
+            </span>
+            <span className="hidden md:inline" style={{ color: "#7A7056" }}>|</span>
+            <span className="hidden md:inline" style={{ color: "#E2D9BC", fontSize: "12px" }}>
+              Full portal authority: monitor all activities, payments, attendees &amp; tables for every account.
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsAdminDashboardOpen(true)}
+            style={{
+              background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+              color: "#070709",
+              border: "none",
+              borderRadius: "6px",
+              padding: "5px 12px",
+              fontSize: "11px",
+              fontWeight: "900",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              boxShadow: "0 2px 8px rgba(212, 175, 55, 0.35)",
+              whiteSpace: "nowrap"
+            }}
+          >
+            <span>⚡ View Everything In Portal</span>
+          </button>
+        </div>
+      )}
+
       {/* Sticky Navigation */}
       <Navbar
         user={currentUser}
@@ -196,7 +258,11 @@ export default function Home() {
         onOpenOrganizerDashboard={() =>
           requireAuth(() => setIsOrganizerDashboardOpen(true), "to access your Organizer Studio & Dashboard")
         }
-        onOpenAdminDashboard={() => setIsAdminDashboardOpen(true)}
+        onOpenAdminDashboard={() => {
+          if (isSuperAdmin(currentUser)) {
+            setIsAdminDashboardOpen(true);
+          }
+        }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         activeCategory={activeCategory}
@@ -615,7 +681,7 @@ export default function Home() {
       )}
 
       {/* Super Admin Command Center & Moderation Hub */}
-      {isAdminDashboardOpen && (
+      {isAdminDashboardOpen && isSuperAdmin(currentUser) && (
         <AdminDashboard
           currentUser={currentUser}
           isOpen={isAdminDashboardOpen}
