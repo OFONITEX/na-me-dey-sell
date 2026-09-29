@@ -246,6 +246,12 @@ export function saveNewEvent(eventData) {
       eventId: eventData.id
     });
 
+    if (typeof window !== "undefined") {
+      try {
+        window.dispatchEvent(new CustomEvent("nmds_events_change", { detail: { type: "create", event: eventData } }));
+      } catch {}
+    }
+
     return newEvents;
   } catch (err) {
     console.error("Failed to save new event:", err);
@@ -255,30 +261,45 @@ export function saveNewEvent(eventData) {
 
 /**
  * Update an existing event by ID (title, venue, tiers, flyer, etc.)
+ * Resilient against string/number ID formats, whitespace, and missing entries.
  */
 export function updateEvent(eventId, updatedFields) {
   if (typeof window === "undefined") return null;
   try {
     const events = getStoredEvents();
-    const index = events.findIndex(e => e.id === eventId);
-    if (index === -1) return null;
+    const cleanId = String(eventId || "").trim().toLowerCase();
+    const index = events.findIndex(e => String(e.id || "").trim().toLowerCase() === cleanId);
 
-    const existing = events[index];
-    const updated = {
-      ...existing,
-      ...updatedFields,
-      updatedAt: new Date().toISOString()
-    };
-
-    events[index] = updated;
-    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+    let updated;
+    if (index === -1) {
+      console.warn("Event not found in stored events, recovering entry for ID:", eventId);
+      const seed = INITIAL_EVENTS.find(s => String(s.id || "").trim().toLowerCase() === cleanId);
+      updated = {
+        ...(seed || {}),
+        ...updatedFields,
+        id: eventId,
+        updatedAt: new Date().toISOString()
+      };
+      const newEvents = [updated, ...events];
+      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(newEvents));
+    } else {
+      const existing = events[index];
+      updated = {
+        ...existing,
+        ...updatedFields,
+        id: existing.id || eventId,
+        updatedAt: new Date().toISOString()
+      };
+      events[index] = updated;
+      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+    }
 
     // Also update any future ticket references if event title changed
-    if (updatedFields.title && updatedFields.title !== existing.title) {
+    if (updatedFields.title) {
       try {
         const tickets = getStoredTickets();
         const updatedTickets = tickets.map(t => 
-          t.eventId === eventId ? { ...t, eventTitle: updatedFields.title } : t
+          String(t.eventId || "").trim().toLowerCase() === cleanId ? { ...t, eventTitle: updatedFields.title } : t
         );
         localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(updatedTickets));
       } catch {}
@@ -296,6 +317,12 @@ export function updateEvent(eventId, updatedFields) {
       eventId: updated.id
     });
 
+    if (typeof window !== "undefined") {
+      try {
+        window.dispatchEvent(new CustomEvent("nmds_events_change", { detail: { type: "update", event: updated } }));
+      } catch {}
+    }
+
     return updated;
   } catch (err) {
     console.error("Failed to update event:", err);
@@ -310,8 +337,9 @@ export function deleteEvent(eventId) {
   if (typeof window === "undefined") return false;
   try {
     const events = getStoredEvents();
-    const target = events.find(e => e.id === eventId);
-    const filtered = events.filter(e => e.id !== eventId);
+    const cleanId = String(eventId || "").trim().toLowerCase();
+    const target = events.find(e => String(e.id || "").trim().toLowerCase() === cleanId);
+    const filtered = events.filter(e => String(e.id || "").trim().toLowerCase() !== cleanId);
     localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(filtered));
 
     if (target) {
@@ -326,6 +354,12 @@ export function deleteEvent(eventId) {
         eventTitle: target.title,
         eventId: target.id
       });
+    }
+
+    if (typeof window !== "undefined") {
+      try {
+        window.dispatchEvent(new CustomEvent("nmds_events_change", { detail: { type: "delete", eventId } }));
+      } catch {}
     }
 
     return true;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon, CheckCircleIcon, ShieldCheckIcon } from "./Icons";
 import { saveNewEvent } from "../lib/ticketService";
-import { promoteToOrganizer } from "../lib/authService";
+import { promoteToOrganizer, trackUserCreatedEvent } from "../lib/authService";
 import CitySearchSelector from "./CitySearchSelector";
 import DatePickerCalendar from "./DatePickerCalendar";
 import VenueLocationSearch from "./VenueLocationSearch";
@@ -351,6 +351,7 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated 
     };
 
     saveNewEvent(newEvent);
+    trackUserCreatedEvent(newEvent.id, currentUser?.id || currentUser?.email || "guest");
     if (currentUser?.email) {
       promoteToOrganizer(currentUser.email);
     }

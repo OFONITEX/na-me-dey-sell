@@ -11,6 +11,7 @@ import OrganizerScannerModal from "../components/OrganizerScannerModal";
 import CreateEventModal from "../components/CreateEventModal";
 import OrganizerDashboard from "../components/OrganizerDashboard";
 import AdminDashboard from "../components/AdminDashboard";
+import EditEventModal from "../components/EditEventModal";
 import AuthModal from "../components/AuthModal";
 import {
   SparklesIcon,
@@ -42,6 +43,7 @@ export default function Home() {
 
   // Modal States
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null);
   const [checkoutData, setCheckoutData] = useState(null);
   const [activePassTickets, setActivePassTickets] = useState(null);
   const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
@@ -60,7 +62,17 @@ export default function Home() {
       setCurrentUser(user);
     });
 
-    return () => unsubscribe();
+    const handleEventsChange = () => {
+      setEvents(getStoredEvents());
+      setTickets(getStoredTickets());
+    };
+
+    window.addEventListener("nmds_events_change", handleEventsChange);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("nmds_events_change", handleEventsChange);
+    };
   }, []);
 
   const refreshData = () => {
@@ -407,7 +419,9 @@ export default function Home() {
             <EventCard
               key={evt.id}
               event={evt}
+              currentUser={currentUser}
               onSelect={setSelectedEvent}
+              onEditEvent={setEditingEvent}
             />
           ))}
         </div>
@@ -454,7 +468,9 @@ export default function Home() {
               <EventCard
                 key={evt.id}
                 event={evt}
+                currentUser={currentUser}
                 onSelect={setSelectedEvent}
+                onEditEvent={setEditingEvent}
               />
             ))}
           </div>
@@ -613,8 +629,26 @@ export default function Home() {
       {selectedEvent && (
         <EventDetailModal
           event={selectedEvent}
+          currentUser={currentUser}
           onClose={() => setSelectedEvent(null)}
           onProceedToCheckout={handleStartBooking}
+          onEditEvent={setEditingEvent}
+        />
+      )}
+
+      {/* Direct Event Editor for Organizers & Admins */}
+      {editingEvent && (
+        <EditEventModal
+          event={editingEvent}
+          isOpen={Boolean(editingEvent)}
+          onClose={() => setEditingEvent(null)}
+          onEventUpdated={(updated) => {
+            setEditingEvent(null);
+            refreshData();
+            if (selectedEvent && String(selectedEvent.id) === String(updated.id)) {
+              setSelectedEvent(updated);
+            }
+          }}
         />
       )}
 

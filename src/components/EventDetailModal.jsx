@@ -3,8 +3,15 @@
 import { useState } from "react";
 import { CloseIcon, CalendarIcon, ClockIcon, MapPinIcon, CheckIcon, ShieldCheckIcon, TicketIcon, ArrowRightIcon, SparklesIcon } from "./Icons";
 import { formatNaira } from "../lib/ticketService";
+import { canEditEvent } from "../lib/authService";
 
-export default function EventDetailModal({ event, onClose, onProceedToCheckout }) {
+export default function EventDetailModal({
+  event,
+  currentUser,
+  onClose,
+  onProceedToCheckout,
+  onEditEvent
+}) {
   const safeTiers = event?.tiers?.length ? event.tiers : [{ id: "tier_default", name: "General Admission", price: 0, currency: "₦", capacity: 100, soldCount: 0, description: "Standard entry", perks: ["General access"] }];
   const [selectedTierId, setSelectedTierId] = useState(safeTiers[0]?.id || "");
   const [quantity, setQuantity] = useState(1);
@@ -12,6 +19,7 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
 
   if (!event) return null;
 
+  const userCanEdit = canEditEvent(event, currentUser);
   const selectedTier = safeTiers.find(t => t.id === selectedTierId) || safeTiers[0];
   const remaining = Math.max(0, (selectedTier?.capacity || 100) - (selectedTier?.soldCount || 0));
   const subtotal = selectedTier ? selectedTier.price * quantity : 0;
@@ -93,6 +101,58 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
             )}
           </div>
         </div>
+
+        {/* Organizer Quick-Action Banner */}
+        {userCanEdit && (
+          <div
+            style={{
+              padding: "10px 24px",
+              background: "linear-gradient(90deg, rgba(212, 175, 55, 0.18) 0%, rgba(14, 14, 20, 0.95) 100%)",
+              borderBottom: "1px solid rgba(212, 175, 55, 0.35)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "10px"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <SparklesIcon size={16} style={{ color: "#F5D061" }} />
+              <div>
+                <span style={{ fontSize: "12px", color: "#F5D061", fontWeight: "800" }}>
+                  👑 You have Organizer Access to this Event
+                </span>
+                <span style={{ fontSize: "11px", color: "#E2D9BC", marginLeft: "6px" }}>
+                  ({event.organizer || "Created by you"})
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                if (onEditEvent) onEditEvent(event);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "6px 14px",
+                background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                border: "none",
+                borderRadius: "6px",
+                color: "#070709",
+                fontSize: "12px",
+                fontWeight: "900",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(212, 175, 55, 0.35)"
+              }}
+            >
+              <span>✏️ Edit Event &amp; Tiers</span>
+            </button>
+          </div>
+        )}
 
         {/* Modal Scrollable Body */}
         <div style={{ padding: "24px", overflowY: "auto", maxHeight: "calc(90vh - 300px)", display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -222,6 +282,32 @@ export default function EventDetailModal({ event, onClose, onProceedToCheckout }
                 +
               </button>
             </div>
+
+            {userCanEdit && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onEditEvent) onEditEvent(event);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "10px 16px",
+                  background: "rgba(212, 175, 55, 0.12)",
+                  border: "1px solid rgba(212, 175, 55, 0.45)",
+                  borderRadius: "8px",
+                  color: "#F5D061",
+                  fontSize: "12px",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                <span>✏️ Edit Event</span>
+              </button>
+            )}
 
             <button className="rx-btn rx-btn-gold" onClick={handleProceed}>
               <span className="rx-btn-text">Proceed to Checkout</span>

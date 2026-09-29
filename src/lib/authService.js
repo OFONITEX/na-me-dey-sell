@@ -270,6 +270,95 @@ export function isOrganizer(user) {
   return user.role === "organizer" || isSuperAdmin(user) || Boolean(user.isOrganizer);
 }
 
+/**
+ * Record an event ID as created by a specific user in localStorage
+ */
+export function trackUserCreatedEvent(eventId, userIdOrEmail) {
+  if (typeof window === "undefined" || !eventId) return;
+  try {
+    const key = `nmds_user_created_${String(userIdOrEmail || "guest").toLowerCase().trim()}`;
+    const raw = localStorage.getItem(key);
+    const list = raw ? JSON.parse(raw) : [];
+    if (!list.includes(eventId)) {
+      list.push(eventId);
+      localStorage.setItem(key, JSON.stringify(list));
+    }
+    // Also track in global created events list for current browser session
+    const genKey = "nmds_all_user_created_ids";
+    const genRaw = localStorage.getItem(genKey);
+    const genList = genRaw ? JSON.parse(genRaw) : [];
+    if (!genList.includes(eventId)) {
+      genList.push(eventId);
+      localStorage.setItem(genKey, JSON.stringify(genList));
+    }
+  } catch {}
+}
+
+/**
+ * Retrieve all event IDs marked as created by this user
+ */
+export function getUserCreatedEventIds(user) {
+  if (typeof window === "undefined" || !user) return [];
+  try {
+    const ids = [];
+    if (user.id) {
+      const raw = localStorage.getItem(`nmds_user_created_${String(user.id).toLowerCase().trim()}`);
+      if (raw) ids.push(...JSON.parse(raw));
+    }
+    if (user.email) {
+      const raw = localStorage.getItem(`nmds_user_created_${String(user.email).toLowerCase().trim()}`);
+      if (raw) ids.push(...JSON.parse(raw));
+    }
+    return [...new Set(ids)];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Determine if current user is the original creator or organizer of this event.
+ * Uses robust matching: email, user ID, normalized phone numbers (last 10 digits),
+ * organizer brand name, or tracked created event IDs.
+ */
+export function isEventCreator(event, user) {
+  if (!event || !user) return false;
+
+  const userEmail = (user.email || "").toLowerCase().trim();
+  const userId = (user.id || "").toLowerCase().trim();
+  const userPhone = (user.phone || "").replace(/\D/g, "").slice(-10);
+  const userName = (user.fullName || user.name || "").toLowerCase().trim();
+
+  const orgEmail = (event.organizerEmail || event.createdBy || "").toLowerCase().trim();
+  const orgId = (event.organizerId || "").toLowerCase().trim();
+  const orgPhone = (event.organizerPhone || "").replace(/\D/g, "").slice(-10);
+  const orgName = (event.organizer || "").toLowerCase().trim();
+
+  // Match by email
+  if (userEmail && orgEmail && userEmail === orgEmail) return true;
+  // Match by user ID
+  if (userId && orgId && userId === orgId) return true;
+  // Match by phone number (last 10 digits handles Nigerian 080... vs +23480...)
+  if (userPhone && orgPhone && userPhone === orgPhone) return true;
+  // Match by organizer name
+  if (userName && orgName && (userName === orgName || orgName.includes(userName) || userName.includes(orgName))) return true;
+
+  // Match by tracked created event IDs
+  const tracked = getUserCreatedEventIds(user);
+  if (tracked.includes(event.id)) return true;
+
+  return false;
+}
+
+/**
+ * Check if the user has authorization to edit this event:
+ * Either they created/organize the event, or they are a Super Admin.
+ */
+export function canEditEvent(event, user) {
+  if (!event || !user) return false;
+  if (isSuperAdmin(user)) return true;
+  return isEventCreator(event, user);
+}
+
 // Get currently logged in user
 export function getAuthUser() {
   if (typeof window === "undefined") return null;

@@ -39,6 +39,10 @@ export default function EditEventModal({
     city: event.city || "",
     address: event.address || "",
     organizer: event.organizer || "",
+    organizerEmail: event.organizerEmail || "",
+    organizerPhone: event.organizerPhone || "",
+    organizerId: event.organizerId || "",
+    createdBy: event.createdBy || "",
     description: event.description || "",
     accentColor: event.accentColor || "#D4AF37",
     imageUrl: event.imageUrl || "",
@@ -58,6 +62,47 @@ export default function EditEventModal({
           }
         ]
   );
+
+  // Synchronize state dynamically whenever event prop changes or modal opens
+  useEffect(() => {
+    if (event) {
+      setFormData({
+        title: event.title || "",
+        subtitle: event.subtitle || "",
+        category: event.category || "Concerts",
+        date: event.date || "",
+        time: event.time || "",
+        venue: event.venue || "",
+        city: event.city || "",
+        address: event.address || "",
+        organizer: event.organizer || "",
+        organizerEmail: event.organizerEmail || "",
+        organizerPhone: event.organizerPhone || "",
+        organizerId: event.organizerId || "",
+        createdBy: event.createdBy || "",
+        description: event.description || "",
+        accentColor: event.accentColor || "#D4AF37",
+        imageUrl: event.imageUrl || "",
+        status: event.status || "live"
+      });
+
+      setTiers(
+        event.tiers && event.tiers.length > 0
+          ? event.tiers.map(t => ({ ...t }))
+          : [
+              {
+                id: `tier_${Date.now()}_1`,
+                name: "Regular Admission",
+                price: 5000,
+                capacity: 500,
+                description: "Standard entry pass."
+              }
+            ]
+      );
+      setErrorMessage("");
+      setSuccessToast("");
+    }
+  }, [event]);
 
   const categories = [
     "Corporate Events",
@@ -123,6 +168,11 @@ export default function EditEventModal({
     try {
       const updatedEvent = updateEvent(event.id, {
         ...formData,
+        organizer: formData.organizer || event.organizer,
+        organizerEmail: formData.organizerEmail || event.organizerEmail || "",
+        organizerPhone: formData.organizerPhone || event.organizerPhone || "",
+        organizerId: event.organizerId || formData.organizerId || `org_${Date.now()}`,
+        createdBy: event.createdBy || formData.createdBy || event.organizerEmail || "",
         tiers: tiers.map(t => ({
           ...t,
           price: Number(t.price) || 0,
@@ -440,6 +490,56 @@ export default function EditEventModal({
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   style={{ width: "100%", padding: "12px 14px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", color: "#ffffff", fontSize: "13px", outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit" }}
                 />
+              </div>
+
+              {/* Organizer Brand & Contact Profile */}
+              <div style={{ background: "rgba(212, 175, 55, 0.05)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "12px", padding: "16px", marginTop: "4px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: "800", textTransform: "uppercase", color: "#D4AF37", letterSpacing: "0.05em" }}>
+                    Organizer Brand &amp; Contact Details
+                  </span>
+                  <span style={{ fontSize: "10px", color: "#948B75" }}>
+                    (Controls event ownership &amp; attendee contact info)
+                  </span>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "10px", fontWeight: "700", color: "#E2D9BC", marginBottom: "4px" }}>
+                      ORGANIZER NAME / BRAND
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.organizer}
+                      onChange={e => setFormData({ ...formData, organizer: e.target.value })}
+                      placeholder="e.g. Flytime Promotions HQ"
+                      style={{ width: "100%", height: "38px", padding: "0 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "12px", outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "10px", fontWeight: "700", color: "#E2D9BC", marginBottom: "4px" }}>
+                      ORGANIZER EMAIL
+                    </label>
+                    <input
+                      type="email"
+                      value={formData.organizerEmail}
+                      onChange={e => setFormData({ ...formData, organizerEmail: e.target.value })}
+                      placeholder="info@yourdomain.com"
+                      style={{ width: "100%", height: "38px", padding: "0 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "12px", outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "10px", fontWeight: "700", color: "#E2D9BC", marginBottom: "4px" }}>
+                      ORGANIZER PHONE
+                    </label>
+                    <input
+                      type="tel"
+                      value={formData.organizerPhone}
+                      onChange={e => setFormData({ ...formData, organizerPhone: e.target.value })}
+                      placeholder="+234 800 000 0000"
+                      style={{ width: "100%", height: "38px", padding: "0 10px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "6px", color: "#fff", fontSize: "12px", outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}

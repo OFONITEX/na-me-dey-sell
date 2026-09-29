@@ -1,12 +1,13 @@
-"use client";
-
 import { useState } from "react";
 import { CalendarIcon, MapPinIcon, TicketIcon, ArrowRightIcon, ClockIcon, FlameIcon, SparklesIcon, CheckIcon } from "./Icons";
 import { formatNaira } from "../lib/ticketService";
+import { canEditEvent } from "../lib/authService";
 
-export default function EventCard({ event, onSelect }) {
+export default function EventCard({ event, currentUser, onSelect, onEditEvent }) {
   const [isGoing, setIsGoing] = useState(false);
   const [goingCount, setGoingCount] = useState(event.goingCount || 48);
+
+  const userCanEdit = canEditEvent(event, currentUser);
 
   const handleGoingToggle = (e) => {
     e.stopPropagation();
@@ -38,6 +39,38 @@ export default function EventCard({ event, onSelect }) {
           <TicketIcon size={12} className="rx-live-badge-icon" />
           <span>{event.liveSoldText || "Fast selling event"}</span>
         </div>
+
+        {/* Organizer Edit Shortcut Chip */}
+        {userCanEdit && onEditEvent && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditEvent(event);
+            }}
+            style={{
+              position: "absolute",
+              top: "12px",
+              right: "12px",
+              zIndex: 10,
+              background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+              color: "#070709",
+              border: "none",
+              borderRadius: "20px",
+              padding: "4px 10px",
+              fontSize: "11px",
+              fontWeight: "900",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.6), 0 0 10px rgba(212,175,55,0.4)",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px"
+            }}
+            title="Edit your created event"
+          >
+            <span>✏️ Edit</span>
+          </button>
+        )}
 
         {/* Category Badge */}
         <div className="rx-category-badge">
@@ -111,12 +144,45 @@ export default function EventCard({ event, onSelect }) {
             <span className="rx-price-amount">{formatNaira(lowestPrice, event.currency || event.tiers?.[0]?.currency || "₦")}</span>
           </div>
 
-          <div className="rx-btn rx-btn-primary rx-btn-sm">
-            <span className="rx-btn-text">Get Ticket</span>
-            <span className="rx-btn-icon">
-              <ArrowRightIcon size={14} />
-            </span>
-          </div>
+          {userCanEdit && onEditEvent ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditEvent(event);
+                }}
+                style={{
+                  background: "rgba(212, 175, 55, 0.15)",
+                  border: "1px solid rgba(212, 175, 55, 0.5)",
+                  color: "#F5D061",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  fontSize: "11px",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px"
+                }}
+              >
+                <span>✏️ Edit</span>
+              </button>
+              <div className="rx-btn rx-btn-primary rx-btn-sm">
+                <span className="rx-btn-text">View</span>
+                <span className="rx-btn-icon">
+                  <ArrowRightIcon size={14} />
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="rx-btn rx-btn-primary rx-btn-sm">
+              <span className="rx-btn-text">Get Ticket</span>
+              <span className="rx-btn-icon">
+                <ArrowRightIcon size={14} />
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -28,7 +28,7 @@ import {
   saveNewEvent,
   getOrganizerEventAnalytics
 } from "../lib/ticketService";
-import { isSuperAdmin } from "../lib/authService";
+import { isSuperAdmin, isEventCreator, canEditEvent } from "../lib/authService";
 import EditEventModal from "./EditEventModal";
 
 export default function OrganizerDashboard({
@@ -67,22 +67,7 @@ export default function OrganizerDashboard({
   // Filter events belonging to this organizer account
   const myEvents = useMemo(() => {
     if (!currentUser) return [];
-    const userEmail = (currentUser.email || "").toLowerCase().trim();
-    const userId = (currentUser.id || "").toLowerCase().trim();
-    const userPhone = (currentUser.phone || "").replace(/\D/g, "");
-
-    return events.filter(e => {
-      const orgEmail = (e.organizerEmail || e.createdBy || "").toLowerCase().trim();
-      const orgId = (e.organizerId || "").toLowerCase().trim();
-      const orgPhone = (e.organizerPhone || "").replace(/\D/g, "");
-
-      // Match strictly by owner email, user ID, createdBy, or phone
-      const matchesEmail = Boolean(userEmail && orgEmail && (orgEmail === userEmail));
-      const matchesId = Boolean(userId && orgId && (orgId === userId));
-      const matchesPhone = Boolean(userPhone && orgPhone && (orgPhone === userPhone));
-
-      return matchesEmail || matchesId || matchesPhone;
-    });
+    return events.filter(e => isEventCreator(e, currentUser));
   }, [events, currentUser]);
 
   // Display events based on admin toggle or user's own events
