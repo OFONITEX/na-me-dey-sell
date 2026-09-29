@@ -117,6 +117,7 @@ export default function AuthModal({
 
   return (
     <div
+      className="modal-backdrop rx-modal-backdrop rx-auth-modal-overlay"
       style={{
         position: "fixed",
         inset: 0,
@@ -135,6 +136,7 @@ export default function AuthModal({
       }}
     >
       <div
+        className="modal-panel rx-modal-card rx-auth-modal-card"
         style={{
           width: "100%",
           maxWidth: "480px",

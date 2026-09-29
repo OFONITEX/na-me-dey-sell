@@ -37,10 +37,11 @@ export default function EventDetailModal({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-panel" style={{ maxWidth: "720px" }} onClick={e => e.stopPropagation()}>
+    <div className="modal-backdrop rx-modal-backdrop" onClick={onClose}>
+      <div className="modal-panel rx-detail-modal-panel" style={{ maxWidth: "720px" }} onClick={e => e.stopPropagation()}>
         {/* Header Hero Banner with image */}
         <div
+          className="rx-detail-hero-banner"
           style={{
             position: "relative",
             minHeight: "220px",
@@ -106,6 +107,7 @@ export default function EventDetailModal({
         {/* Organizer Quick-Action Banner */}
         {userCanEdit && (
           <div
+            className="rx-detail-organizer-banner"
             style={{
               padding: "10px 24px",
               background: "linear-gradient(90deg, rgba(212, 175, 55, 0.18) 0%, rgba(14, 14, 20, 0.95) 100%)",
@@ -283,8 +285,8 @@ export default function EventDetailModal({
         </div>
 
         {/* Modal Footer with Quantity Stepper & Proceed Button */}
-        <div style={{ padding: "18px 24px", background: "#0E0E14", borderTop: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
-          <div>
+        <div className="rx-detail-modal-footer" style={{ padding: "18px 24px", background: "#0E0E14", borderTop: "1px solid rgba(212, 175, 55, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px" }}>
+          <div className="rx-detail-footer-price-wrap">
             <div style={{ fontSize: "10px", fontWeight: "800", textTransform: "uppercase", color: "var(--text-dim)" }}>
               Total ({quantity} {quantity === 1 ? "ticket" : "tickets"})
             </div>
@@ -293,8 +295,8 @@ export default function EventDetailModal({
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px" }}>
+          <div className="rx-detail-footer-actions-wrap" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div className="rx-detail-stepper" style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px" }}>
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -315,6 +317,7 @@ export default function EventDetailModal({
             {userCanEdit && (
               <button
                 type="button"
+                className="rx-detail-edit-btn"
                 onClick={() => {
                   onClose();
                   if (onEditEvent) onEditEvent(event);
@@ -338,7 +341,7 @@ export default function EventDetailModal({
               </button>
             )}
 
-            <button className="rx-btn rx-btn-gold" onClick={handleProceed}>
+            <button className="rx-btn rx-btn-gold rx-detail-proceed-btn" onClick={handleProceed}>
               <span className="rx-btn-text">Proceed to Checkout</span>
               <span className="rx-btn-icon">
                 <ArrowRightIcon size={14} />

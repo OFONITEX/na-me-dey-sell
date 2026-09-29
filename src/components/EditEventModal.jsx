@@ -200,6 +200,7 @@ export default function EditEventModal({
 
   return (
     <div
+      className="modal-backdrop rx-modal-backdrop rx-edit-modal-backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -218,6 +219,7 @@ export default function EditEventModal({
       }}
     >
       <div
+        className="modal-panel rx-modal-card rx-edit-modal-panel"
         style={{
           width: "100%",
           maxWidth: "800px",
@@ -293,6 +295,7 @@ export default function EditEventModal({
 
         {/* Navigation Tabs */}
         <div
+          className="rx-edit-tabs"
           style={{
             display: "flex",
             gap: "8px",
@@ -343,7 +346,7 @@ export default function EditEventModal({
         )}
 
         {/* Form Body (Scrollable) */}
-        <form onSubmit={handleSubmit} style={{ overflowY: "auto", flex: 1, padding: "20px 24px" }}>
+        <form onSubmit={handleSubmit} className="rx-edit-form-body" style={{ overflowY: "auto", flex: 1, padding: "20px 24px" }}>
           {activeTab === "general" && (
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {/* Event Title */}
@@ -374,7 +377,7 @@ export default function EditEventModal({
               </div>
 
               {/* Category & Status */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div className="rx-form-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: "800", textTransform: "uppercase", color: "#E2D9BC", marginBottom: "6px" }}>
                     Category
@@ -407,7 +410,7 @@ export default function EditEventModal({
               </div>
 
               {/* Date & Time */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div className="rx-form-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: "800", textTransform: "uppercase", color: "#E2D9BC", marginBottom: "6px" }}>
                     Date &amp; Schedule
@@ -436,7 +439,7 @@ export default function EditEventModal({
               </div>
 
               {/* Venue & City */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              <div className="rx-form-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 <div>
                   <label style={{ display: "block", fontSize: "11px", fontWeight: "800", textTransform: "uppercase", color: "#D4AF37", marginBottom: "6px" }}>
                     Venue Name *
@@ -502,7 +505,7 @@ export default function EditEventModal({
                     (Controls event ownership &amp; attendee contact info)
                   </span>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+                <div className="rx-form-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "10px", fontWeight: "700", color: "#E2D9BC", marginBottom: "4px" }}>
                       ORGANIZER NAME / BRAND
@@ -714,6 +717,7 @@ export default function EditEventModal({
 
           {/* Footer Action Bar */}
           <div
+            className="rx-edit-footer"
             style={{
               marginTop: "24px",
               paddingTop: "16px",

@@ -125,6 +125,7 @@ export default function MyTicketsModal({ tickets, onClose, onSelectTicket }) {
               return (
                 <div
                   key={t.ticketId}
+                  className="rx-ticket-item-row"
                   onClick={() => onSelectTicket(t)}
                   style={{
                     background: "#0E0E14",

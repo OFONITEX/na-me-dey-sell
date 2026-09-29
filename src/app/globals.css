@@ -229,6 +229,49 @@ h1, h2, h3, h4, h5, .font-heading {
   gap: 20px;
 }
 
+@media (max-width: 768px) {
+  .nav-links-row {
+    display: none !important;
+  }
+}
+
+.rx-hamburger-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .rx-hamburger-btn {
+    display: flex !important;
+  }
+}
+
+/* Responsive visibility utilities */
+.hidden { display: none !important; }
+.block { display: block !important; }
+.flex { display: flex !important; }
+.inline-flex { display: inline-flex !important; }
+
+@media (min-width: 640px) {
+  .sm\:hidden { display: none !important; }
+  .sm\:flex { display: flex !important; }
+  .sm\:inline { display: inline !important; }
+  .sm\:block { display: block !important; }
+}
+
+@media (min-width: 768px) {
+  .md\:hidden { display: none !important; }
+  .md\:flex { display: flex !important; }
+  .md\:inline-flex { display: inline-flex !important; }
+  .md\:block { display: block !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:hidden { display: none !important; }
+  .lg\:flex { display: flex !important; }
+  .lg\:inline { display: inline !important; }
+  .lg\:block { display: block !important; }
+}
+
 .nav-link-item {
   color: var(--text-muted);
   font-size: 13px;
@@ -1701,18 +1744,285 @@ html, body {
   }
 
   /* Full-screen Dashboards on Mobile */
-  .dashboard-modal-overlay {
+  .dashboard-modal-overlay,
+  .rx-dashboard-modal-overlay,
+  .rx-superadmin-modal-overlay {
     padding: 0 !important;
     align-items: stretch !important;
   }
 
-  .dashboard-modal-container {
+  .dashboard-modal-container,
+  .rx-organizer-modal-container,
+  .rx-superadmin-modal-container,
+  .rx-admin-modal-container {
     height: 100dvh !important;
     max-height: 100dvh !important;
     border-radius: 0 !important;
     border: none !important;
     width: 100vw !important;
     max-width: 100vw !important;
+  }
+
+  /* Event Detail Modal Mobile UX */
+  .rx-detail-modal-panel {
+    max-height: 95dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  .rx-detail-hero-banner {
+    min-height: 180px !important;
+    padding: 16px 18px !important;
+  }
+
+  .rx-detail-organizer-banner {
+    padding: 8px 16px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .rx-detail-modal-footer {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 12px 16px !important;
+    gap: 10px !important;
+  }
+
+  .rx-detail-footer-price-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  .rx-detail-footer-actions-wrap {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .rx-detail-stepper {
+    flex-shrink: 0 !important;
+  }
+
+  .rx-detail-edit-btn {
+    display: none !important;
+  }
+
+  .rx-detail-proceed-btn {
+    flex: 1 !important;
+    width: auto !important;
+  }
+
+  .rx-detail-proceed-btn .rx-btn-text {
+    flex: 1 !important;
+    padding: 11px 16px !important;
+    font-size: 13px !important;
+    justify-content: center !important;
+  }
+
+  /* Organizer Studio Mobile UX */
+  .rx-dashboard-header {
+    padding: 14px 16px !important;
+    gap: 10px !important;
+  }
+
+  .rx-dashboard-kpis {
+    padding: 12px 14px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .rx-dashboard-tabs {
+    padding: 8px 14px !important;
+    gap: 6px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .rx-dashboard-body {
+    padding: 14px !important;
+  }
+
+  .rx-organizer-event-row {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 14px !important;
+  }
+
+  .rx-organizer-flyer-thumb {
+    width: 100% !important;
+    height: 160px !important;
+  }
+
+  .rx-organizer-actions-col {
+    min-width: 100% !important;
+    width: 100% !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .rx-organizer-actions-col button {
+    flex: 1 1 calc(50% - 6px) !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+  }
+
+  /* Super Admin Command Center Mobile UX */
+  .rx-superadmin-header {
+    padding: 14px 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .rx-superadmin-kpis {
+    padding: 10px 14px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .rx-superadmin-tabs {
+    padding: 8px 14px !important;
+    gap: 6px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .rx-superadmin-body {
+    padding: 14px !important;
+  }
+
+  .rx-superadmin-overview-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* Single Event Admin Hub */
+  .rx-admin-modal-header {
+    padding: 14px 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .rx-admin-modal-kpis {
+    padding: 10px 14px !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .rx-admin-modal-tabs {
+    padding: 8px 14px !important;
+    gap: 6px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .rx-admin-modal-body {
+    padding: 14px !important;
+  }
+
+  /* Checkout Modal Mobile UX */
+  .rx-checkout-modal-panel {
+    max-height: 95dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  .rx-checkout-contact-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .rx-checkout-footer {
+    padding: 14px 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .rx-checkout-footer > div:first-child {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .rx-checkout-footer .rx-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+  }
+
+  /* Edit Event Modal Mobile UX */
+  .rx-edit-modal-panel {
+    max-height: 95dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+  }
+
+  .rx-edit-tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px 14px !important;
+  }
+
+  .rx-edit-form-body {
+    padding: 16px !important;
+  }
+
+  .rx-form-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .rx-form-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .rx-edit-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .rx-edit-footer button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Auth Modal Mobile UX */
+  .rx-auth-modal-card {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 95dvh !important;
+  }
+
+  /* Pass Wallet Roster */
+  .rx-ticket-item-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .rx-ticket-item-row > div:last-child {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* Scanner Modal */
+  .rx-scanner-stats-grid {
+    padding: 12px 14px !important;
+    gap: 8px !important;
+  }
+
+  /* Event Card Footer on Mobile */
+  .rx-card-footer {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
   }
 
   .digital-pass-card {
@@ -1756,8 +2066,8 @@ html, body {
   }
 }
 
-/* Extra Small Phones (max-width: 400px) */
-@media (max-width: 400px) {
+/* Extra Small Phones (max-width: 480px) */
+@media (max-width: 480px) {
   .rx-hero-title {
     font-size: 1.7rem;
   }
@@ -1773,5 +2083,33 @@ html, body {
   .rx-stat-label {
     font-size: 8px;
   }
+
+  .rx-organizer-actions-col button {
+    flex: 1 1 100% !important;
+  }
+
+  .rx-scanner-stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    padding: 10px 12px !important;
+  }
+
+  .rx-scanner-stats-grid > div {
+    padding: 8px 4px !important;
+  }
+
+  .rx-scanner-stats-grid > div > div:last-child {
+    font-size: 1.15rem !important;
+  }
 }
+
+/* Very Small Screen (max-width: 360px) */
+@media (max-width: 360px) {
+  .rx-dashboard-kpis,
+  .rx-superadmin-kpis,
+  .rx-admin-modal-kpis {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 

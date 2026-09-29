@@ -190,7 +190,7 @@ export default function OrganizerDashboard({
 
   return (
     <div
-      className="dashboard-modal-overlay"
+      className="dashboard-modal-overlay rx-modal-backdrop rx-dashboard-modal-overlay"
       style={{
         position: "fixed",
         inset: 0,
@@ -209,7 +209,7 @@ export default function OrganizerDashboard({
       }}
     >
       <div
-        className="dashboard-modal-container"
+        className="dashboard-modal-container rx-modal-card rx-organizer-modal-container"
         style={{
           width: "100%",
           maxWidth: "1140px",
@@ -229,6 +229,7 @@ export default function OrganizerDashboard({
 
         {/* Dashboard Top Header */}
         <div
+          className="rx-dashboard-header"
           style={{
             padding: "18px 28px",
             borderBottom: "1px solid rgba(212, 175, 55, 0.15)",
@@ -330,6 +331,7 @@ export default function OrganizerDashboard({
 
         {/* Quick KPI Stat Strip */}
         <div
+          className="rx-dashboard-kpis"
           style={{
             padding: "16px 28px",
             display: "grid",
@@ -362,6 +364,7 @@ export default function OrganizerDashboard({
 
         {/* Tab Navigation */}
         <div
+          className="rx-dashboard-tabs"
           style={{
             display: "flex",
             gap: "8px",
@@ -408,7 +411,7 @@ export default function OrganizerDashboard({
         )}
 
         {/* Content Container (Scrollable) */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 28px" }}>
+        <div className="rx-dashboard-body" style={{ flex: 1, overflowY: "auto", padding: "20px 28px" }}>
           {/* TAB 1: MY EVENTS */}
           {activeTab === "events" && (
             <div>
@@ -479,6 +482,7 @@ export default function OrganizerDashboard({
                     return (
                       <div
                         key={evt.id}
+                        className="rx-organizer-event-row"
                         style={{
                           background: "rgba(255,255,255,0.02)",
                           border: "1px solid rgba(212, 175, 55, 0.25)",
@@ -491,7 +495,7 @@ export default function OrganizerDashboard({
                         }}
                       >
                         {/* Event Flyer Thumbnail */}
-                        <div style={{ width: "140px", height: "95px", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
+                        <div className="rx-organizer-flyer-thumb" style={{ width: "140px", height: "95px", borderRadius: "10px", overflow: "hidden", position: "relative" }}>
                           <img
                             src={evt.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80"}
                             alt={evt.title}
@@ -551,7 +555,7 @@ export default function OrganizerDashboard({
                         </div>
 
                         {/* Organizer Action Buttons */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "160px" }}>
+                        <div className="rx-organizer-actions-col" style={{ display: "flex", flexDirection: "column", gap: "8px", minWidth: "160px" }}>
                           {/* EVENT ADMIN HUB (SINGLE EVENT DASHBOARD) */}
                           {onOpenEventAdmin && (
                             <button

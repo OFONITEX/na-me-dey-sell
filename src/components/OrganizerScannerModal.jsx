@@ -66,7 +66,7 @@ export default function OrganizerScannerModal({ tickets, onRefreshTickets, onClo
         </div>
 
         {/* Live Gate Check-in Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", padding: "16px 24px", background: "#08080C", borderBottom: "1px solid rgba(212, 175, 55, 0.15)" }}>
+        <div className="rx-scanner-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", padding: "16px 24px", background: "#08080C", borderBottom: "1px solid rgba(212, 175, 55, 0.15)" }}>
           <div style={{ background: "#0E0E14", border: "1px solid rgba(212, 175, 55, 0.2)", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
             <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-dim)", textTransform: "uppercase" }}>Passes Issued</div>
             <div style={{ fontFamily: "Sora", fontSize: "1.5rem", fontWeight: "900", color: "#fff", marginTop: "2px" }}>{totalSold}</div>

@@ -131,9 +131,9 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop rx-modal-backdrop rx-checkout-modal-overlay" onClick={onClose}>
       <div
-        className="modal-panel"
+        className="modal-panel rx-modal-card rx-checkout-modal-panel"
         style={{
           maxWidth: "580px",
           maxHeight: "92vh",
@@ -297,7 +297,7 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
               </div>
 
               {/* 2-Column Grid for Email & Phone */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              <div className="rx-checkout-contact-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 <div>
                   <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>Email (Pass Delivery)</label>
                   <div style={{ display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "9px 12px", gap: "10px" }}>
@@ -482,6 +482,7 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
 
         {/* STICKY FOOTER ACTION BAR - ALWAYS 100% VISIBLE WITHOUT SCROLLING */}
         <div
+          className="rx-checkout-footer"
           style={{
             padding: "16px 24px",
             background: "#08080C",

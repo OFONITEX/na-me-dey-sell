@@ -228,6 +228,7 @@ export default function EventAdminModal({
 
   return (
     <div
+      className="modal-backdrop rx-modal-overlay rx-admin-modal-overlay"
       style={{
         position: "fixed",
         inset: 0,
@@ -246,6 +247,7 @@ export default function EventAdminModal({
       }}
     >
       <div
+        className="modal-panel rx-modal-card rx-admin-modal-container"
         style={{
           width: "100%",
           maxWidth: "960px",
@@ -265,6 +267,7 @@ export default function EventAdminModal({
 
         {/* Modal Header */}
         <div
+          className="rx-admin-modal-header"
           style={{
             padding: "20px 28px",
             borderBottom: "1px solid rgba(212, 175, 55, 0.18)",
@@ -455,6 +458,7 @@ export default function EventAdminModal({
 
         {/* Live Event KPI Stat Strip */}
         <div
+          className="rx-admin-modal-kpis"
           style={{
             padding: "16px 28px",
             display: "grid",
@@ -517,6 +521,7 @@ export default function EventAdminModal({
 
         {/* Tab Navigation */}
         <div
+          className="rx-admin-modal-tabs"
           style={{
             display: "flex",
             gap: "8px",
@@ -563,7 +568,7 @@ export default function EventAdminModal({
         )}
 
         {/* Modal Body Container (Scrollable) */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 28px" }}>
+        <div className="rx-admin-modal-body" style={{ flex: 1, overflowY: "auto", padding: "20px 28px" }}>
           {/* TAB 1: OVERVIEW & TIERS */}
           {activeTab === "overview" && (
             <div>

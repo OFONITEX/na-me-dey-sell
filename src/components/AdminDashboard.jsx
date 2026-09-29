@@ -418,7 +418,7 @@ export default function AdminDashboard({
 
   return (
     <div
-      className="dashboard-modal-overlay"
+      className="dashboard-modal-overlay rx-modal-backdrop rx-superadmin-modal-overlay"
       style={{
         position: "fixed",
         inset: 0,
@@ -437,7 +437,7 @@ export default function AdminDashboard({
       }}
     >
       <div
-        className="dashboard-modal-container"
+        className="dashboard-modal-container rx-modal-card rx-superadmin-modal-container"
         style={{
           width: "100%",
           maxWidth: "1280px",
@@ -457,6 +457,7 @@ export default function AdminDashboard({
 
         {/* Master Header */}
         <div
+          className="rx-superadmin-header"
           style={{
             padding: "16px 28px",
             borderBottom: "1px solid rgba(212, 175, 55, 0.2)",
@@ -708,6 +709,7 @@ export default function AdminDashboard({
 
             {/* KPI STATS BAR */}
             <div
+              className="rx-superadmin-kpis"
               style={{
                 padding: "14px 28px",
                 display: "grid",
@@ -765,6 +767,7 @@ export default function AdminDashboard({
 
             {/* TAB NAVIGATION */}
             <div
+              className="rx-superadmin-tabs"
               style={{
                 display: "flex",
                 gap: "6px",
@@ -814,7 +817,7 @@ export default function AdminDashboard({
             )}
 
             {/* MAIN TAB CONTENT CONTAINER */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "20px 28px" }}>
+            <div className="rx-superadmin-body" style={{ flex: 1, overflowY: "auto", padding: "20px 28px" }}>
 
               {/* TAB 0: PORTAL OVERVIEW */}
               {activeTab === "overview" && (
@@ -967,7 +970,7 @@ export default function AdminDashboard({
                   )}
 
                   {/* 2-Column Split: Recent Live Activities & Recent Payments */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                  <div className="rx-superadmin-overview-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                     {/* Live Activities Summary Table */}
                     <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "14px", padding: "18px" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>

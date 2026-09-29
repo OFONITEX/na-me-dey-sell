@@ -600,7 +600,7 @@ export default function Navbar({
           {/* Mobile Hamburger Toggle Button */}
           <button
             type="button"
-            className="flex md:hidden"
+            className="rx-hamburger-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
             style={{
@@ -610,7 +610,6 @@ export default function Navbar({
               color: "#F5D061",
               width: "36px",
               height: "36px",
-              display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
