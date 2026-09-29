@@ -773,6 +773,10 @@ export default function Home() {
           currentUser={currentUser}
           onClose={() => setIsCreateEventOpen(false)}
           onEventCreated={handleEventCreated}
+          onEditEvent={(evt) => {
+            setIsCreateEventOpen(false);
+            setEditingEvent(evt);
+          }}
         />
       )}
 

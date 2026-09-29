@@ -41,16 +41,18 @@ export function formatNaira(amount, currency = "₦") {
  * Loads events from localStorage or seeds with default events
  */
 export function getStoredEvents() {
-  if (typeof window === "undefined") return INITIAL_EVENTS;
+  if (typeof window === "undefined") return sortEventsByCreatedAt(INITIAL_EVENTS);
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.EVENTS);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(INITIAL_EVENTS));
-      return INITIAL_EVENTS;
+      const sorted = sortEventsByCreatedAt(INITIAL_EVENTS);
+      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(sorted));
+      return sorted;
     }
     const parsed = JSON.parse(raw);
     let updated = false;
     let synchronized = parsed.map(evt => {
+      // Sync missing organizer fields from seed data
       if (!evt.organizerEmail || !evt.createdBy) {
         const seed = INITIAL_EVENTS.find(s => s.id === evt.id);
         if (seed && seed.organizerEmail) {
@@ -64,31 +66,27 @@ export function getStoredEvents() {
           };
         }
       }
+      // Backfill createdAt from seed data if missing
+      if (!evt.createdAt) {
+        const seed = INITIAL_EVENTS.find(s => s.id === evt.id);
+        if (seed && seed.createdAt) {
+          updated = true;
+          return { ...evt, createdAt: seed.createdAt };
+        }
+      }
       return evt;
     });
 
-    // Ensure all seed events exist in stored catalog, with NAPHSS pinned at index 0
+    // Ensure all seed events exist in stored catalog
     INITIAL_EVENTS.forEach(seed => {
-      const exists = synchronized.some(e => e.id === seed.id || (e.title && e.title.toLowerCase().includes("naphss")));
+      const exists = synchronized.some(e => e.id === seed.id);
       if (!exists) {
-        if (seed.id === "evt_naphss_dinner_night") {
-          synchronized.unshift(seed);
-        } else {
-          synchronized.push(seed);
-        }
+        synchronized.push(seed);
         updated = true;
       }
     });
 
-    // Make sure NAPHSS Dinner Night is prioritized at the top of synchronized catalog
-    const naphssIdx = synchronized.findIndex(e => e.id === "evt_naphss_dinner_night" || (e.title && e.title.toLowerCase().includes("naphss")));
-    if (naphssIdx > 0) {
-      const [naphssEvt] = synchronized.splice(naphssIdx, 1);
-      synchronized.unshift(naphssEvt);
-      updated = true;
-    }
-
-    // Specifically guarantee that any NAPHSS event grants organizer/admin rights to iamrhobbinraynerhq01@gmail.com and brinoekanem@gmail.com
+    // Guarantee that any NAPHSS event grants organizer/admin rights to the correct emails
     synchronized = synchronized.map(evt => {
       if (evt.id === "evt_naphss_dinner_night" || (evt.title && evt.title.toLowerCase().includes("naphss"))) {
         if (evt.organizerEmail !== "iamrhobbinraynerhq01@gmail.com" || evt.createdBy !== "iamrhobbinraynerhq01@gmail.com" || !evt.isFeatured) {
@@ -107,6 +105,9 @@ export function getStoredEvents() {
       return evt;
     });
 
+    // Sort all events by createdAt descending (newest first)
+    synchronized = sortEventsByCreatedAt(synchronized);
+
     if (updated) {
       try {
         localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(synchronized));
@@ -115,8 +116,20 @@ export function getStoredEvents() {
     return synchronized;
   } catch (err) {
     console.error("Failed to load events:", err);
-    return INITIAL_EVENTS;
+    return sortEventsByCreatedAt(INITIAL_EVENTS);
   }
+}
+
+/**
+ * Sort events by createdAt timestamp descending (newest first).
+ * Events without createdAt are placed after those with timestamps.
+ */
+function sortEventsByCreatedAt(events) {
+  return [...events].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
 }
 
 export const INITIAL_ACTIVITIES = [

@@ -27,6 +27,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #070709 0%, #151d16 50%, #D4AF37 100%)",
     description: "The National Association of Public Health Science Students (NAPHSS) proudly presents the 2026 Annual Dinner & Awards Night! A night of distinction, elegance, fine dining, student awards, celebrity musical guests, comedy performances, and the crowning of Mr & Miss NAPHSS. Dress to inspire in your finest black-tie or royal traditional attire.",
+    createdAt: "2026-09-28T10:00:00.000Z",
     tiers: [
       {
         id: "tier_naphss_student",
@@ -83,6 +84,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #2D1B4E 0%, #522672 50%, #ff8a65 100%)",
     description: "Experience the vibrant rhythm of Afe Mbre. Featuring stellar live performances from top afrobeat sensations, high-energy DJ sets, local gourmet street food, cocktail lounges, and interactive light installations under the night sky.",
+    createdAt: "2026-09-20T14:00:00.000Z",
     tiers: [
       {
         id: "tier_regular",
@@ -139,6 +141,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #070709 0%, #1a160d 50%, #D4AF37 100%)",
     description: "Join over 2,000 founders, tech executives, angel investors, and engineers. Includes high-stakes startup pitch sessions, autonomous agent panels, networking lounges, and an exclusive sunset investor cocktail.",
+    createdAt: "2026-09-18T09:00:00.000Z",
     tiers: [
       {
         id: "tier_builder",
@@ -185,6 +188,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #38022b 0%, #831843 50%, #ff8a65 100%)",
     description: "The most anticipated musical night in Abuja. Featuring a stellar lineup of Africa's hottest musical acts, live bands, aerial acrobatics, and an electrifying light and fireworks finale.",
+    createdAt: "2026-09-15T11:00:00.000Z",
     tiers: [
       {
         id: "tier_ga",
@@ -241,6 +245,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #3b1e06 0%, #7c2d12 50%, #ca8a04 100%)",
     description: "An unforgettable outdoor culinary celebration with 40+ master grillers, fresh palm wine tasting bars, games arena, sip-and-paint canvas stalls, and acoustic African live music.",
+    createdAt: "2026-09-12T08:00:00.000Z",
     tiers: [
       {
         id: "tier_single",
@@ -287,6 +292,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #1c1402 0%, #522672 60%, #b45309 100%)",
     description: "Get ready for tears of joy and non-stop punchlines! A masterclass comedy gala featuring top stand-up legends, viral skit sensations, and celebrity musical guest appearances.",
+    createdAt: "2026-09-10T16:00:00.000Z",
     tiers: [
       {
         id: "tier_reg",
@@ -343,6 +349,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #1f021e 0%, #701a75 50%, #e11d48 100%)",
     description: "No December in Lagos is complete without the Elegushi Sun Splash. Join thousands of party-goers and diaspora visitors for the quintessential Detty December bash on the white sands of Lagos.",
+    createdAt: "2026-09-22T17:00:00.000Z",
     tiers: [
       {
         id: "tier_beach_pass",
@@ -389,6 +396,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #070709 0%, #1a160d 50%, #D4AF37 100%)",
     description: "The pinnacle of corporate networking and excellence in West Africa. Join 500+ CEOs, ambassadors, and institutional investors for a 5-course gourmet dining experience, keynote presentations, and the annual honors gala.",
+    createdAt: "2026-09-25T12:00:00.000Z",
     tiers: [
       {
         id: "tier_corp_individual",
@@ -435,6 +443,7 @@ export const INITIAL_EVENTS = [
     imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
     bannerPattern: "linear-gradient(135deg, #2b031c 0%, #831843 50%, #f472b6 100%)",
     description: "An enchanting bridal and wedding showcase for couples, event planners, and banquet hosts. Experience live nuptial table arrangements, cake tasting sessions, designer runway reveals, and meet master wedding coordinators.",
+    createdAt: "2026-09-08T10:00:00.000Z",
     tiers: [
       {
         id: "tier_wedding_couple",

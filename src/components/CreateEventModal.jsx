@@ -11,12 +11,13 @@ import { SUPPORTED_CURRENCIES } from "../data/currencies";
 
 const DRAFT_STORAGE_KEY = "nmds_event_draft_v1";
 
-export default function CreateEventModal({ currentUser, onClose, onEventCreated }) {
+export default function CreateEventModal({ currentUser, onClose, onEventCreated, onEditEvent }) {
   const [selectedCurrency, setSelectedCurrency] = useState(SUPPORTED_CURRENCIES[0]); // NGN default
   const [showProModal, setShowProModal] = useState(false);
   const [draftSavedToast, setDraftSavedToast] = useState(false);
   const [savedDraftAvailable, setSavedDraftAvailable] = useState(null);
   const [descActiveTab, setDescActiveTab] = useState("editor"); // 'editor' | 'preview'
+  const [publishedEvent, setPublishedEvent] = useState(null); // success screen state
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -359,8 +360,116 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated 
       localStorage.removeItem(DRAFT_STORAGE_KEY);
     } catch (_) {}
     onEventCreated(newEvent);
-    onClose();
+    setPublishedEvent(newEvent);
   };
+
+  // Success screen after publishing
+  if (publishedEvent) {
+    return (
+      <div className="modal-backdrop" onClick={onClose} style={{ zIndex: 1100 }}>
+        <div
+          className="modal-panel"
+          style={{
+            maxWidth: "520px",
+            width: "92%",
+            borderRadius: "16px",
+            overflow: "hidden",
+            textAlign: "center",
+            padding: "48px 32px"
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Success Icon */}
+          <div style={{
+            width: "72px",
+            height: "72px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 20px",
+            boxShadow: "0 0 30px rgba(212, 175, 55, 0.4)"
+          }}>
+            <CheckCircleIcon size={36} style={{ color: "#070709" }} />
+          </div>
+
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "900", color: "#fff", margin: "0 0 8px" }}>
+            Event Published! 🎉
+          </h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "14px", margin: "0 0 6px", lineHeight: "1.5" }}>
+            Your event is now live and visible to all users on Nà Mè Dèy Sell.
+          </p>
+          <p style={{
+            color: "#F5D061",
+            fontSize: "15px",
+            fontWeight: "800",
+            margin: "0 0 28px",
+            wordBreak: "break-word"
+          }}>
+            &ldquo;{publishedEvent.title}&rdquo;
+          </p>
+
+          {/* Action Buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px", margin: "0 auto" }}>
+            {/* Edit Event Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (onEditEvent) {
+                  onEditEvent(publishedEvent);
+                }
+                onClose();
+              }}
+              style={{
+                background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                color: "#070709",
+                border: "none",
+                borderRadius: "10px",
+                padding: "14px 24px",
+                fontSize: "15px",
+                fontWeight: "900",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                boxShadow: "0 4px 20px rgba(212, 175, 55, 0.4)",
+                width: "100%",
+                letterSpacing: "0.02em"
+              }}
+            >
+              <span>✏️</span>
+              <span>Edit Event Details</span>
+            </button>
+
+            {/* Done / Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                color: "#fff",
+                border: "1px solid rgba(255,255,255,0.15)",
+                borderRadius: "10px",
+                padding: "12px 24px",
+                fontSize: "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+                width: "100%"
+              }}
+            >
+              Done — Go to Dashboard
+            </button>
+          </div>
+
+          <p style={{ color: "var(--text-dim)", fontSize: "11px", marginTop: "20px" }}>
+            Your event is public and ranked by creation time. Share your event link to start selling tickets!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const wordCount = (formData.description || "").trim().split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 180));
