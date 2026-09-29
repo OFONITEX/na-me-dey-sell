@@ -67,26 +67,40 @@ export function getStoredEvents() {
       return evt;
     });
 
-    // Ensure all seed events exist in stored catalog
+    // Ensure all seed events exist in stored catalog, with NAPHSS pinned at index 0
     INITIAL_EVENTS.forEach(seed => {
-      const exists = synchronized.some(e => e.id === seed.id || (e.title && e.title.toLowerCase().includes("naphss") && seed.id === "evt_naphss_dinner_night"));
+      const exists = synchronized.some(e => e.id === seed.id || (e.title && e.title.toLowerCase().includes("naphss")));
       if (!exists) {
-        synchronized.push(seed);
+        if (seed.id === "evt_naphss_dinner_night") {
+          synchronized.unshift(seed);
+        } else {
+          synchronized.push(seed);
+        }
         updated = true;
       }
     });
 
-    // Specifically guarantee that any NAPHSS event grants organizer/admin rights to iamrhobbinraynerhq01@gmail.com
+    // Make sure NAPHSS Dinner Night is prioritized at the top of synchronized catalog
+    const naphssIdx = synchronized.findIndex(e => e.id === "evt_naphss_dinner_night" || (e.title && e.title.toLowerCase().includes("naphss")));
+    if (naphssIdx > 0) {
+      const [naphssEvt] = synchronized.splice(naphssIdx, 1);
+      synchronized.unshift(naphssEvt);
+      updated = true;
+    }
+
+    // Specifically guarantee that any NAPHSS event grants organizer/admin rights to iamrhobbinraynerhq01@gmail.com and brinoekanem@gmail.com
     synchronized = synchronized.map(evt => {
-      if (evt.title && evt.title.toLowerCase().includes("naphss")) {
-        if (evt.organizerEmail !== "iamrhobbinraynerhq01@gmail.com" || evt.createdBy !== "iamrhobbinraynerhq01@gmail.com") {
+      if (evt.id === "evt_naphss_dinner_night" || (evt.title && evt.title.toLowerCase().includes("naphss"))) {
+        if (evt.organizerEmail !== "iamrhobbinraynerhq01@gmail.com" || evt.createdBy !== "iamrhobbinraynerhq01@gmail.com" || !evt.isFeatured) {
           updated = true;
           return {
             ...evt,
             organizer: evt.organizer || "NAPHSS Executive Council",
             organizerEmail: "iamrhobbinraynerhq01@gmail.com",
             createdBy: "iamrhobbinraynerhq01@gmail.com",
-            organizerPhone: evt.organizerPhone || "+2348030000002"
+            organizerPhone: evt.organizerPhone || "+2348030000002",
+            badge: evt.badge || "👑 Featured • NAPHSS Gala Night",
+            isFeatured: true
           };
         }
       }
@@ -1208,7 +1222,8 @@ export function getAccountPortalData(accountEmailOrId) {
   const accountEvents = allEvents.filter(e =>
     (e.organizerEmail && e.organizerEmail.toLowerCase() === clean) ||
     (e.createdBy && e.createdBy.toLowerCase() === clean) ||
-    (e.organizerId && String(e.organizerId).toLowerCase() === clean)
+    (e.organizerId && String(e.organizerId).toLowerCase() === clean) ||
+    ((clean === "iamrhobbinraynerhq01@gmail.com" || clean === "brinoekanem@gmail.com") && (e.id === "evt_naphss_dinner_night" || (e.title && e.title.toLowerCase().includes("naphss"))))
   );
   const accountEventIds = new Set(accountEvents.map(e => e.id));
 

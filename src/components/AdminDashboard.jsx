@@ -94,6 +94,11 @@ export default function AdminDashboard({
   const users = useMemo(() => getAllRegisteredUsers(), [isOpen, toastMessage]);
   const superAdminEmails = useMemo(() => getSuperAdminEmails(), [isOpen]);
 
+  // Spotlight NAPHSS Event
+  const naphssEvent = useMemo(() => {
+    return events.find(e => e.id === "evt_naphss_dinner_night" || (e.title && e.title.toLowerCase().includes("naphss")));
+  }, [events]);
+
   // Account Scoped Data
   const accountData = useMemo(() => {
     return getAccountPortalData(selectedAccountFilter);
@@ -843,34 +848,123 @@ export default function AdminDashboard({
                     <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                       <button
                         type="button"
+                        onClick={() => setActiveTab("events")}
+                        style={{ padding: "8px 14px", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", border: "none", borderRadius: "8px", color: "#070709", fontSize: "12px", fontWeight: "900", cursor: "pointer", boxShadow: "0 2px 10px rgba(212, 175, 55, 0.4)" }}
+                      >
+                        🎪 View All Events ({filteredEvents.length})
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setActiveTab("activities")}
                         style={{ padding: "8px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "8px", color: "#F5D061", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
                       >
-                        📋 View All Activities
+                        📋 Activities
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveTab("payments")}
                         style={{ padding: "8px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "8px", color: "#10B981", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
                       >
-                        💳 View All Payments
+                        💳 Payments
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveTab("attendees")}
                         style={{ padding: "8px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "8px", color: "#60A5FA", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
                       >
-                        🎟️ View All Attendees
+                        🎟️ Attendees
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveTab("analytics")}
-                        style={{ padding: "8px 14px", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", border: "none", borderRadius: "8px", color: "#070709", fontSize: "12px", fontWeight: "800", cursor: "pointer" }}
+                        style={{ padding: "8px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "8px", color: "#E2D9BC", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
                       >
-                        📊 View Analytics Tables
+                        📊 Analytics
                       </button>
                     </div>
                   </div>
+
+                  {/* SPOTLIGHT EVENT CARD: NAPHSS ANNUAL DINNER & AWARDS NIGHT */}
+                  {naphssEvent && (
+                    <div
+                      style={{
+                        background: "linear-gradient(135deg, rgba(212, 175, 55, 0.14) 0%, rgba(14, 14, 20, 0.98) 100%)",
+                        border: "1px solid rgba(212, 175, 55, 0.45)",
+                        borderRadius: "14px",
+                        padding: "16px 20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "16px",
+                        boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)"
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                        <div style={{ width: "68px", height: "68px", borderRadius: "10px", overflow: "hidden", flexShrink: 0, border: "1px solid rgba(212, 175, 55, 0.45)" }}>
+                          <img
+                            src={naphssEvent.imageUrl || "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=400&q=80"}
+                            alt={naphssEvent.title}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </div>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "10px", fontWeight: "900", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", color: "#070709", padding: "2px 8px", borderRadius: "20px", textTransform: "uppercase" }}>
+                              👑 Spotlight Event • NAPHSS Gala
+                            </span>
+                            <span style={{ fontSize: "11px", color: "#10B981", fontWeight: "800" }}>
+                              ● Live Active
+                            </span>
+                          </div>
+                          <h3 style={{ fontSize: "16px", fontWeight: "900", color: "#ffffff", margin: "0 0 4px" }}>
+                            {naphssEvent.title}
+                          </h3>
+                          <div style={{ fontSize: "12px", color: "#E2D9BC", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                            <span>📍 {naphssEvent.venue}, {naphssEvent.city}</span>
+                            <span>📅 {naphssEvent.date}</span>
+                            <span style={{ color: "#F5D061" }}>👤 {naphssEvent.organizer}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          onClick={() => setEditingEvent(naphssEvent)}
+                          style={{
+                            padding: "8px 16px",
+                            background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
+                            border: "none",
+                            borderRadius: "8px",
+                            color: "#070709",
+                            fontSize: "12px",
+                            fontWeight: "900",
+                            cursor: "pointer",
+                            boxShadow: "0 2px 10px rgba(212, 175, 55, 0.4)"
+                          }}
+                        >
+                          ✏️ Edit Event
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab("events")}
+                          style={{
+                            padding: "8px 14px",
+                            background: "rgba(255, 255, 255, 0.06)",
+                            border: "1px solid rgba(212, 175, 55, 0.35)",
+                            borderRadius: "8px",
+                            color: "#F5D061",
+                            fontSize: "12px",
+                            fontWeight: "800",
+                            cursor: "pointer"
+                          }}
+                        >
+                          🎪 View in Events Table →
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 2-Column Split: Recent Live Activities & Recent Payments */}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>

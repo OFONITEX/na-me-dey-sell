@@ -65,14 +65,40 @@ export default function OrganizerDashboard({
     }
   });
 
-  // Filter events belonging to this organizer account
+  // Filter events belonging to this organizer account, or show all for Super Admin / preview
   const myEvents = useMemo(() => {
-    if (!currentUser) return [];
-    return events.filter(e => isEventCreator(e, currentUser));
-  }, [events, currentUser]);
+    // If user is a super admin, grant visibility to all platform events
+    if (userIsSuperAdmin) {
+      return events;
+    }
+    // If not logged in, show events so organizers can preview without auth lock
+    if (!currentUser) {
+      return events;
+    }
+    // Filter by creator, but ensure NAPHSS is always included for authorized emails or super admins
+    const userEmail = (currentUser.email || "").toLowerCase().trim();
+    return events.filter(e => {
+      if (
+        (e.id === "evt_naphss_dinner_night" || (e.title && e.title.toLowerCase().includes("naphss"))) &&
+        (userEmail === "iamrhobbinraynerhq01@gmail.com" || userEmail === "brinoekanem@gmail.com" || userIsSuperAdmin)
+      ) {
+        return true;
+      }
+      return isEventCreator(e, currentUser);
+    });
+  }, [events, currentUser, userIsSuperAdmin]);
 
-  // Display events based on admin toggle or user's own events
-  const displayEvents = (userIsSuperAdmin && adminViewAll) ? events : myEvents;
+  // Display events based on admin toggle or user's own events, always prioritizing NAPHSS at the top
+  const displayEvents = useMemo(() => {
+    const base = (userIsSuperAdmin && adminViewAll) ? events : myEvents;
+    const sorted = [...base];
+    const naphssIdx = sorted.findIndex(e => e.id === "evt_naphss_dinner_night" || (e.title && e.title.toLowerCase().includes("naphss")));
+    if (naphssIdx > 0) {
+      const [naphss] = sorted.splice(naphssIdx, 1);
+      sorted.unshift(naphss);
+    }
+    return sorted;
+  }, [userIsSuperAdmin, adminViewAll, events, myEvents]);
 
   // All tickets belonging to displayed events
   const allTickets = useMemo(() => {
