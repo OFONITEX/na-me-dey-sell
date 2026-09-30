@@ -25,7 +25,8 @@ import {
   getStoredTickets,
   updateEvent,
   getActivityFeed,
-  recordActivity
+  recordActivity,
+  getEventSlug
 } from "../lib/ticketService";
 import { triggerConfetti } from "../lib/confetti";
 
@@ -98,10 +99,11 @@ export default function EventAdminModal({
   const percentCheckedIn = totalSold > 0 ? Math.min(100, Math.round((checkedInCount / totalSold) * 100)) : 0;
   const remainingTickets = Math.max(0, totalCapacity - totalSold);
 
-  // Link generation
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://namedeysell.com";
-  const shareableEventLink = `${origin}/?event=${event.id}`;
-  const directCheckoutLink = `${origin}/?event=${event.id}&mode=attendee`;
+  // Clean branded event link generation (e.g. https://na-me-dey-sell.pages.dev/naphss-dinner-night)
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://na-me-dey-sell.pages.dev";
+  const eventSlug = getEventSlug(event);
+  const shareableEventLink = `${origin}/${eventSlug}`;
+  const directCheckoutLink = `${origin}/${eventSlug}?mode=attendee`;
 
   const handleCopyLink = () => {
     try {

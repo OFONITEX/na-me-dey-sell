@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CloseIcon, CalendarIcon, ClockIcon, MapPinIcon, CheckIcon, ShieldCheckIcon, TicketIcon, ArrowRightIcon, SparklesIcon } from "./Icons";
-import { formatNaira } from "../lib/ticketService";
+import { formatNaira, getEventSlug } from "../lib/ticketService";
 import { canEditEvent } from "../lib/authService";
 
 export default function EventDetailModal({
@@ -17,8 +17,23 @@ export default function EventDetailModal({
   const [selectedTierId, setSelectedTierId] = useState(safeTiers[0]?.id || "");
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(event?.imageUrl || "");
+  const [copiedLink, setCopiedLink] = useState(false);
 
   if (!event) return null;
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://na-me-dey-sell.pages.dev";
+  const eventSlug = getEventSlug(event);
+  const shareableEventLink = `${origin}/${eventSlug}`;
+
+  const handleCopyLink = () => {
+    try {
+      navigator.clipboard.writeText(shareableEventLink);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    } catch {
+      alert(`Link: ${shareableEventLink}`);
+    }
+  };
 
   const userCanEdit = canEditEvent(event, currentUser);
   const selectedTier = safeTiers.find(t => t.id === selectedTierId) || safeTiers[0];
@@ -58,15 +73,42 @@ export default function EventDetailModal({
           </button>
 
           <div style={{ position: "relative", zIndex: 2 }}>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
-              <span style={{ background: "rgba(212, 175, 55, 0.2)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", fontSize: "11px", fontWeight: "800", padding: "4px 10px", borderRadius: "4px", textTransform: "uppercase" }}>
-                {event.category}
-              </span>
-              {event.badge && (
-                <span style={{ background: "rgba(245, 208, 97, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", fontSize: "11px", fontWeight: "800", padding: "3px 8px", borderRadius: "4px" }}>
-                  {event.badge}
+            <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                <span style={{ background: "rgba(212, 175, 55, 0.2)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", fontSize: "11px", fontWeight: "800", padding: "4px 10px", borderRadius: "4px", textTransform: "uppercase" }}>
+                  {event.category}
                 </span>
-              )}
+                {event.badge && (
+                  <span style={{ background: "rgba(245, 208, 97, 0.15)", border: "1px solid var(--brand-gold)", color: "var(--brand-gold)", fontSize: "11px", fontWeight: "800", padding: "3px 8px", borderRadius: "4px" }}>
+                    {event.badge}
+                  </span>
+                )}
+              </div>
+
+              {/* Quick Share Link button */}
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                style={{
+                  background: copiedLink ? "rgba(16, 185, 129, 0.85)" : "rgba(10, 10, 15, 0.75)",
+                  backdropFilter: "blur(8px)",
+                  border: copiedLink ? "1px solid #10B981" : "1px solid rgba(212, 175, 55, 0.6)",
+                  color: copiedLink ? "#ffffff" : "#F5D061",
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  fontSize: "11px",
+                  fontWeight: "800",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                  transition: "all 0.2s ease"
+                }}
+                title={`Copy clean event link: ${shareableEventLink}`}
+              >
+                <span>{copiedLink ? "✓ Link Copied!" : "🔗 Share Event Link"}</span>
+              </button>
             </div>
             <h2 style={{ fontSize: "1.8rem", fontWeight: "900", color: "#fff", marginBottom: "6px" }}>{event.title}</h2>
             <div style={{ fontSize: "13px", color: "var(--brand-gold-bright)", fontWeight: "600" }}>

@@ -43,6 +43,81 @@ export function formatNaira(amount, currency = "₦") {
   return formatPrice(amount, currency);
 }
 
+/**
+ * Convert any string into an SEO-friendly URL slug
+ */
+export function slugify(text) {
+  if (!text) return "";
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/&/g, "and")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
+
+/**
+ * Get clean URL slug for an event.
+ * Uses event.slug if present, else maps standard IDs or slugifies the title.
+ * Examples:
+ *  - "NAPHSS Annual Dinner & Awards Night 2026" -> "naphss-dinner-night"
+ *  - "Vibes Barn: Afe Mbre Festival" -> "vibes-barn"
+ */
+export function getEventSlug(event) {
+  if (!event) return "";
+  if (event.slug) return slugify(event.slug);
+  
+  const id = String(event.id || "").trim().toLowerCase();
+  if (id === "evt_naphss_dinner_night" || id.includes("naphss")) {
+    return "naphss-dinner-night";
+  }
+  if (id === "evt_vibes_barn_afe_mbre" || id.includes("vibes_barn")) {
+    return "vibes-barn";
+  }
+
+  if (id.startsWith("evt_") && !id.startsWith("evt_user_") && !id.startsWith("evt_1")) {
+    return slugify(id.replace(/^evt_/, "").replace(/_/g, "-"));
+  }
+
+  return slugify(event.title) || id;
+}
+
+/**
+ * Finds an event in an array by slug, ID, or title slug
+ */
+export function findEventBySlugOrId(eventsList, targetSlugOrId) {
+  if (!eventsList || !targetSlugOrId) return null;
+  const cleanTarget = String(targetSlugOrId).toLowerCase().trim();
+
+  return eventsList.find(e => {
+    if (!e) return false;
+    const cleanId = String(e.id || "").toLowerCase().trim();
+    if (cleanId === cleanTarget) return true;
+
+    const eventSlug = getEventSlug(e).toLowerCase();
+    if (eventSlug === cleanTarget) return true;
+
+    if (e.slug && String(e.slug).toLowerCase().trim() === cleanTarget) return true;
+
+    const titleSlug = slugify(e.title || "").toLowerCase();
+    if (titleSlug === cleanTarget) return true;
+
+    // Special matchers for NAPHSS and Vibes Barn
+    if (cleanTarget.includes("naphss") && (cleanId.includes("naphss") || (e.title && e.title.toLowerCase().includes("naphss")))) {
+      return true;
+    }
+    if (cleanTarget.includes("vibes-barn") && (cleanId.includes("vibes_barn") || (e.title && e.title.toLowerCase().includes("vibes barn")))) {
+      return true;
+    }
+
+    return false;
+  }) || null;
+}
+
 export const LEGACY_REMOVED_EVENT_IDS = new Set([
   "evt_flytime_fest_burna",
   "evt_lagos_tech_unwind",

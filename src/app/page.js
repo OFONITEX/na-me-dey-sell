@@ -25,7 +25,7 @@ import {
   FlameIcon,
   CrownIcon
 } from "../components/Icons";
-import { getStoredEvents, getStoredTickets, INITIAL_TICKETS, syncEventsWithSupabase } from "../lib/ticketService";
+import { getStoredEvents, getStoredTickets, INITIAL_TICKETS, syncEventsWithSupabase, findEventBySlugOrId } from "../lib/ticketService";
 import { INITIAL_EVENTS } from "../data/mockEvents";
 import { getAuthUser, logoutUser, subscribeAuth, isSuperAdmin, canEditEvent } from "../lib/authService";
 
@@ -73,21 +73,32 @@ export default function Home() {
 
     window.addEventListener("nmds_events_change", handleEventsChange);
 
-    // Support direct public ticket link query parameter (?event=id)
+    // Support direct public ticket link from clean URL path (e.g. /naphss-dinner-night) or ?event=slug
     try {
       const params = new URLSearchParams(window.location.search);
       const urlEventId = params.get("event");
       const urlMode = params.get("mode");
-      if (urlEventId) {
-        const found = loadedEvents.find(
-          e => String(e.id || "").toLowerCase() === String(urlEventId).toLowerCase()
-        );
+
+      // Check pathname (e.g. /naphss-dinner-night or /e/naphss-dinner-night)
+      let pathnameSlug = "";
+      if (typeof window !== "undefined") {
+        const rawPath = window.location.pathname || "";
+        const cleanPath = rawPath.replace(/^\/e\//, "").replace(/^\//, "").replace(/\/$/, "");
+        if (cleanPath && cleanPath !== "admin" && !cleanPath.startsWith("admin/") && !cleanPath.startsWith("_")) {
+          pathnameSlug = cleanPath;
+        }
+      }
+
+      const targetIdentifier = urlEventId || pathnameSlug;
+      if (targetIdentifier) {
+        const found = findEventBySlugOrId(loadedEvents, targetIdentifier);
         if (found) {
           if (urlMode === "attendee") {
             setSelectedEvent(found);
-          } else if (canEditEvent(found, authUser)) {
+          } else if (urlMode === "admin" && canEditEvent(found, authUser)) {
             setAdminEvent(found);
           } else {
+            // Default: open the public ticket checkout modal so the user can buy tickets directly
             setSelectedEvent(found);
           }
         }
@@ -98,6 +109,28 @@ export default function Home() {
     let realtimeUnsub = null;
     syncEventsWithSupabase((cloudEvents) => {
       setEvents(cloudEvents);
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlEventId = params.get("event");
+        const urlMode = params.get("mode");
+        let pathnameSlug = "";
+        const rawPath = window.location.pathname || "";
+        const cleanPath = rawPath.replace(/^\/e\//, "").replace(/^\//, "").replace(/\/$/, "");
+        if (cleanPath && cleanPath !== "admin" && !cleanPath.startsWith("admin/") && !cleanPath.startsWith("_")) {
+          pathnameSlug = cleanPath;
+        }
+        const targetIdentifier = urlEventId || pathnameSlug;
+        if (targetIdentifier) {
+          const found = findEventBySlugOrId(cloudEvents, targetIdentifier);
+          if (found) {
+            if (urlMode === "admin" && canEditEvent(found, authUser)) {
+              setAdminEvent(found);
+            } else {
+              setSelectedEvent(found);
+            }
+          }
+        }
+      } catch {}
     }).then((unsub) => {
       realtimeUnsub = unsub;
     }).catch(() => {});
