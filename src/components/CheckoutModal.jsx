@@ -24,6 +24,7 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
   const [promoSuccess, setPromoSuccess] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [gatewayError, setGatewayError] = useState("");
+  const [copiedAccount, setCopiedAccount] = useState(false);
 
   const currencySymbol = event?.currency || tier?.currency || "₦";
 
@@ -368,27 +369,7 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
                 <span style={{ fontSize: "9px", color: "var(--text-muted)" }}>Transfer/Card/USSD</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => { setPaymentMethod("paystack"); setGatewayError(""); }}
-                style={{
-                  background: paymentMethod === "paystack" ? "rgba(212, 175, 55, 0.2)" : "#070709",
-                  border: paymentMethod === "paystack" ? "2px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
-                  borderRadius: "8px",
-                  padding: "10px 6px",
-                  color: "#fff",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                <span style={{ fontSize: "18px" }}>⚡</span>
-                <span style={{ fontSize: "12px", fontWeight: "800" }}>Paystack</span>
-                <span style={{ fontSize: "9px", color: "var(--text-dim)" }}>Card / Apple Pay</span>
-              </button>
-
+              {/* Direct Bank Transfer */}
               <button
                 type="button"
                 onClick={() => { setPaymentMethod("bank_transfer"); setGatewayError(""); }}
@@ -402,12 +383,44 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
                   flexDirection: "column",
                   alignItems: "center",
                   gap: "4px",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  position: "relative"
                 }}
               >
+                <span style={{ position: "absolute", top: "-7px", right: "6px", background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)", color: "#070709", fontSize: "8px", fontWeight: "900", padding: "1px 5px", borderRadius: "999px" }}>
+                  DIRECT
+                </span>
                 <span style={{ fontSize: "18px" }}>🏦</span>
                 <span style={{ fontSize: "12px", fontWeight: "800" }}>Bank Transfer</span>
-                <span style={{ fontSize: "9px", color: "var(--text-dim)" }}>Dedicated Account</span>
+                <span style={{ fontSize: "9px", color: "var(--brand-gold)" }}>Opay Instant</span>
+              </button>
+
+              {/* Paystack (Disabled) */}
+              <button
+                type="button"
+                disabled
+                style={{
+                  background: "#070709",
+                  border: "1px dashed rgba(255, 255, 255, 0.15)",
+                  borderRadius: "8px",
+                  padding: "10px 6px",
+                  color: "#666",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "4px",
+                  cursor: "not-allowed",
+                  opacity: 0.45,
+                  position: "relative"
+                }}
+                title="Paystack payment method is currently disabled"
+              >
+                <span style={{ position: "absolute", top: "-7px", right: "6px", background: "rgba(239, 68, 68, 0.25)", border: "1px solid rgba(239, 68, 68, 0.6)", color: "#fca5a5", fontSize: "7px", fontWeight: "900", padding: "1px 4px", borderRadius: "4px" }}>
+                  DISABLED
+                </span>
+                <span style={{ fontSize: "18px", filter: "grayscale(1)" }}>⚡</span>
+                <span style={{ fontSize: "12px", fontWeight: "800", color: "#777" }}>Paystack</span>
+                <span style={{ fontSize: "9px", color: "#555" }}>Unavailable</span>
               </button>
             </div>
           </div>
@@ -416,24 +429,75 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
           {paymentMethod === "bank_transfer" && (
             <div
               style={{
-                background: "rgba(212, 175, 55, 0.08)",
-                border: "1px solid rgba(212, 175, 55, 0.25)",
-                borderRadius: "8px",
-                padding: "12px 14px",
+                background: "linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(10, 10, 16, 0.95) 100%)",
+                border: "1px solid rgba(212, 175, 55, 0.4)",
+                borderRadius: "10px",
+                padding: "14px 16px",
                 display: "flex",
                 flexDirection: "column",
-                gap: "6px"
+                gap: "10px",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)"
               }}
             >
-              <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase" }}>
-                Dedicated Ticket Bank Account
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "11px", fontWeight: "900", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  🏦 Dedicated Bank Transfer Account
+                </span>
+                <span style={{ fontSize: "10px", color: "var(--emerald-green)", fontWeight: "800", background: "rgba(16, 185, 129, 0.15)", padding: "2px 6px", borderRadius: "4px" }}>
+                  Instant Verification
+                </span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#fff" }}>
-                <span>Bank: <strong>Wema Bank / Providus</strong></span>
-                <span>Account: <strong style={{ color: "var(--brand-gold)" }}>0283948172</strong></span>
+
+              {/* Account Number with 1-Click Copy */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px", alignItems: "center", background: "rgba(0,0,0,0.45)", padding: "10px 14px", borderRadius: "8px", border: "1px solid rgba(212, 175, 55, 0.25)" }}>
+                <div>
+                  <div style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "2px" }}>Account Number</div>
+                  <div style={{ fontSize: "20px", fontWeight: "900", color: "var(--brand-gold)", letterSpacing: "0.08em", fontFamily: "monospace" }}>
+                    8167112462
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof navigator !== "undefined" && navigator.clipboard) {
+                      navigator.clipboard.writeText("8167112462");
+                    }
+                    setCopiedAccount(true);
+                    setTimeout(() => setCopiedAccount(false), 2500);
+                  }}
+                  style={{
+                    background: copiedAccount ? "var(--emerald-green)" : "rgba(212, 175, 55, 0.2)",
+                    border: "1px solid rgba(212, 175, 55, 0.5)",
+                    color: copiedAccount ? "#070709" : "#F5D061",
+                    borderRadius: "6px",
+                    padding: "7px 12px",
+                    fontSize: "11px",
+                    fontWeight: "800",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  <span>{copiedAccount ? "Copied! ✓" : "Copy Number"}</span>
+                </button>
               </div>
-              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                Beneficiary: <strong>Nà Mè Dèy Sell Events</strong> • Automatic Instant Pass Issue
+
+              {/* Bank & Account Name Grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "10px", fontSize: "12px", background: "rgba(255,255,255,0.02)", padding: "8px 12px", borderRadius: "6px" }}>
+                <div>
+                  <div style={{ color: "var(--text-dim)", fontSize: "10px", textTransform: "uppercase" }}>Bank Name</div>
+                  <strong style={{ color: "#F5D061", fontSize: "13px" }}>Opay</strong>
+                </div>
+                <div>
+                  <div style={{ color: "var(--text-dim)", fontSize: "10px", textTransform: "uppercase" }}>Account Name</div>
+                  <strong style={{ color: "#fff", fontSize: "13px" }}>Ofonitech Solutionz</strong>
+                </div>
+              </div>
+
+              <div style={{ fontSize: "11px", color: "var(--text-muted)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "8px" }}>
+                💡 Transfer exact amount (<strong style={{ color: "var(--brand-gold)" }}>{formatNaira(finalTotal, currencySymbol)}</strong>). Click &quot;Confirm Bank Transfer&quot; below to receive your ticket and QR pass immediately.
               </div>
             </div>
           )}
@@ -529,9 +593,7 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
                 <span>
                   {paymentMethod === "monnify"
                     ? "Pay via Monnify"
-                    : paymentMethod === "bank_transfer"
-                    ? "Confirm Bank Transfer"
-                    : "Pay via Paystack"}
+                    : "Confirm Bank Transfer"}
                 </span>
                 <span className="rx-btn-icon" style={{ marginLeft: "4px" }}>
                   <ArrowRightIcon size={14} />
