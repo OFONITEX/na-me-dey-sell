@@ -371,7 +371,7 @@ export default function Home() {
         onSelectCategory={setActiveCategory}
       />
 
-      {/* Hero Section styled after Rigitix */}
+      {/* Hero Section */}
       <section className="rx-hero">
         <div className="rx-hero-glow-1" />
         <div className="rx-hero-glow-2" />

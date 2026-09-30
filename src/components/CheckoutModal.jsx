@@ -33,7 +33,7 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
     const code = promoCode.trim().toUpperCase();
     if (!code) return;
 
-    if (code === "NMDS20" || code === "VIBES20") {
+    if (code === "NMDS20") {
       const discount = Math.round(subtotal * 0.2);
       setAppliedDiscount(discount);
       setPromoSuccess(`Promo applied: 20% discount (-${formatNaira(discount, currencySymbol)})`);

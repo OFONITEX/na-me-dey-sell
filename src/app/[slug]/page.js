@@ -4,8 +4,7 @@ import { getEventSlug } from "../../lib/ticketService";
 
 export function generateStaticParams() {
   const defaultSlugs = [
-    { slug: "naphss-dinner-night" },
-    { slug: "vibes-barn" }
+    { slug: "naphss-dinner-night" }
   ];
 
   const eventSlugs = INITIAL_EVENTS.map(event => ({

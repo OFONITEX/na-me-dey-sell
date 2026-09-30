@@ -50,7 +50,7 @@ export default function Navbar({
           <span className="brand-tagline-pill">Official Tickets</span>
         </div>
 
-        {/* Desktop Navigation Links modeled after Rigitix */}
+        {/* Desktop Navigation Links */}
         <nav className="nav-links-row hidden md:flex">
           {/* Solutions Dropdown */}
           <div
@@ -585,7 +585,7 @@ export default function Navbar({
             </div>
           )}
 
-          {/* Rigitix Signature Split Button: Create Event (Desktop/Tablet) */}
+          {/* Primary Action Split Button: Create Event (Desktop/Tablet) */}
           <button
             className="rx-btn rx-btn-primary hidden md:inline-flex"
             onClick={onOpenCreateEvent}

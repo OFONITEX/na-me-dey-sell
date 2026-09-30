@@ -118,7 +118,7 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent, o
         </div>
       </div>
 
-      {/* Rigitix Signature Perforated Notches */}
+      {/* Ticket Signature Perforated Notches */}
       <div className="rx-ticket-notches">
         <div className="rx-notch-left" />
         <div className="rx-perforated-line" />
@@ -148,7 +148,7 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent, o
           {event.subtitle}
         </p>
 
-        {/* Rigitix-style RSVP & Social Proof */}
+        {/* Event RSVP & Social Proof */}
         <div className="rx-social-proof-row">
           <button
             type="button"

@@ -99,30 +99,6 @@ export const SEED_USERS = [
     initials: "RR"
   },
   {
-    id: "usr_organizer_davido",
-    fullName: "David Adeleke (Davido)",
-    email: "davido@dmw.ng",
-    phone: "+2348021112233",
-    role: "organizer",
-    isSuperAdmin: false,
-    verified: true,
-    authProvider: "direct",
-    createdAt: "2026-02-10T10:00:00.000Z",
-    initials: "DA"
-  },
-  {
-    id: "usr_organizer_flytime",
-    fullName: "Flytime Promotions HQ",
-    email: "info@flytimefest.com",
-    phone: "+2348034445566",
-    role: "organizer",
-    isSuperAdmin: false,
-    verified: true,
-    authProvider: "direct",
-    createdAt: "2026-02-15T12:00:00.000Z",
-    initials: "FP"
-  },
-  {
     id: "usr_attendee_chukwudi",
     fullName: "Chukwudi Eze",
     email: "chukwudi.eze@gmail.com",

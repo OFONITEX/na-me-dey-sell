@@ -65,7 +65,6 @@ export function slugify(text) {
  * Uses event.slug if present, else maps standard IDs or slugifies the title.
  * Examples:
  *  - "NAPHSS Annual Dinner & Awards Night 2026" -> "naphss-dinner-night"
- *  - "Vibes Barn: Afe Mbre Festival" -> "vibes-barn"
  */
 export function getEventSlug(event) {
   if (!event) return "";
@@ -74,9 +73,6 @@ export function getEventSlug(event) {
   const id = String(event.id || "").trim().toLowerCase();
   if (id === "evt_naphss_dinner_night" || id.includes("naphss")) {
     return "naphss-dinner-night";
-  }
-  if (id === "evt_vibes_barn_afe_mbre" || id.includes("vibes_barn")) {
-    return "vibes-barn";
   }
 
   if (id.startsWith("evt_") && !id.startsWith("evt_user_") && !id.startsWith("evt_1")) {
@@ -106,11 +102,8 @@ export function findEventBySlugOrId(eventsList, targetSlugOrId) {
     const titleSlug = slugify(e.title || "").toLowerCase();
     if (titleSlug === cleanTarget) return true;
 
-    // Special matchers for NAPHSS and Vibes Barn
+    // Special matcher for NAPHSS
     if (cleanTarget.includes("naphss") && (cleanId.includes("naphss") || (e.title && e.title.toLowerCase().includes("naphss")))) {
-      return true;
-    }
-    if (cleanTarget.includes("vibes-barn") && (cleanId.includes("vibes_barn") || (e.title && e.title.toLowerCase().includes("vibes barn")))) {
       return true;
     }
 
@@ -119,6 +112,7 @@ export function findEventBySlugOrId(eventsList, targetSlugOrId) {
 }
 
 export const LEGACY_REMOVED_EVENT_IDS = new Set([
+  "evt_vibes_barn_afe_mbre",
   "evt_flytime_fest_burna",
   "evt_lagos_tech_unwind",
   "evt_eko_supper_club_experience",
@@ -148,7 +142,7 @@ export function getStoredEvents() {
     const parsed = JSON.parse(raw);
     let updated = false;
 
-    // Remove legacy mock events, preserving Vibes Barn and any newly created events
+    // Remove legacy mock events, preserving authentic events
     const filtered = parsed.filter(evt => {
       if (LEGACY_REMOVED_EVENT_IDS.has(evt.id)) {
         updated = true;
@@ -231,15 +225,15 @@ export const INITIAL_ACTIVITIES = [
     type: "payment",
     category: "Payment",
     title: "Ticket Purchase Completed",
-    description: "Chukwudi Eze paid ₦25,000 for VIP Lounge Pass at Vibes Barn Festival",
-    actor: "Chukwudi Eze",
-    actorEmail: "chukwudi.eze@gmail.com",
+    description: "Dr. Samuel Bassey paid ₦10,000 for VIP Executive Delegate Pass at NAPHSS Annual Dinner",
+    actor: "Dr. Samuel Bassey",
+    actorEmail: "dr.bassey@healthscience.org",
     role: "attendee",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    eventId: "evt_vibes_barn_afe_mbre",
-    orderId: "ORD-NG-849201",
-    amount: 25000,
-    timestamp: "2026-09-27T20:15:00.000Z"
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventId: "evt_naphss_dinner_night",
+    orderId: "ORD-NG-728192",
+    amount: 10000,
+    timestamp: "2026-09-28T16:20:00.000Z"
   },
   {
     id: "act_init_4",
@@ -267,31 +261,32 @@ export const INITIAL_ACTIVITIES = [
     id: "act_init_6",
     type: "payment",
     category: "Payment",
-    title: "Monnify Card Payment Cleared",
-    description: "Tunde Bakare paid ₦10,000 for 2x Regular Access passes",
-    actor: "Tunde Bakare",
-    actorEmail: "tunde.bakare@lagosmail.com",
+    title: "Monnify Payment Cleared",
+    description: "Emeka Okafor paid ₦3,500 for Standard Student Pass",
+    actor: "Emeka Okafor",
+    actorEmail: "emeka.okafor@uniuyo.edu.ng",
     role: "attendee",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    eventId: "evt_vibes_barn_afe_mbre",
-    orderId: "ORD-NG-628491",
-    amount: 10000,
-    timestamp: "2026-09-26T14:20:00.000Z"
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventId: "evt_naphss_dinner_night",
+    orderId: "ORD-NG-728190",
+    amount: 3500,
+    timestamp: "2026-09-28T14:30:00.000Z"
   },
   {
     id: "act_init_9",
     type: "checkin",
     category: "Gate Check-In",
     title: "Gate Check-In Admitted",
-    description: "Chukwudi Eze scanned in at VIP Entrance with ticket pass NMDS-2026-9X7M-K42B",
+    description: "NAPHSS Alumni delegate scanned in with ticket pass NMDS-2026-NAPH-TBL1",
     actor: "Gate Marshall Kalu",
     role: "staff",
-    ticketId: "NMDS-2026-9X7M-K42B",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    eventId: "evt_vibes_barn_afe_mbre",
-    timestamp: "2026-09-27T20:45:10.000Z"
+    ticketId: "NMDS-2026-NAPH-TBL1",
+    eventTitle: "NAPHSS Annual Dinner & Awards Night 2026",
+    eventId: "evt_naphss_dinner_night",
+    timestamp: "2026-09-28T18:50:00.000Z"
   }
 ];
+
 
 export function getActivityFeed() {
   if (typeof window === "undefined") return INITIAL_ACTIVITIES;
@@ -580,72 +575,6 @@ export function toggleEventStatus(eventId, newStatus) {
 
 export const INITIAL_TICKETS = [
   {
-    ticketId: "NMDS-2026-9X7M-K42B",
-    orderId: "ORD-NG-849201",
-    eventId: "evt_vibes_barn_afe_mbre",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    eventSubtitle: "The ultimate cultural groove, live music, beachside culinary feast, and Afro-fusion experience.",
-    eventDate: "Sep 27, 2026",
-    eventTime: "08:00 PM - 04:00 AM",
-    venue: "Ibom Tropicana Entertainment Center",
-    city: "Uyo, Akwa Ibom",
-    address: "Udo Udoma Banking District",
-    organizer: "Vibes Barn Global",
-    organizerEmail: "info@vibesbarn.com",
-    accentColor: "#522672",
-    bannerPattern: "linear-gradient(135deg, #2D1B4E 0%, #522672 50%, #ff8a65 100%)",
-    tierId: "tier_vip",
-    tierName: "VIP Lounge Pass",
-    tierPrice: 25000,
-    currency: "₦",
-    xpReward: 50,
-    perks: ["Express VIP gate check-in", "Access to elevated VIP viewing deck", "Complimentary welcome drink & canapés"],
-    seatNumber: "VIP-LOUNGE-04",
-    attendee: {
-      name: "Chukwudi Eze",
-      email: "chukwudi.eze@gmail.com",
-      phone: "+234 803 456 7890",
-      notes: "Early VIP Arrival"
-    },
-    paymentMethod: "paystack",
-    purchaseDate: "2026-09-20T18:30:00.000Z",
-    status: "checked_in",
-    checkedInAt: "2026-09-27T20:45:10.000Z",
-    gateStaff: "Gate Marshall Kalu"
-  },
-  {
-    ticketId: "NMDS-2026-3X8K-Q72L",
-    orderId: "ORD-NG-628491",
-    eventId: "evt_vibes_barn_afe_mbre",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    eventSubtitle: "The ultimate cultural groove, live music, beachside culinary feast, and Afro-fusion experience.",
-    eventDate: "Sep 27, 2026",
-    eventTime: "08:00 PM - 04:00 AM",
-    venue: "Ibom Tropicana Entertainment Center",
-    city: "Uyo, Akwa Ibom",
-    address: "Udo Udoma Banking District",
-    organizer: "Vibes Barn Global",
-    organizerEmail: "info@vibesbarn.com",
-    accentColor: "#522672",
-    tierId: "tier_reg",
-    tierName: "Regular Access",
-    tierPrice: 5000,
-    currency: "₦",
-    xpReward: 25,
-    perks: ["General entry", "Festival wristband"],
-    seatNumber: "REG-GA-102",
-    attendee: {
-      name: "Tunde Bakare",
-      email: "tunde.bakare@lagosmail.com",
-      phone: "+234 802 334 5566"
-    },
-    paymentMethod: "monnify",
-    purchaseDate: "2026-09-26T14:20:00.000Z",
-    status: "active",
-    checkedInAt: null,
-    gateStaff: null
-  },
-  {
     ticketId: "NMDS-2026-NAPH-1A8K",
     orderId: "ORD-NG-728190",
     eventId: "evt_naphss_dinner_night",
@@ -826,52 +755,6 @@ export function saveTickets(newTicketsList) {
 }
 
 export const INITIAL_PAYMENTS = [
-  {
-    orderId: "ORD-NG-849201",
-    transactionRef: "MNF_TX_849201_912",
-    paymentReference: "MNF_REV_2026_9401",
-    eventId: "evt_vibes_barn_afe_mbre",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    organizer: "Vibes Barn Global",
-    organizerEmail: "info@vibesbarn.com",
-    attendee: {
-      name: "Chukwudi Eze",
-      email: "chukwudi.eze@gmail.com",
-      phone: "+234 803 456 7890"
-    },
-    quantity: 1,
-    tierName: "VIP Lounge Pass",
-    grossAmount: 25000,
-    platformFee: 1250,
-    organizerPayout: 23750,
-    currency: "₦",
-    paymentMethod: "monnify",
-    paymentStatus: "PAID",
-    timestamp: "2026-09-20T18:30:00.000Z"
-  },
-  {
-    orderId: "ORD-NG-628491",
-    transactionRef: "MNF_TX_628491_582",
-    paymentReference: "MNF_REV_2026_6284",
-    eventId: "evt_vibes_barn_afe_mbre",
-    eventTitle: "Vibes Barn: Afe Mbre Festival",
-    organizer: "Vibes Barn Global",
-    organizerEmail: "info@vibesbarn.com",
-    attendee: {
-      name: "Tunde Bakare",
-      email: "tunde.bakare@lagosmail.com",
-      phone: "+234 802 334 5566"
-    },
-    quantity: 2,
-    tierName: "Regular Access",
-    grossAmount: 10000,
-    platformFee: 500,
-    organizerPayout: 9500,
-    currency: "₦",
-    paymentMethod: "monnify",
-    paymentStatus: "PAID",
-    timestamp: "2026-09-26T14:20:00.000Z"
-  },
   {
     orderId: "ORD-NG-728190",
     transactionRef: "MNF_TX_728190_001",
