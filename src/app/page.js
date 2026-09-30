@@ -207,13 +207,10 @@ export default function Home() {
       setAdminEvent(event);
       return;
     }
-    if (canEditEvent(event, currentUser)) {
-      setSelectedEvent(null);
-      setAdminEvent(event);
-    } else {
-      setAdminEvent(null);
-      setSelectedEvent(event);
-    }
+    // Default click on an event card opens the ticket booking & detail modal
+    // (Organizers have a dedicated admin ribbon inside the modal + quick buttons on the card)
+    setAdminEvent(null);
+    setSelectedEvent(event);
   };
 
   // Require account registration/login before proceeding to checkout
@@ -473,6 +470,7 @@ export default function Home() {
               currentUser={currentUser}
               onSelect={handleSelectEvent}
               onEditEvent={setEditingEvent}
+              onOpenAdmin={(selected) => handleSelectEvent(selected, "admin")}
             />
           ))}
         </div>
@@ -522,6 +520,7 @@ export default function Home() {
                 currentUser={currentUser}
                 onSelect={handleSelectEvent}
                 onEditEvent={setEditingEvent}
+                onOpenAdmin={(selected) => handleSelectEvent(selected, "admin")}
               />
             ))}
           </div>

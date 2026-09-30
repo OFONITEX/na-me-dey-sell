@@ -3,7 +3,7 @@ import { CalendarIcon, MapPinIcon, TicketIcon, ArrowRightIcon, ClockIcon, FlameI
 import { formatNaira } from "../lib/ticketService";
 import { canEditEvent } from "../lib/authService";
 
-export default function EventCard({ event, currentUser, onSelect, onEditEvent }) {
+export default function EventCard({ event, currentUser, onSelect, onEditEvent, onOpenAdmin }) {
   const [isGoing, setIsGoing] = useState(false);
   const [goingCount, setGoingCount] = useState(event.goingCount || 48);
 
@@ -23,7 +23,7 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent })
   const lowestPrice = event?.tiers?.length ? Math.min(...event.tiers.map(t => t.price)) : 0;
 
   return (
-    <div className="rx-creative-card" onClick={() => onSelect(event)}>
+    <div className="rx-creative-card" onClick={() => onSelect(event, "attendee")}>
       {/* Top Banner Image Section */}
       <div className="rx-card-top">
         <img
@@ -172,18 +172,47 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent })
             <span className="rx-price-amount">{formatNaira(lowestPrice, event.currency || event.tiers?.[0]?.currency || "₦")}</span>
           </div>
 
-          {userCanEdit ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              {onEditEvent && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+            {userCanEdit && (
+              <>
+                {onEditEvent && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditEvent(event);
+                    }}
+                    style={{
+                      background: "rgba(212, 175, 55, 0.12)",
+                      border: "1px solid rgba(212, 175, 55, 0.45)",
+                      color: "#F5D061",
+                      borderRadius: "6px",
+                      padding: "6px 9px",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "3px"
+                    }}
+                    title="Edit event details & ticket tiers"
+                  >
+                    <span>✏️ Edit</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onEditEvent(event);
+                    if (onOpenAdmin) {
+                      onOpenAdmin(event);
+                    } else if (onSelect) {
+                      onSelect(event, "admin");
+                    }
                   }}
                   style={{
-                    background: "rgba(212, 175, 55, 0.15)",
-                    border: "1px solid rgba(212, 175, 55, 0.5)",
+                    background: "rgba(212, 175, 55, 0.18)",
+                    border: "1px solid rgba(212, 175, 55, 0.6)",
                     color: "#F5D061",
                     borderRadius: "6px",
                     padding: "6px 10px",
@@ -192,36 +221,35 @@ export default function EventCard({ event, currentUser, onSelect, onEditEvent })
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
-                    gap: "4px"
+                    gap: "3px"
                   }}
-                  title="Edit event details & ticket tiers"
+                  title="Open Event Admin Studio"
                 >
-                  <span>✏️ Edit</span>
+                  <span>👑 Admin</span>
                 </button>
-              )}
-              <div
-                className="rx-btn rx-btn-primary rx-btn-sm"
-                style={{
-                  background: "linear-gradient(135deg, #D4AF37 0%, #F5D061 100%)",
-                  color: "#070709",
-                  fontWeight: "900"
-                }}
-                title="Open Event Admin Studio"
-              >
-                <span className="rx-btn-text">👑 Admin Hub</span>
-                <span className="rx-btn-icon">
-                  <ArrowRightIcon size={14} />
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="rx-btn rx-btn-primary rx-btn-sm">
+              </>
+            )}
+
+            <button
+              type="button"
+              className="rx-btn rx-btn-primary rx-btn-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(event, "attendee");
+              }}
+              style={{
+                cursor: "pointer",
+                border: "none",
+                outline: "none"
+              }}
+              title="Get tickets for this event"
+            >
               <span className="rx-btn-text">Get Ticket</span>
               <span className="rx-btn-icon">
                 <ArrowRightIcon size={14} />
               </span>
-            </div>
-          )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
