@@ -25,7 +25,7 @@ import {
   FlameIcon,
   CrownIcon
 } from "../components/Icons";
-import { getStoredEvents, getStoredTickets, INITIAL_TICKETS } from "../lib/ticketService";
+import { getStoredEvents, getStoredTickets, INITIAL_TICKETS, syncEventsWithSupabase } from "../lib/ticketService";
 import { INITIAL_EVENTS } from "../data/mockEvents";
 import { getAuthUser, logoutUser, subscribeAuth, isSuperAdmin, canEditEvent } from "../lib/authService";
 
@@ -94,9 +94,18 @@ export default function Home() {
       }
     } catch {}
 
+    // Cloud sync with Supabase (fetches latest events & subscribes to live edits across all devices)
+    let realtimeUnsub = null;
+    syncEventsWithSupabase((cloudEvents) => {
+      setEvents(cloudEvents);
+    }).then((unsub) => {
+      realtimeUnsub = unsub;
+    }).catch(() => {});
+
     return () => {
       unsubscribe();
       window.removeEventListener("nmds_events_change", handleEventsChange);
+      if (typeof realtimeUnsub === "function") realtimeUnsub();
     };
   }, []);
 

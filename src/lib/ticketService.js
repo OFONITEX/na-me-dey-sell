@@ -1,4 +1,10 @@
 import { INITIAL_EVENTS } from "../data/mockEvents";
+import {
+  isSupabaseConfigured,
+  fetchEventsFromSupabase,
+  upsertEventToSupabase,
+  subscribeToEventsRealtime
+} from "./supabaseClient";
 
 const STORAGE_KEYS = {
   EVENTS: "nmds_events_v2",
@@ -281,10 +287,75 @@ export function saveNewEvent(eventData) {
       } catch {}
     }
 
+    // Sync with Supabase cloud database if configured
+    if (isSupabaseConfigured()) {
+      upsertEventToSupabase(eventData).catch(err => console.warn("Supabase upsert event notice:", err));
+    }
+
     return newEvents;
   } catch (err) {
     console.error("Failed to save new event:", err);
     return [];
+  }
+}
+
+/**
+ * Synchronize local events with Supabase cloud database.
+ * If Supabase is active, pulls latest events, merges into local storage,
+ * and sets up a real-time listener so changes made on any phone/PC reflect everywhere.
+ */
+export async function syncEventsWithSupabase(onEventsRefreshed = null) {
+  if (typeof window === "undefined" || !isSupabaseConfigured()) return () => {};
+
+  try {
+    const cloudEvents = await fetchEventsFromSupabase();
+    if (cloudEvents && Array.isArray(cloudEvents) && cloudEvents.length > 0) {
+      const formatted = cloudEvents.map(row => ({
+        id: row.id,
+        title: row.title,
+        subtitle: row.subtitle,
+        category: row.category,
+        date: row.date,
+        time: row.time,
+        venue: row.venue,
+        city: row.city,
+        address: row.address,
+        organizer: row.organizer,
+        organizerEmail: row.organizer_email,
+        createdBy: row.created_by,
+        organizerPhone: row.organizer_phone,
+        badge: row.badge,
+        isFeatured: Boolean(row.is_featured),
+        liveSoldText: row.live_sold_text,
+        xpReward: Number(row.xp_reward) || 50,
+        goingCount: Number(row.going_count) || 1,
+        accentColor: row.accent_color,
+        secondaryColor: row.secondary_color,
+        imageUrl: row.image_url,
+        galleryImages: row.gallery_images || [],
+        bannerPattern: row.banner_pattern,
+        description: row.description,
+        status: row.status || "live",
+        tiers: row.tiers || [],
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }));
+
+      const sorted = sortEventsByCreatedAt(formatted);
+      localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(sorted));
+      if (onEventsRefreshed) onEventsRefreshed(sorted);
+      window.dispatchEvent(new CustomEvent("nmds_events_change", { detail: { type: "sync", events: sorted } }));
+    }
+
+    // Subscribe to realtime postgres changes
+    const unsubscribe = subscribeToEventsRealtime(() => {
+      syncEventsWithSupabase(onEventsRefreshed);
+    });
+
+    return unsubscribe;
+  } catch (err) {
+    console.warn("Supabase event sync notice:", err);
+    return () => {};
   }
 }
 
@@ -321,6 +392,11 @@ export function updateEvent(eventId, updatedFields) {
       };
       events[index] = updated;
       localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+    }
+
+    // Sync with Supabase cloud database if configured
+    if (isSupabaseConfigured()) {
+      upsertEventToSupabase(updated).catch(err => console.warn("Supabase update event notice:", err));
     }
 
     // Also update any future ticket references if event title changed
