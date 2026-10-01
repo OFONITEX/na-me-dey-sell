@@ -274,7 +274,7 @@ export default function TicketVerificationModal({
                           letterSpacing: "0.5px"
                         }}
                       >
-                        {isCheckedIn ? "PASS ALREADY REDEEMED" : "✓ VERIFIED PAID &amp; AUTHENTIC PASS"}
+                        {isCheckedIn ? "PASS ALREADY REDEEMED" : "✓ VERIFIED PAID & AUTHENTIC PASS"}
                       </div>
                       <div style={{ fontSize: "11px", color: "#fff", opacity: 0.85 }}>
                         {isCheckedIn
@@ -320,12 +320,12 @@ export default function TicketVerificationModal({
                   </div>
                   <div>
                     <span style={{ color: "var(--text-dim)" }}>Status: </span>
-                    <strong style={{ color: "#10B981" }}>PAID &amp; SETTLED</strong>
+                    <strong style={{ color: "#10B981" }}>PAID & SETTLED</strong>
                   </div>
                   <div>
                     <span style={{ color: "var(--text-dim)" }}>Ref: </span>
                     <strong style={{ color: "#fff", fontFamily: "JetBrains Mono" }}>
-                      {ticket.paymentReference ? ticket.paymentReference.slice(0, 16) : `ORD-${ticket.orderId}`}
+                      {ticket.paymentReference ? ticket.paymentReference : ticket.orderId}
                     </strong>
                   </div>
                 </div>
