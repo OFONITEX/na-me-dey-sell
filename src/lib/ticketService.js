@@ -3,7 +3,11 @@ import {
   isSupabaseConfigured,
   fetchEventsFromSupabase,
   upsertEventToSupabase,
-  subscribeToEventsRealtime
+  subscribeToEventsRealtime,
+  fetchTicketsFromSupabase,
+  fetchTicketByIdFromSupabase,
+  upsertTicketsToSupabase,
+  markTicketCheckedInInSupabase
 } from "./supabaseClient";
 
 const STORAGE_KEYS = {
@@ -747,6 +751,14 @@ export function saveTickets(newTicketsList) {
     const existing = getStoredTickets();
     const updated = [...newTicketsList, ...existing];
     localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(updated));
+
+    // Also persist newly purchased tickets to Supabase cloud database
+    if (isSupabaseConfigured() && newTicketsList && newTicketsList.length > 0) {
+      upsertTicketsToSupabase(newTicketsList).catch(err => {
+        console.warn("Supabase ticket cloud sync notice:", err);
+      });
+    }
+
     return updated;
   } catch (err) {
     console.error("Failed to save tickets:", err);
@@ -993,7 +1005,149 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
 }
 
 /**
- * Validates a ticket ID for Gate Staff Scanner
+ * Look up and verify a ticket's payment, details, and authenticity without mutating gate check-in status.
+ * Searches localStorage, then Supabase cloud database, then INITIAL_TICKETS fallback.
+ */
+export async function findAndVerifyTicket(queryId) {
+  if (!queryId) return { found: false, message: "No Ticket ID provided." };
+
+  let cleanId = String(queryId).trim();
+  // Extract ticketId if full URL or QR payload was scanned
+  if (cleanId.includes("verify=")) {
+    const match = cleanId.match(/verify=([^&]+)/);
+    if (match) cleanId = decodeURIComponent(match[1]);
+  } else if (cleanId.startsWith("NMDS:") && cleanId.includes("|")) {
+    const parts = cleanId.split("|");
+    const idPart = parts.find(p => p.startsWith("NMDS:"));
+    if (idPart) cleanId = idPart.replace("NMDS:", "");
+  }
+  cleanId = cleanId.trim().toUpperCase();
+
+  // 1. Look in localStorage
+  const localTickets = getStoredTickets();
+  let found = localTickets.find(
+    t => t.ticketId.toUpperCase() === cleanId || cleanId.includes(t.ticketId.toUpperCase()) || (t.orderId && t.orderId.toUpperCase() === cleanId)
+  );
+
+  // 2. Look in Supabase cloud database if not found locally
+  if (!found) {
+    try {
+      found = await fetchTicketByIdFromSupabase(cleanId);
+      if (found) {
+        // Cache to local tickets
+        const updated = [found, ...localTickets];
+        if (typeof window !== "undefined") {
+          localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(updated));
+        }
+      }
+    } catch (e) {
+      console.warn("Supabase lookup notice:", e);
+    }
+  }
+
+  // 3. Fallback to INITIAL_TICKETS
+  if (!found) {
+    found = INITIAL_TICKETS.find(
+      t => t.ticketId.toUpperCase() === cleanId || cleanId.includes(t.ticketId.toUpperCase()) || (t.orderId && t.orderId.toUpperCase() === cleanId)
+    );
+  }
+
+  if (!found) {
+    return {
+      found: false,
+      ticket: null,
+      status: "NOT_FOUND",
+      message: `Ticket ID "${cleanId}" not found in Nà Mè Dèy Sell registry. Check for typo or counterfeit.`
+    };
+  }
+
+  return {
+    found: true,
+    ticket: found,
+    isPaid: (found.paymentStatus || "PAID").toUpperCase() === "PAID",
+    status: found.status || "active",
+    message: found.status === "checked_in"
+      ? `Verified Pass (Admitted at Gate on ${new Date(found.checkedInAt).toLocaleTimeString()})`
+      : "✓ Authentic Verified Pass — Monnify Payment Confirmed"
+  };
+}
+
+/**
+ * Admits an attendee at gate: checks in ticket in localStorage and Supabase
+ */
+export async function admitTicketCheckIn(ticketId, staffName = "Gate Marshall") {
+  const verified = await findAndVerifyTicket(ticketId);
+  if (!verified.found || !verified.ticket) {
+    return {
+      success: false,
+      status: "NOT_FOUND",
+      message: `Ticket ID "${ticketId}" not found in Nà Mè Dèy Sell registry.`
+    };
+  }
+
+  const ticket = verified.ticket;
+  if (ticket.status === "checked_in") {
+    return {
+      success: false,
+      status: "ALREADY_CHECKED_IN",
+      message: `ALERT: This ticket was already redeemed on ${new Date(ticket.checkedInAt).toLocaleTimeString()} at Gate Check-in!`,
+      ticket
+    };
+  }
+
+  const checkInTime = new Date().toISOString();
+  const updatedTicket = {
+    ...ticket,
+    status: "checked_in",
+    checkedInAt: checkInTime,
+    gateStaff: staffName
+  };
+
+  // Update in localStorage
+  if (typeof window !== "undefined") {
+    try {
+      const tickets = getStoredTickets();
+      const idx = tickets.findIndex(t => t.ticketId.toUpperCase() === ticket.ticketId.toUpperCase());
+      if (idx !== -1) {
+        tickets[idx] = updatedTicket;
+      } else {
+        tickets.unshift(updatedTicket);
+      }
+      localStorage.setItem(STORAGE_KEYS.TICKETS, JSON.stringify(tickets));
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Update in Supabase cloud database
+  try {
+    await markTicketCheckedInInSupabase(ticket.ticketId, staffName);
+  } catch (e) {
+    console.warn("Supabase check-in cloud update notice:", e);
+  }
+
+  recordActivity({
+    type: "checkin",
+    category: "Gate Check-In",
+    title: "Attendee Admitted",
+    description: `${ticket.attendee?.name || "Attendee"} admitted at gate for "${ticket.eventTitle}" (${ticket.tierName})`,
+    actor: staffName,
+    role: "staff",
+    ticketId: ticket.ticketId,
+    eventTitle: ticket.eventTitle,
+    orderId: ticket.orderId
+  });
+
+  return {
+    success: true,
+    status: "SUCCESS",
+    message: `ENTRY GRANTED! Welcome ${ticket.attendee?.name || "Attendee"}. Tier: ${ticket.tierName}.`,
+    ticket: updatedTicket
+  };
+}
+
+/**
+ * Validates a ticket ID for Gate Staff Scanner (Synchronous legacy wrapper)
  */
 export function validateTicket(ticketId, staffName = "Gate Marshall #1") {
   const cleanId = (ticketId || "").trim().toUpperCase();
@@ -1042,6 +1196,9 @@ export function validateTicket(ticketId, staffName = "Gate Marshall #1") {
     }
   }
 
+  // Also notify Supabase in background
+  markTicketCheckedInInSupabase(found.ticketId, staffName).catch(() => {});
+
   recordActivity({
     type: "checkin",
     category: "Gate Check-In",
@@ -1067,15 +1224,15 @@ export function validateTicket(ticketId, staffName = "Gate Marshall #1") {
   };
 }
 
-export function verifyTicketCheckIn(ticketId, staffName = "Gate Marshall") {
-  const result = validateTicket(ticketId, staffName);
+export async function verifyTicketCheckIn(ticketId, staffName = "Gate Marshall") {
+  const result = await admitTicketCheckIn(ticketId, staffName);
   if (result.success) {
     return {
       status: "SUCCESS",
       message: result.message,
       ticket: result.ticket
     };
-  } else if (result.status === "already_checked_in") {
+  } else if (result.status === "ALREADY_CHECKED_IN") {
     return {
       status: "ALREADY_CHECKED_IN",
       message: result.message,

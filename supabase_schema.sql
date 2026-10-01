@@ -199,6 +199,82 @@ INSERT INTO public.events (
   ]'::jsonb
 ) ON CONFLICT (id) DO NOTHING;
 
--- 8. Clean up any legacy cloned events
+-- 8. Clean up any legacy cloned events and tickets
 DELETE FROM public.events WHERE id = 'evt_vibes_barn_afe_mbre';
+DELETE FROM public.tickets WHERE event_id = 'evt_vibes_barn_afe_mbre';
+
+-- 9. Seed Initial Verified Tickets
+INSERT INTO public.tickets (
+  ticket_id,
+  order_id,
+  event_id,
+  event_title,
+  tier_id,
+  tier_name,
+  tier_price,
+  currency,
+  attendee_name,
+  attendee_email,
+  attendee_phone,
+  payment_method,
+  payment_reference,
+  payment_status,
+  seat_number,
+  status
+) VALUES
+  (
+    'NMDS-2026-NAPH-1A8K',
+    'ORD-NG-728190',
+    'evt_naphss_dinner_night',
+    'NAPHSS Annual Dinner & Awards Night 2026',
+    'tier_naphss_student',
+    'Standard Student Pass',
+    3500,
+    '₦',
+    'Emeka Okafor',
+    'emeka.okafor@uniuyo.edu.ng',
+    '+234 803 112 4455',
+    'monnify',
+    'MNF_REV_2026_7281',
+    'PAID',
+    'STU-TABLE-04',
+    'active'
+  ),
+  (
+    'NMDS-2026-NAPH-9X2P',
+    'ORD-NG-728191',
+    'evt_naphss_dinner_night',
+    'NAPHSS Annual Dinner & Awards Night 2026',
+    'tier_naphss_student',
+    'Standard Student Pass',
+    3500,
+    '₦',
+    'Blessing Effiong',
+    'blessing.effiong@uniuyo.edu.ng',
+    '+234 814 223 9988',
+    'monnify',
+    'MNF_REV_2026_7282',
+    'PAID',
+    'STU-TABLE-09',
+    'active'
+  ),
+  (
+    'NMDS-2026-NAPH-VIP3',
+    'ORD-NG-728192',
+    'evt_naphss_dinner_night',
+    'NAPHSS Annual Dinner & Awards Night 2026',
+    'tier_naphss_vip',
+    'VIP Executive Delegate Pass',
+    10000,
+    '₦',
+    'Dr. Samuel Bassey',
+    'dr.bassey@healthscience.org',
+    '+234 802 334 1122',
+    'monnify',
+    'MNF_REV_2026_7283',
+    'PAID',
+    'VIP-ROW-1',
+    'active'
+  )
+ON CONFLICT (ticket_id) DO NOTHING;
 

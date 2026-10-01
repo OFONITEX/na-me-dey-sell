@@ -229,9 +229,9 @@ export default function Navbar({
             </button>
           )}
 
-          {/* Gate Scanner (Desktop only) */}
+          {/* Gate Scanner */}
           <button
-            className="nav-link-item hidden lg:flex"
+            className="nav-link-item hidden sm:flex"
             onClick={onOpenScanner}
             title="Gate Staff Ticket Validator"
             style={{ border: "1px solid rgba(212, 175, 55, 0.3)", borderRadius: "6px" }}

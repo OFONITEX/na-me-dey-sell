@@ -14,6 +14,7 @@ import AdminDashboard from "../components/AdminDashboard";
 import EditEventModal from "../components/EditEventModal";
 import EventAdminModal from "../components/EventAdminModal";
 import AuthModal from "../components/AuthModal";
+import TicketVerificationModal from "../components/TicketVerificationModal";
 import {
   SparklesIcon,
   TicketIcon,
@@ -53,6 +54,7 @@ export default function Home() {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isOrganizerDashboardOpen, setIsOrganizerDashboardOpen] = useState(false);
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
+  const [verifyingTicketId, setVerifyingTicketId] = useState(null);
 
   // Load data and authenticate on mount
   useEffect(() => {
@@ -74,10 +76,16 @@ export default function Home() {
     window.addEventListener("nmds_events_change", handleEventsChange);
 
     // Support direct public ticket link from clean URL path (e.g. /naphss-dinner-night) or ?event=slug
+    // Support instant barcode/QR verification link (e.g. /?verify=NMDS-2026-NAPH-1A8K or ?ticket=...)
     try {
       const params = new URLSearchParams(window.location.search);
       const urlEventId = params.get("event");
       const urlMode = params.get("mode");
+      const verifyParam = params.get("verify") || params.get("ticket") || params.get("barcode") || params.get("scan");
+
+      if (verifyParam) {
+        setVerifyingTicketId(verifyParam);
+      }
 
       // Check pathname (e.g. /naphss-dinner-night or /e/naphss-dinner-night)
       let pathnameSlug = "";
@@ -806,6 +814,27 @@ export default function Home() {
           tickets={tickets}
           onRefreshTickets={refreshData}
           onClose={() => setIsScannerOpen(false)}
+        />
+      )}
+
+      {verifyingTicketId && (
+        <TicketVerificationModal
+          ticketId={verifyingTicketId}
+          onClose={() => {
+            setVerifyingTicketId(null);
+            if (typeof window !== "undefined" && window.history.replaceState) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("verify");
+              url.searchParams.delete("ticket");
+              url.searchParams.delete("scan");
+              url.searchParams.delete("barcode");
+              window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : ""));
+            }
+          }}
+          onOpenDigitalPass={(passTickets) => setActivePassTickets(passTickets)}
+          onTicketStatusChanged={() => {
+            setTickets(getStoredTickets());
+          }}
         />
       )}
 

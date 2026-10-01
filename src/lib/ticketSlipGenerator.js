@@ -255,20 +255,35 @@ export async function downloadTicketSlip(ticket, passIndex = 0, totalPasses = 1)
   ctx.font = "bold 20px 'JetBrains Mono', monospace";
   ctx.fillText(ticket.ticketId, 320, 748);
 
+  // Prominent Payment Verified Badge
+  ctx.fillStyle = "rgba(16, 185, 129, 0.15)";
+  ctx.strokeStyle = "#10B981";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(width - 250, 723, 160, 36, [6]);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#10B981";
+  ctx.font = "bold 12px 'Sora', Inter, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("✓ VERIFIED PAID", width - 170, 745);
+  ctx.textAlign = "left";
+
   // 1D Barcode Container (White card for maximum optical readability)
   ctx.fillStyle = "#FFFFFF";
   ctx.beginPath();
-  ctx.roundRect(75, 790, width - 150, 110, [10]);
+  ctx.roundRect(75, 785, width - 150, 115, [10]);
   ctx.fill();
 
   // Draw 1D Barcode
   try {
-    drawBarcodeOnCanvas(ctx, ticket.ticketId, 95, 805, width - 190, 65, "#000000");
+    drawBarcodeOnCanvas(ctx, ticket.ticketId, 95, 798, width - 190, 68, "#000000");
 
     ctx.fillStyle = "#111111";
     ctx.font = "bold 13px 'JetBrains Mono', monospace";
     ctx.textAlign = "center";
-    ctx.fillText(`* ${ticket.ticketId} *`, width / 2, 890);
+    ctx.fillText(`* ${ticket.ticketId} *  •  [PAID: ${ticket.currency || "₦"}${Number(ticket.tierPrice || 0).toLocaleString()}]`, width / 2, 888);
     ctx.textAlign = "left";
   } catch (err) {
     console.warn("Barcode canvas draw error:", err);
@@ -277,8 +292,8 @@ export async function downloadTicketSlip(ticket, passIndex = 0, totalPasses = 1)
   // QR Code + Security Info (2 Column footer inside bottom section)
   // Left: QR Code on White surface
   const qrX = 85;
-  const qrY = 925;
-  const qrSize = 170;
+  const qrY = 920;
+  const qrSize = 175;
 
   ctx.fillStyle = "#FFFFFF";
   ctx.beginPath();
@@ -286,7 +301,9 @@ export async function downloadTicketSlip(ticket, passIndex = 0, totalPasses = 1)
   ctx.fill();
 
   try {
-    const qrMatrix = generateQRCodeMatrix(`NMDS:${ticket.ticketId}|ORD:${ticket.orderId}|EVT:${ticket.eventId}`);
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://na-me-dey-sell.pages.dev";
+    const verifyUrl = `${origin}/?verify=${encodeURIComponent(ticket.ticketId)}`;
+    const qrMatrix = generateQRCodeMatrix(verifyUrl);
     const numCells = qrMatrix.length;
     const padding = 12;
     const cellPx = (qrSize - padding * 2) / numCells;

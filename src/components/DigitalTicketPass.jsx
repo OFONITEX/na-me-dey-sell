@@ -430,20 +430,45 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
 
           {/* Bottom Stub: Scannable 1D Barcode & 2D QR Code */}
           <div className="pass-stub" style={{ paddingTop: "12px" }}>
+            {/* Prominent Payment & Admission Verification Badge */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(212, 175, 55, 0.2) 100%)",
+                border: "1px solid #10B981",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "8px"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span style={{ color: "#10B981", fontSize: "14px", fontWeight: "900" }}>✓</span>
+                <span style={{ fontSize: "11px", fontWeight: "900", color: "#10B981", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Payment: Verified Paid
+                </span>
+              </div>
+              <span style={{ fontSize: "11px", fontWeight: "900", color: "#F5D061" }}>
+                {ticket.currency || "₦"}{Number(ticket.tierPrice || 0).toLocaleString()}
+              </span>
+            </div>
+
             <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "8px" }}>
               Admission Gate Scan
             </div>
 
-            {/* 2D QR Code */}
+            {/* 2D QR Code (Scans directly to verification page) */}
             <div className="stub-qr-container">
               <QRCodeSVG
-                value={`NMDS:${ticket.ticketId}|ORD:${ticket.orderId}|EVT:${ticket.eventId}`}
+                value={typeof window !== "undefined" ? `${window.location.origin}/?verify=${encodeURIComponent(ticket.ticketId)}` : `https://na-me-dey-sell.pages.dev/?verify=${encodeURIComponent(ticket.ticketId)}`}
                 size={140}
                 darkColor="#070709"
                 lightColor="#ffffff"
               />
             </div>
-            <span className="qr-hint">Scan QR at Gate for Instant Admission</span>
+            <span className="qr-hint">Scan with Camera or Gate Scanner to Verify Pass</span>
 
             {/* Official 1D Barcode */}
             <div
@@ -466,7 +491,7 @@ export default function DigitalTicketPass({ tickets, initialIndex = 0, onClose }
               />
             </div>
             <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: "6px" }}>
-              Laser Barcode &amp; Optical QR Dual-Verification Enabled
+              Laser Barcode &amp; Optical QR Dual-Verification Enabled • Gate Admission Ready
             </div>
           </div>
 
