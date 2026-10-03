@@ -26,7 +26,7 @@ import {
   FlameIcon,
   CrownIcon
 } from "../components/Icons";
-import { getStoredEvents, getStoredTickets, INITIAL_TICKETS, syncEventsWithSupabase, findEventBySlugOrId } from "../lib/ticketService";
+import { getStoredEvents, getStoredTickets, INITIAL_TICKETS, syncEventsWithSupabase, syncTicketsWithSupabase, findEventBySlugOrId } from "../lib/ticketService";
 import { INITIAL_EVENTS } from "../data/mockEvents";
 import { getAuthUser, logoutUser, subscribeAuth, isSuperAdmin, canEditEvent } from "../lib/authService";
 
@@ -74,6 +74,7 @@ export default function Home() {
     };
 
     window.addEventListener("nmds_events_change", handleEventsChange);
+    window.addEventListener("nmds_tickets_change", handleEventsChange);
 
     // Support direct public ticket link from clean URL path (e.g. /naphss-dinner-night) or ?event=slug
     // Support instant barcode/QR verification link (e.g. /?verify=NMDS-2026-NAPH-1A8K or ?ticket=...)
@@ -141,6 +142,11 @@ export default function Home() {
       } catch {}
     }).then((unsub) => {
       realtimeUnsub = unsub;
+    }).catch(() => {});
+
+    // Sync cloud tickets
+    syncTicketsWithSupabase((cloudTickets) => {
+      setTickets(cloudTickets);
     }).catch(() => {});
 
     return () => {

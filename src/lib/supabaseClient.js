@@ -203,6 +203,13 @@ export function mapSupabaseTicketRow(row) {
   };
 }
 
+const MOCK_SEED_TICKET_IDS = new Set([
+  "NMDS-2026-NAPH-1A8K",
+  "NMDS-2026-NAPH-9X2P",
+  "NMDS-2026-NAPH-VIP3",
+  "NMDS-2026-NAPH-TBL1"
+]);
+
 /**
  * Fetch all tickets from Supabase cloud database
  */
@@ -212,13 +219,16 @@ export async function fetchTicketsFromSupabase() {
     const { data, error } = await supabase
       .from("tickets")
       .select("*")
+      .neq("status", "purged_demo")
       .order("created_at", { ascending: false });
 
     if (error) {
       console.warn("Supabase fetch tickets notice:", error.message);
       return null;
     }
-    return (data || []).map(mapSupabaseTicketRow);
+    return (data || [])
+      .map(mapSupabaseTicketRow)
+      .filter(t => t && !MOCK_SEED_TICKET_IDS.has(t.ticketId) && t.status !== "purged_demo");
   } catch (err) {
     console.warn("Supabase fetch tickets error:", err);
     return null;
