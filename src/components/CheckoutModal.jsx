@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CloseIcon, UserIcon, MailIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, TagIcon, CheckCircleIcon, SparklesIcon, ArrowRightIcon } from "./Icons";
+import { CloseIcon, UserIcon, MailIcon, PhoneIcon, CreditCardIcon, ShieldCheckIcon, CheckCircleIcon, SparklesIcon, ArrowRightIcon } from "./Icons";
 import { issueTickets, formatNaira } from "../lib/ticketService";
 import { payWithMonnify } from "../lib/monnifyService";
 import { triggerConfetti } from "../lib/confetti";
@@ -18,35 +18,12 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
   });
 
   const [paymentMethod, setPaymentMethod] = useState("monnify");
-  const [promoCode, setPromoCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState(0);
-  const [promoError, setPromoError] = useState("");
-  const [promoSuccess, setPromoSuccess] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [gatewayError, setGatewayError] = useState("");
 
   const currencySymbol = event?.currency || tier?.currency || "₦";
 
-  const handleApplyPromo = () => {
-    setPromoError("");
-    setPromoSuccess("");
-    const code = promoCode.trim().toUpperCase();
-    if (!code) return;
-
-    if (code === "NMDS20") {
-      const discount = Math.round(subtotal * 0.2);
-      setAppliedDiscount(discount);
-      setPromoSuccess(`Promo applied: 20% discount (-${formatNaira(discount, currencySymbol)})`);
-    } else if (code === "DETTY50") {
-      const discount = Math.round(subtotal * 0.1);
-      setAppliedDiscount(discount);
-      setPromoSuccess(`Promo applied: 10% discount (-${formatNaira(discount, currencySymbol)})`);
-    } else {
-      setPromoError("Invalid code. Try 'NMDS20' or 'DETTY50'");
-    }
-  };
-
-  const finalTotal = Math.max(0, subtotal - appliedDiscount);
+  const finalTotal = Math.max(0, subtotal);
 
   const finalizeOrder = (gatewayResponse = null) => {
     const orderResult = issueTickets({
@@ -55,7 +32,6 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
       quantity,
       attendee,
       paymentMethod,
-      promoDiscount: appliedDiscount,
       gatewayResponse
     });
 
@@ -363,41 +339,12 @@ export default function CheckoutModal({ bookingData, currentUser, onClose, onOrd
             </div>
           </div>
 
-          {/* Promo code */}
-          <div style={{ display: "flex", gap: "8px" }}>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", background: "#070709", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "6px", padding: "8px 12px", gap: "8px" }}>
-              <TagIcon size={14} style={{ color: "var(--brand-gold)" }} />
-              <input
-                type="text"
-                placeholder="Discount code (try NMDS20)"
-                style={{ background: "transparent", border: "none", color: "#fff", width: "100%", outline: "none", fontSize: "12px" }}
-                value={promoCode}
-                onChange={e => setPromoCode(e.target.value)}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleApplyPromo}
-              style={{ background: "rgba(212, 175, 55, 0.15)", border: "1px solid rgba(212, 175, 55, 0.3)", color: "var(--brand-gold)", padding: "8px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: "700", cursor: "pointer" }}
-            >
-              Apply
-            </button>
-          </div>
-          {promoSuccess && <div style={{ fontSize: "11px", color: "var(--emerald-green)" }}>{promoSuccess}</div>}
-          {promoError && <div style={{ fontSize: "11px", color: "#ef4444" }}>{promoError}</div>}
-
           {/* Price Breakdown */}
           <div style={{ borderTop: "1px solid rgba(212, 175, 55, 0.15)", paddingTop: "10px", display: "flex", flexDirection: "column", gap: "4px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
               <span>Subtotal</span>
               <span>{formatNaira(subtotal, currencySymbol)}</span>
             </div>
-            {appliedDiscount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--emerald-green)" }}>
-                <span>Discount</span>
-                <span>-{formatNaira(appliedDiscount, currencySymbol)}</span>
-              </div>
-            )}
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
               <span>Gateway Processing Fee</span>
               <span style={{ color: "var(--emerald-green)", fontWeight: "700" }}>FREE (0%)</span>
