@@ -738,7 +738,7 @@ export default function OrganizerDashboard({
                         <th style={{ padding: "12px 14px" }}>Schedule &amp; Venue</th>
                         <th style={{ padding: "12px 14px" }}>Sold / Capacity</th>
                         <th style={{ padding: "12px 14px" }}>Gross Sales (₦)</th>
-                        <th style={{ padding: "12px 14px" }}>Net Payout (95%)</th>
+                        <th style={{ padding: "12px 14px" }}>Net Payout (93%)</th>
                         <th style={{ padding: "12px 14px" }}>Gate Check-In %</th>
                         <th style={{ padding: "12px 14px" }}>Status</th>
                         <th style={{ padding: "12px 14px" }}>Action</th>

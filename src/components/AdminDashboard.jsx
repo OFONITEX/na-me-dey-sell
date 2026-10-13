@@ -237,8 +237,8 @@ export default function AdminDashboard({
       "Quantity",
       "Tier Name",
       "Gross Amount (NGN)",
-      "Platform Fee (5%)",
-      "Organizer Payout (95%)",
+      "Platform Fee (7%)",
+      "Organizer Payout (93%)",
       "Status",
       "Timestamp"
     ];
@@ -730,7 +730,7 @@ export default function AdminDashboard({
 
               <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(212, 175, 55, 0.25)", borderRadius: "10px", padding: "10px 14px" }}>
                 <div style={{ fontSize: "11px", fontWeight: "700", color: "#D4AF37", textTransform: "uppercase" }}>
-                  Platform Revenue (5%)
+                  Platform Revenue (7%)
                 </div>
                 <div style={{ fontSize: "20px", fontWeight: "900", color: "#F5D061", marginTop: "2px" }}>
                   {formatNaira(platformFeesCollected)}
@@ -1235,7 +1235,7 @@ export default function AdminDashboard({
                           <th style={{ padding: "12px 14px" }}>Payer Account</th>
                           <th style={{ padding: "12px 14px" }}>Organizer Account</th>
                           <th style={{ padding: "12px 14px" }}>Gross Paid</th>
-                          <th style={{ padding: "12px 14px" }}>Fee Split (5% / 95%)</th>
+                          <th style={{ padding: "12px 14px" }}>Fee Split (7% / 93%)</th>
                           <th style={{ padding: "12px 14px" }}>Status</th>
                           <th style={{ padding: "12px 14px" }}>Action</th>
                         </tr>
@@ -1753,8 +1753,8 @@ export default function AdminDashboard({
                             <th style={{ padding: "10px 12px" }}>Capacity</th>
                             <th style={{ padding: "10px 12px" }}>Tickets Sold</th>
                             <th style={{ padding: "10px 12px" }}>Gross Sales (₦)</th>
-                            <th style={{ padding: "10px 12px" }}>Platform Fee (5%)</th>
-                            <th style={{ padding: "10px 12px" }}>Net Payout (95%)</th>
+                            <th style={{ padding: "10px 12px" }}>Platform Fee (7%)</th>
+                            <th style={{ padding: "10px 12px" }}>Net Payout (93%)</th>
                             <th style={{ padding: "10px 12px" }}>Gate Check-In %</th>
                             <th style={{ padding: "10px 12px" }}>Status</th>
                           </tr>
@@ -1764,7 +1764,7 @@ export default function AdminDashboard({
                             const evtTickets = filteredAttendees.filter(t => t.eventId === evt.id);
                             const evtPayments = filteredPayments.filter(p => p.eventId === evt.id);
                             const gross = evtPayments.reduce((s, p) => s + (Number(p.grossAmount) || 0), 0);
-                            const fee = Math.round(gross * 0.05);
+                            const fee = Math.round(gross * 0.07);
                             const payout = gross - fee;
                             const totalCap = (evt.tiers || []).reduce((s, t) => s + (Number(t.capacity) || 100), 0);
                             const sold = evtTickets.length;
@@ -1877,8 +1877,8 @@ export default function AdminDashboard({
               <div><strong style={{ color: "#948B75" }}>Payer:</strong> {inspectedPayment.attendee?.name} ({inspectedPayment.attendee?.email}, {inspectedPayment.attendee?.phone})</div>
               <div><strong style={{ color: "#948B75" }}>Tier &amp; Qty:</strong> {inspectedPayment.quantity}x {inspectedPayment.tierName}</div>
               <div><strong style={{ color: "#948B75" }}>Gross Amount:</strong> <span style={{ color: "#10B981", fontWeight: "800" }}>{formatNaira(inspectedPayment.grossAmount, inspectedPayment.currency)}</span></div>
-              <div><strong style={{ color: "#948B75" }}>Platform Fee (5%):</strong> {formatNaira(inspectedPayment.platformFee, inspectedPayment.currency)}</div>
-              <div><strong style={{ color: "#948B75" }}>Organizer Payout (95%):</strong> <span style={{ color: "#60A5FA", fontWeight: "700" }}>{formatNaira(inspectedPayment.organizerPayout, inspectedPayment.currency)}</span></div>
+              <div><strong style={{ color: "#948B75" }}>Platform Fee (7%):</strong> {formatNaira(inspectedPayment.platformFee, inspectedPayment.currency)}</div>
+              <div><strong style={{ color: "#948B75" }}>Organizer Payout (93%):</strong> <span style={{ color: "#60A5FA", fontWeight: "700" }}>{formatNaira(inspectedPayment.organizerPayout, inspectedPayment.currency)}</span></div>
               <div><strong style={{ color: "#948B75" }}>Status:</strong> <span style={{ color: "#10B981", fontWeight: "800" }}>{inspectedPayment.paymentStatus}</span></div>
               <div><strong style={{ color: "#948B75" }}>Timestamp:</strong> {new Date(inspectedPayment.timestamp).toLocaleString()}</div>
             </div>

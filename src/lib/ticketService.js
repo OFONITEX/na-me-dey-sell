@@ -693,8 +693,8 @@ export const INITIAL_PAYMENTS = [
     quantity: 1,
     tierName: "Regular",
     grossAmount: 100,
-    platformFee: 5,
-    organizerPayout: 95,
+    platformFee: 7,
+    organizerPayout: 93,
     currency: "₦",
     paymentMethod: "monnify",
     paymentStatus: "PAID",
@@ -721,6 +721,14 @@ export function getPaymentsLedger() {
       parsed = [...INITIAL_PAYMENTS];
       updated = true;
     }
+    // Update legacy 5% fee on test payment to 7%
+    parsed.forEach(p => {
+      if (p.orderId === "ORD-NG-629103" && p.platformFee === 5) {
+        p.platformFee = 7;
+        p.organizerPayout = 93;
+        updated = true;
+      }
+    });
     if (updated) {
       try {
         localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(parsed));
@@ -820,7 +828,7 @@ export function issueTickets({ event, tier, quantity, attendee, paymentMethod, p
   saveTickets(createdTickets);
 
   const totalPaid = Math.max(0, (tier.price * quantity) - promoDiscount);
-  const platformFee = Math.round(totalPaid * 0.05); // 5% platform commission
+  const platformFee = Math.round(totalPaid * 0.07); // 7% platform commission
   const organizerPayout = totalPaid - platformFee;
 
   // Record transaction in Payments Ledger
@@ -1294,7 +1302,7 @@ export function getOrganizerEventAnalytics(organizerEmailOrId, specificEventId =
   const relevantPayments = allPayments.filter(p => targetEventIds.has(p.eventId));
 
   const grossSales = relevantPayments.reduce((sum, p) => sum + (Number(p.grossAmount) || 0), 0);
-  const platformFee = Math.round(grossSales * 0.05);
+  const platformFee = Math.round(grossSales * 0.07);
   const netPayout = grossSales - platformFee;
   const ticketsSold = relevantTickets.length;
   const checkedInCount = relevantTickets.filter(t => t.status === "checked_in").length;
@@ -1310,7 +1318,7 @@ export function getOrganizerEventAnalytics(organizerEmailOrId, specificEventId =
     const eTickets = relevantTickets.filter(t => t.eventId === e.id);
     const ePayments = relevantPayments.filter(p => p.eventId === e.id);
     const eGross = ePayments.reduce((sum, p) => sum + (Number(p.grossAmount) || 0), 0);
-    const eNet = Math.round(eGross * 0.95);
+    const eNet = Math.round(eGross * 0.93);
     const eSold = eTickets.length;
     const eCap = (e.tiers || []).reduce((tsum, tier) => tsum + (Number(tier.capacity) || 100), 0);
     const eCheckedIn = eTickets.filter(t => t.status === "checked_in").length;

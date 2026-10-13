@@ -491,7 +491,7 @@ export default function EventAdminModal({
               {formatNaira(grossRevenue, event.currency || "₦")}
             </div>
             <div style={{ fontSize: "11px", color: "#10B981", marginTop: "4px" }}>
-              Est. Net Payout (95%): {formatNaira(grossRevenue * 0.95, event.currency || "₦")}
+              Est. Net Payout (93%): {formatNaira(grossRevenue * 0.93, event.currency || "₦")}
             </div>
           </div>
 
