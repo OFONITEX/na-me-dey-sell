@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon, CheckCircleIcon, ShieldCheckIcon } from "./Icons";
-import { saveNewEvent } from "../lib/ticketService";
+import { saveNewEvent, getEventSlug } from "../lib/ticketService";
 import { promoteToOrganizer, trackUserCreatedEvent } from "../lib/authService";
 import DatePickerCalendar from "./DatePickerCalendar";
 import { SUPPORTED_CURRENCIES } from "../data/currencies";
@@ -17,6 +17,7 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated,
   const [savedDraftAvailable, setSavedDraftAvailable] = useState(null);
   const [descActiveTab, setDescActiveTab] = useState("editor"); // 'editor' | 'preview'
   const [publishedEvent, setPublishedEvent] = useState(null); // success screen state
+  const [copiedLink, setCopiedLink] = useState(false);
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -403,11 +404,72 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated,
             color: "#F5D061",
             fontSize: "15px",
             fontWeight: "800",
-            margin: "0 0 28px",
+            margin: "0 0 16px",
             wordBreak: "break-word"
           }}>
             &ldquo;{publishedEvent.title}&rdquo;
           </p>
+
+          {/* Copyable Public Event Link */}
+          {(() => {
+            const origin = typeof window !== "undefined" ? window.location.origin : "https://na-me-dey-sell.pages.dev";
+            const eventSlug = getEventSlug(publishedEvent);
+            const shareUrl = `${origin}/${eventSlug}`;
+            return (
+              <div style={{
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(212, 175, 55, 0.35)",
+                borderRadius: "10px",
+                padding: "12px",
+                marginBottom: "20px",
+                textAlign: "left"
+              }}>
+                <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", marginBottom: "6px" }}>
+                  🔗 Shareable Event Ticket Link:
+                </div>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "8px",
+                  background: "#070709",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid rgba(212, 175, 55, 0.2)"
+                }}>
+                  <span style={{ fontSize: "12px", color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {shareUrl}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        navigator.clipboard.writeText(shareUrl);
+                        setCopiedLink(true);
+                        setTimeout(() => setCopiedLink(false), 2500);
+                      } catch {
+                        alert(`Link: ${shareUrl}`);
+                      }
+                    }}
+                    style={{
+                      background: copiedLink ? "#10B981" : "var(--brand-gold)",
+                      color: copiedLink ? "#fff" : "#070709",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "4px 12px",
+                      fontSize: "11px",
+                      fontWeight: "800",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      transition: "all 0.2s ease"
+                    }}
+                  >
+                    {copiedLink ? "✓ Copied!" : "Copy"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Action Buttons */}
           <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px", margin: "0 auto" }}>

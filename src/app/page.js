@@ -55,6 +55,7 @@ export default function Home() {
   const [isOrganizerDashboardOpen, setIsOrganizerDashboardOpen] = useState(false);
   const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(false);
   const [verifyingTicketId, setVerifyingTicketId] = useState(null);
+  const [isDirectEventLoading, setIsDirectEventLoading] = useState(false);
 
   // Load data and authenticate on mount
   useEffect(() => {
@@ -110,6 +111,9 @@ export default function Home() {
             // Default: open the public ticket checkout modal so the user can buy tickets directly
             setSelectedEvent(found);
           }
+        } else {
+          // Direct link to an event that hasn't been cached locally yet (e.g. newly created event)
+          setIsDirectEventLoading(true);
         }
       }
     } catch {}
@@ -140,9 +144,12 @@ export default function Home() {
           }
         }
       } catch {}
+      setIsDirectEventLoading(false);
     }).then((unsub) => {
       realtimeUnsub = unsub;
-    }).catch(() => {});
+    }).catch(() => {
+      setIsDirectEventLoading(false);
+    });
 
     // Sync cloud tickets
     syncTicketsWithSupabase((cloudTickets) => {
@@ -887,6 +894,47 @@ export default function Home() {
           onClose={() => setIsAdminDashboardOpen(false)}
           onEventsRefresh={refreshData}
         />
+      )}
+
+      {/* Direct Event Loading Overlay */}
+      {isDirectEventLoading && !selectedEvent && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 1200,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "rgba(5, 5, 8, 0.85)",
+          backdropFilter: "blur(8px)"
+        }}>
+          <div style={{
+            background: "#0c0d14",
+            border: "1px solid rgba(212, 175, 55, 0.3)",
+            borderRadius: "16px",
+            padding: "32px 28px",
+            maxWidth: "380px",
+            width: "90%",
+            textAlign: "center",
+            boxShadow: "0 20px 50px rgba(0, 0, 0, 0.6)"
+          }}>
+            <div style={{
+              width: "48px",
+              height: "48px",
+              border: "3px solid rgba(212, 175, 55, 0.2)",
+              borderTopColor: "#D4AF37",
+              borderRadius: "50%",
+              margin: "0 auto 16px",
+              animation: "spin 0.8s linear infinite"
+            }} />
+            <h3 style={{ fontSize: "17px", fontWeight: "800", color: "#fff", marginBottom: "6px" }}>
+              Loading Event Details...
+            </h3>
+            <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: 0, lineHeight: 1.5 }}>
+              Connecting to live event database & ticket tiers.
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Authentication Modal */}
