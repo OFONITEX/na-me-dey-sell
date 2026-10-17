@@ -1,13 +1,31 @@
 import Home from "../page";
 import { INITIAL_EVENTS } from "../../data/mockEvents";
 import { getEventSlug } from "../../lib/ticketService";
+import { fetchEventsFromSupabase } from "../../lib/supabaseClient";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
   const defaultSlugs = [
-    { slug: "naphss-dinner-night" }
+    { slug: "naphss-dinner-night" },
+    { slug: "scsn-dinner-and-award-night-2026" }
   ];
 
-  const eventSlugs = INITIAL_EVENTS.map(event => ({
+  let supabaseEvents = [];
+  try {
+    const data = await fetchEventsFromSupabase();
+    if (data && Array.isArray(data)) {
+      supabaseEvents = data.map(row => ({
+        ...row,
+        id: row.id,
+        title: row.title,
+        slug: row.slug || ""
+      }));
+    }
+  } catch (err) {
+    console.warn("Could not query Supabase events for static params:", err);
+  }
+
+  const allEvents = [...INITIAL_EVENTS, ...supabaseEvents];
+  const eventSlugs = allEvents.map(event => ({
     slug: getEventSlug(event)
   }));
 
@@ -25,7 +43,15 @@ export async function generateMetadata({ params }) {
   const slug = resolvedParams?.slug;
   if (!slug) return { title: "Nà Mè Dèy Sell" };
 
-  const event = INITIAL_EVENTS.find(e => getEventSlug(e) === slug || String(e.id).includes(slug));
+  let allEvents = INITIAL_EVENTS;
+  try {
+    const data = await fetchEventsFromSupabase();
+    if (data && Array.isArray(data)) {
+      allEvents = [...INITIAL_EVENTS, ...data];
+    }
+  } catch {}
+
+  const event = allEvents.find(e => getEventSlug(e) === slug || String(e.id).includes(slug));
   if (event) {
     return {
       title: `${event.title} | Nà Mè Dèy Sell Tickets`,
@@ -33,7 +59,7 @@ export async function generateMetadata({ params }) {
       openGraph: {
         title: `${event.title} - Official Tickets`,
         description: `Get your passes for ${event.title} on Nà Mè Dèy Sell.`,
-        images: event.imageUrl ? [event.imageUrl] : []
+        images: event.imageUrl || event.image_url ? [event.imageUrl || event.image_url] : []
       }
     };
   }

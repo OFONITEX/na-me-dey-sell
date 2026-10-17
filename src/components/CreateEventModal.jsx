@@ -4,10 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { CloseIcon, PlusIcon, SparklesIcon, CalendarIcon, MapPinIcon, CheckCircleIcon, ShieldCheckIcon } from "./Icons";
 import { saveNewEvent } from "../lib/ticketService";
 import { promoteToOrganizer, trackUserCreatedEvent } from "../lib/authService";
-import CitySearchSelector from "./CitySearchSelector";
 import DatePickerCalendar from "./DatePickerCalendar";
-import VenueLocationSearch from "./VenueLocationSearch";
 import { SUPPORTED_CURRENCIES } from "../data/currencies";
+import { POPULAR_VENUES } from "../data/popularVenues";
 
 const DRAFT_STORAGE_KEY = "nmds_event_draft_v1";
 
@@ -632,40 +631,202 @@ export default function CreateEventModal({ currentUser, onClose, onEventCreated,
             </div>
           </div>
 
-          {/* SECTION 3: Venue & Location Navigation */}
+          {/* SECTION 3: Venue & Location (Manual Input) */}
           <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(212,175,55,0.15)" }}>
-            <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px" }}>
-              3. Venue & Location Navigation
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div style={{ fontSize: "11px", fontWeight: "800", color: "var(--brand-gold)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                3. Event Venue &amp; Location
+              </div>
+              <span style={{ fontSize: "11px", color: "var(--brand-gold-bright)", background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.25)", padding: "2px 8px", borderRadius: "12px", fontWeight: "700" }}>
+                ✍️ Manual Input
+              </span>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              {/* Venue Name */}
               <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--brand-gold-bright)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
                   <MapPinIcon size={14} style={{ color: "var(--brand-gold)" }} />
-                  <span>Venue & Street Address (Search Location & Suggest)</span>
+                  <span>Venue Name *</span>
                 </label>
-                <VenueLocationSearch
-                  venueValue={formData.venue}
-                  addressValue={formData.address}
-                  onChange={({ venue, address, city }) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      venue,
-                      address,
-                      city: city ? `${city}, Nigeria` : prev.city
-                    }));
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Camp Gee Arena & Events, Landmark Centre, Eko Hotel"
+                  value={formData.venue}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const matched = POPULAR_VENUES.find(v => v.name.toLowerCase() === val.trim().toLowerCase());
+                    if (matched) {
+                      setFormData(prev => ({
+                        ...prev,
+                        venue: matched.name,
+                        address: prev.address || matched.address,
+                        city: prev.city || matched.city
+                      }));
+                    } else {
+                      setFormData(prev => ({ ...prev, venue: val }));
+                    }
+                  }}
+                  list="popular-venues-list"
+                  style={{
+                    width: "100%",
+                    background: "#070709",
+                    border: "1px solid rgba(212,175,55,0.3)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "#fff",
+                    outline: "none",
+                    fontSize: "14px",
+                    boxSizing: "border-box"
+                  }}
+                />
+                <datalist id="popular-venues-list">
+                  {POPULAR_VENUES.map((v, i) => (
+                    <option key={i} value={v.name}>{v.address}, {v.city}</option>
+                  ))}
+                </datalist>
+
+                {/* Popular Venue Quick Preset Chips */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px" }}>
+                  <span style={{ fontSize: "10px", color: "var(--text-dim)", alignSelf: "center" }}>Quick fill:</span>
+                  {[
+                    { name: "Camp Gee Arena & Events", address: "Ring Road 3, Uyo", city: "Uyo, Akwa Ibom, Nigeria" },
+                    { name: "Ibom Tropicana", address: "Udo Udoma Banking District", city: "Uyo, Akwa Ibom, Nigeria" },
+                    { name: "Godswill Akpabio Stadium", address: "Goodluck Jonathan Boulevard", city: "Uyo, Akwa Ibom, Nigeria" },
+                    { name: "Landmark Centre", address: "Water Corporation Drive, Oniru", city: "Victoria Island, Lagos, Nigeria" },
+                    { name: "Eko Hotel Convention Centre", address: "Plot 1415 Adetokunbo Ademola Street", city: "Victoria Island, Lagos, Nigeria" }
+                  ].map((chip, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        venue: chip.name,
+                        address: chip.address,
+                        city: chip.city
+                      }))}
+                      style={{
+                        background: formData.venue === chip.name ? "rgba(212, 175, 55, 0.25)" : "rgba(212, 175, 55, 0.08)",
+                        border: formData.venue === chip.name ? "1px solid var(--brand-gold)" : "1px solid rgba(212, 175, 55, 0.2)",
+                        color: formData.venue === chip.name ? "var(--brand-gold)" : "var(--brand-gold-bright)",
+                        padding: "3px 8px",
+                        borderRadius: "12px",
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease"
+                      }}
+                    >
+                      📍 {chip.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Street / Location Address */}
+              <div>
+                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                  Street / Area Address
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Ring Road 3, Uyo or Plot 2&3 Water Corporation Road, Oniru"
+                  value={formData.address}
+                  onChange={e => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                  style={{
+                    width: "100%",
+                    background: "#070709",
+                    border: "1px solid rgba(212,175,55,0.25)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "#fff",
+                    outline: "none",
+                    fontSize: "14px",
+                    boxSizing: "border-box"
                   }}
                 />
               </div>
 
+              {/* City, State & Country */}
               <div>
-                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--text-dim)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
-                  City & Country (Worldwide Search)
+                <label style={{ fontSize: "11px", fontWeight: "700", color: "var(--brand-gold-bright)", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
+                  City, State &amp; Country *
                 </label>
-                <CitySearchSelector
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Uyo, Akwa Ibom, Nigeria or Lagos, Nigeria"
                   value={formData.city}
-                  onChange={(selectedCity) => setFormData(prev => ({ ...prev, city: selectedCity }))}
+                  onChange={e => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                  list="popular-cities-list"
+                  style={{
+                    width: "100%",
+                    background: "#070709",
+                    border: "1px solid rgba(212,175,55,0.25)",
+                    borderRadius: "8px",
+                    padding: "10px 14px",
+                    color: "#fff",
+                    outline: "none",
+                    fontSize: "14px",
+                    boxSizing: "border-box"
+                  }}
                 />
+                <datalist id="popular-cities-list">
+                  {[
+                    "Uyo, Akwa Ibom, Nigeria",
+                    "Lagos, Nigeria",
+                    "Abuja, FCT, Nigeria",
+                    "Port Harcourt, Rivers, Nigeria",
+                    "Calabar, Cross River, Nigeria",
+                    "Benin City, Edo, Nigeria",
+                    "Enugu, Nigeria",
+                    "Asaba, Delta, Nigeria",
+                    "Ibadan, Oyo, Nigeria",
+                    "Warri, Delta, Nigeria",
+                    "Owerri, Imo, Nigeria",
+                    "Kano, Nigeria",
+                    "London, United Kingdom",
+                    "Atlanta, GA, United States",
+                    "Houston, TX, United States",
+                    "Toronto, Canada",
+                    "Accra, Ghana"
+                  ].map((c, i) => (
+                    <option key={i} value={c} />
+                  ))}
+                </datalist>
+
+                {/* Popular City Quick Chips */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px" }}>
+                  <span style={{ fontSize: "10px", color: "var(--text-dim)", alignSelf: "center" }}>Popular:</span>
+                  {[
+                    "Uyo, Akwa Ibom, Nigeria",
+                    "Lagos, Nigeria",
+                    "Abuja, FCT, Nigeria",
+                    "Port Harcourt, Rivers, Nigeria",
+                    "Calabar, Cross River, Nigeria",
+                    "Enugu, Nigeria"
+                  ].map((cityOption, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, city: cityOption }))}
+                      style={{
+                        background: formData.city === cityOption ? "rgba(212, 175, 55, 0.25)" : "rgba(255, 255, 255, 0.05)",
+                        border: formData.city === cityOption ? "1px solid var(--brand-gold)" : "1px solid rgba(255, 255, 255, 0.12)",
+                        color: formData.city === cityOption ? "var(--brand-gold)" : "#E2D9BC",
+                        padding: "3px 8px",
+                        borderRadius: "12px",
+                        fontSize: "10px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease"
+                      }}
+                    >
+                      {cityOption.split(",")[0]}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

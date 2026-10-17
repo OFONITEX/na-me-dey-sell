@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/postbuild.js",
     "start": "next start",
-    "deploy": "next build && wrangler pages deploy out --project-name=na-me-dey-sell --branch=main"
+    "deploy": "next build && node scripts/postbuild.js && wrangler pages deploy out --project-name=na-me-dey-sell --branch=main"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
